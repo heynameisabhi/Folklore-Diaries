@@ -13,23 +13,21 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const searchQuery = searchParams.get('search')?.toLowerCase() || '';
 
-        const whereClause: Prisma.UserAccountWhereInput = {
+        const whereClause: Prisma.usersWhereInput = {
             OR: [
-                { user_name: { contains: searchQuery, mode: Prisma.QueryMode.insensitive } },
-                { user_id: { contains: searchQuery, mode: Prisma.QueryMode.insensitive } }
+                { name: { contains: searchQuery, mode: Prisma.QueryMode.insensitive } },
+                { email: { contains: searchQuery, mode: Prisma.QueryMode.insensitive } }
             ]
         };
 
         // Fetch users with search filter if search query is provided
-        const users = await db.userAccount.findMany({
+        const users = await db.users.findMany({
             where: searchQuery ? whereClause : undefined,
             select: {
-                user_id: true,
-                user_name: true,
+                id: true,
+                name: true,
                 email: true,
                 role: true,
-                phone_no: true,
-                address: true,
                 status: true
             }
         });

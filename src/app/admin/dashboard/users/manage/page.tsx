@@ -25,12 +25,10 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface UserAccount {
-  user_id: string;
-  user_name: string;
+  id: string;
+  name: string;
   email: string;
   role: string;
-  phone_no: string;
-  address: string;
   status: string;
 }
 
@@ -61,22 +59,21 @@ export default function ManageUsersPage() {
 
   // Filter users based on search query
   const filteredUsers = users.filter(user => {
-    if (user.role.toUpperCase() === "ADMIN") return false;
+    if (user.role && user.role.toUpperCase() === "ADMIN") return false;
     
     const searchLower = searchQuery.toLowerCase();
     return (
-      user.user_name.toLowerCase().includes(searchLower) ||
-      user.user_id.toLowerCase().includes(searchLower)
+      (user.name || "").toLowerCase().includes(searchLower) ||
+      user.id.toLowerCase().includes(searchLower)
     );
   });
 
-  // instead of useMutation() use useQuery()
   const toggleUserStatus = useMutation({
     mutationFn: async (user: UserAccount) => {
       const updatedStatus = user.status === "ACTIVE" ? "BLOCKED" : "ACTIVE";
       await axios.put('/api/users/toggle-user-status/', {
         status: updatedStatus,
-        userId: user.user_id
+        userId: user.id
       });
 
       return { ...user, status: updatedStatus };
@@ -84,7 +81,7 @@ export default function ManageUsersPage() {
     onSuccess: (updatedUser) => {
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
-          user.user_id === updatedUser.user_id ? updatedUser : user
+          user.id === updatedUser.id ? updatedUser : user
         )
       );
       toast.success("User status updated successfully.");
@@ -124,8 +121,6 @@ export default function ManageUsersPage() {
                 <TableHead className="text-zinc-400">Name</TableHead>
                 <TableHead className="text-zinc-400">Email</TableHead>
                 <TableHead className="text-zinc-400">Role</TableHead>
-                <TableHead className="text-zinc-400">Phone No</TableHead>
-                <TableHead className="text-zinc-400">Address</TableHead>
                 <TableHead className="text-zinc-400">Status</TableHead>
                 <TableHead className="text-zinc-400 text-right">
                   Actions
@@ -135,14 +130,12 @@ export default function ManageUsersPage() {
             <TableBody>
               {filteredUsers.map((user) => (
                 <TableRow
-                  key={user.user_id}
+                  key={user.id}
                   className="border-zinc-700 hover:bg-zinc-800"
                 >
-                  <TableCell>{user.user_name}</TableCell>
+                  <TableCell>{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.role}</TableCell>
-                  <TableCell>{user.phone_no}</TableCell>
-                  <TableCell>{user.address}</TableCell>
                   <TableCell>
                     <span
                       className={`px-2 py-1 rounded-full text-xs ${
@@ -184,7 +177,7 @@ export default function ManageUsersPage() {
             <h2 className="text-xl font-bold mb-4">Confirm Status Change</h2>
             <p>
               Are you sure you want to change status of{" "}
-              <b>{selectedUser.user_name}</b>?
+              <b>{selectedUser.name}</b>?
             </p>
             <div className="mt-4 flex justify-end gap-2">
               <Button

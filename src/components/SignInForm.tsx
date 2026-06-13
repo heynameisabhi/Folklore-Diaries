@@ -53,7 +53,7 @@ export function SignInForm() {
       const currentSession = await getSession();
       setIsLoading(false);
       
-      if (currentSession?.user?.role === "admin") {
+      if (currentSession?.user?.role?.toUpperCase() === "ADMIN") {
         toast.success("Login successful! Welcome Admin.");
         router.push("/admin/dashboard");
       } else {
@@ -69,7 +69,7 @@ export function SignInForm() {
         <CardTitle className="text-2xl font-semibold">
           Sign in{" "}
           <span className="text-[15px] text-green-600">
-            to VEDAs
+            to Folklore Diaries
           </span>
         </CardTitle>
         <CardDescription className="text-zinc-400">

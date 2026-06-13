@@ -76,7 +76,7 @@ const UserAccountNav: FC<UserAccountNavProps> = ({ user }) => {
             </li> */}
             <li>
               <Link
-                href={user.role === "admin" ? "/admin/dashboard" : "/dashboard"}
+                href={user.role?.toLowerCase() === "admin" ? "/admin/dashboard" : "/dashboard"}
                 className="flex items-center gap-2 px-4 py-2 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
                 onClick={() => setIsOpen(false)}
               >

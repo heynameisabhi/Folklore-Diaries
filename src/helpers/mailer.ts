@@ -13,9 +13,9 @@ export const sendEmail = async ({email, userId}: sendEmailProps) => {
         // create a hashed token
         const hashedToken = await bcryptjs.hash(userId.toString(), 10);
         
-        await db.userAccount.update({
+        await db.users.update({
             where: {
-                user_id: userId,
+                id: userId,
             },
             data: {
                 forgotPasswordToken: hashedToken,

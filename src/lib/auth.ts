@@ -2,7 +2,7 @@ import { NextAuthOptions, getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
-import { UserStatus } from "@prisma/client";
+import { user_status } from "@prisma/client";
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -29,14 +29,14 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.password) {
           throw new Error("Password is required.");
         }
-
+        
         console.log("Credentials:", credentials);
 
-        const user = await db.userAccount.findFirst({
+        const user = await db.users.findFirst({
           where: {
             OR: [
               { email: credentials.email || "" },
-              { user_name: credentials.username || "" },
+              { name: credentials.username || "" },
             ],
           },
         });
@@ -47,12 +47,8 @@ export const authOptions: NextAuthOptions = {
           throw new Error("User does not exist. Please register first.");
         }
 
-        if (user.status === UserStatus.BLOCKED) {
+        if (user.status === user_status.BLOCKED) {
           throw new Error("User is blocked. Contact admin.");
-        }
-
-        if (user.status === UserStatus.SUSPENDED) {
-          throw new Error("User is suspended. Contact admin.");
         }
 
         const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password);
@@ -61,10 +57,10 @@ export const authOptions: NextAuthOptions = {
         }
 
         return {
-          id: user.user_id,
-          name: user.user_name,
+          id: user.id,
+          name: user.name || "",
           email: user.email,
-          role: user.role,
+          role: (user.role || "USER") as string,
         };
       },
     }),

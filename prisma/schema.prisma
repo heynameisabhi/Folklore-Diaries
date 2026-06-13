@@ -1,125 +1,137 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-model GranthaDeck {
-  grantha_deck_id        String      @id
-  grantha_deck_name      String?
-  grantha_owner_name     String?
-  grantha_source_address String?
-  length_in_cms          Float?
-  width_in_cms           Float?
-  total_leaves           Int?
-  total_images           Int?
-  stitch_or_nonstitch    String?
-  physical_condition     String?
-  granthas               Grantha[]
-  user_id                String
-  user                   UserAccount @relation(fields: [user_id], references: [user_id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model contributor {
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name              String?
+  age               Int?
+  address           String?
+  guru_name         String?
+  practice_duration String?
+  drug_contributor  drug_contributor[]
 }
 
-model Language {
-  language_id   String    @id @default(uuid())
-  language_name String?
-  granthas      Grantha[]
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model disease {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String         @unique
+  drug_disease drug_disease[]
+  usage_method usage_method[]
 }
 
-model Author {
-  author_id   String    @id @default(uuid())
-  author_name String?
-  birth_year  String?
-  death_year  String?
-  bio         String?
-  scribe_name String?
-  granthas    Grantha[]
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model drug {
+  id                    String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  primary_name          String?
+  botanical_description String?
+  source_type           source_type?
+  created_at            DateTime?          @default(now()) @db.Timestamp(6)
+  drug_contributor      drug_contributor[]
+  drug_disease          drug_disease[]
+  drug_names            drug_names[]
+  drug_photos           drug_photos[]
+  research              research[]
+  usage_method          usage_method[]
 }
 
-model Grantha {
-  grantha_id      String         @id // default ids are not required here
-  grantha_deck_id String
-  grantha_name    String?
-  language_id     String
-  author_id       String
-  description     String?
-  remarks         String?
-  granthaDeck     GranthaDeck    @relation(fields: [grantha_deck_id], references: [grantha_deck_id], onDelete: Cascade)
-  language        Language       @relation(fields: [language_id], references: [language_id], onDelete: Cascade)
-  author          Author         @relation(fields: [author_id], references: [author_id], onDelete: Cascade)
-  scannedImages   ScannedImage[]
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model drug_contributor {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  drug_id        String?      @db.Uuid
+  contributor_id String?      @db.Uuid
+  contributor    contributor? @relation(fields: [contributor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  drug           drug?        @relation(fields: [drug_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
-enum UserStatus {
-  ACTIVE
-  BLOCKED
-  SUSPENDED
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model drug_disease {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  drug_id    String?  @db.Uuid
+  disease_id String?  @db.Uuid
+  disease    disease? @relation(fields: [disease_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  drug       drug?    @relation(fields: [drug_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
-model UserAccount {
-  user_id                   String          @id @default(uuid())
-  user_name                 String          @unique
-  email                     String          @unique
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model drug_names {
+  id      String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name    String?
+  type    drug_name_type?
+  drug_id String?         @db.Uuid
+  drug    drug?           @relation(fields: [drug_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model drug_photos {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  image_url String?
+  drug_id   String? @db.Uuid
+  drug      drug?   @relation(fields: [drug_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model research {
+  id      String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type    research_type?
+  title   String?
+  link    String?
+  drug_id String?        @db.Uuid
+  drug    drug?          @relation(fields: [drug_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model usage_method {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  drug_id            String?  @db.Uuid
+  disease_id         String?  @db.Uuid
+  method_description String?
+  disease            disease? @relation(fields: [disease_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  drug               drug?    @relation(fields: [drug_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model users {
+  id                        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                      String?
+  email                     String       @unique
   password                  String
-  role                      String
-  phone_no                  String?
-  address                   String?
-  accessControls            AccessControl[]
+  role                      user_role?   @default(USER)
+  status                    user_status? @default(ACTIVE)
   forgotPasswordToken       String?
   forgotPasswordTokenExpiry DateTime?
-  status                    UserStatus      @default(ACTIVE) @map("status")
-  GranthaDeck               GranthaDeck[]
-
-  createdAt                 DateTime @default(now())
-  updatedAt                 DateTime @updatedAt
 }
 
-model AccessControl {
-  access_id        String      @id @default(uuid())
-  user_id          String
-  permission_level String?
-  userAccount      UserAccount @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+enum drug_name_type {
+  BOTANICAL
+  SANSKRIT
+  VERNACULAR
 }
 
-model ScannedImage {
-  image_id           String              @id @default(uuid())
-  image_name         String
-  image_url          String
-  grantha_id         String
-  grantha            Grantha             @relation(fields: [grantha_id], references: [grantha_id], onDelete: Cascade)
-  scanningProperties ScanningProperties?
+enum research_type {
+  ARTICLE
+  THESIS
 }
 
-model ScanningProperties {
-  scan_id                      String       @id @default(uuid())
-  image_id                     String       @unique
-  worked_by                    String?
-  file_format                  String
-  scanner_model                String
-  resolution_dpi               String
-  lighting_conditions          String?
-  color_depth                  String?
-  scanning_start_date          String?
-  scanning_completed_date      String?
-  post_scanning_completed_date String?
-  horizontal_or_vertical_scan  String?
-  scannedImage                 ScannedImage @relation(fields: [image_id], references: [image_id], onDelete: Cascade)
+enum source_type {
+  PLANT
+  ANIMAL
+  MINERAL
 }
 
-// This table is just used for storing names of scanner models
-model ScannerModel {
-  id   String @id @default(uuid())
-  name String
+enum user_role {
+  ADMIN
+  USER
+}
+
+enum user_status {
+  ACTIVE
+  BLOCKED
 }

@@ -47,11 +47,11 @@ export default function Footer() {
                 <Leaf className="h-5 w-5 text-white" />
               </div>
               <span className="text-xl text-transparent bg-clip-text bg-gradient-to-tr from-gray-600 to-white font-bold tracking-widest">
-                VEDAs
+                Folklore Diaries
               </span>
             </Link>
             <p className="text-zinc-400 mb-4">
-              Preserving ancient knowledge through advanced OCR technology.
+              Documenting traditional folk medicine knowledge for future generations.
             </p>
             <div className="flex gap-4">
               <Link
@@ -199,7 +199,7 @@ export default function Footer() {
 
         <div className="border-t border-zinc-800 pt-8 text-center">
           <p className="text-zinc-500 flex items-center justify-center gap-1">
-            © {new Date().getFullYear()} Palm Leaf Transcription Project. Made
+            © {new Date().getFullYear()} Folklore Diaries. Made
             with
             <Heart className="h-4 w-4 text-emerald-500" /> by our contributors.
           </p>

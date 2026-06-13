@@ -15,7 +15,8 @@ export const useAuth = (allowedRoles: string[]) => {
     console.log("Allowed roles:", allowedRoles);
     
     // Check if user is authorized
-    const authorized = session && allowedRoles.includes(session.user?.role);
+    const userRole = session?.user?.role?.toLowerCase();
+    const authorized = !!(session && userRole && allowedRoles.map(r => r.toLowerCase()).includes(userRole));
     setIsAuthorized(authorized);
     
     // If not authorized, redirect

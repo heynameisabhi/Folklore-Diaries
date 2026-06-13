@@ -10,24 +10,18 @@ export async function GET() {
             return NextResponse.json("Unauthorized", { status: 401 });
         }
 
-        const firstFiveGranthaDeckRecords = await db.granthaDeck.findMany({
-            where: {
-                user_id: session.user.id
-            },
+        // Fetch recent drug records (drugs are not user-scoped in new schema)
+        const recentDrugRecords = await db.drug.findMany({
             orderBy: {
-                createdAt: "desc",
+                created_at: "desc",
             },
             take: 5,
         })
 
-        const recordCount = await db.granthaDeck.count({
-            where: {
-                user_id: session.user.id
-            }
-        })
+        const recordCount = await db.drug.count()
 
 
-        return NextResponse.json({ firstFiveGranthaDeckRecords, recordCount, message: "Records fetched successfully" }, { status: 200 });
+        return NextResponse.json({ recentDrugRecords, recordCount, message: "Records fetched successfully" }, { status: 200 });
         
     } catch (error: any) {
 

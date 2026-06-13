@@ -100,7 +100,7 @@ export default function ContributorsSection() {
             </span>
           </h2>
           <p className="text-zinc-400 text-lg">
-            Meet the dedicated contributors behind VEDAs project, working together to preserve and digitize ancient manuscripts.
+            Meet the dedicated contributors behind Folklore Diaries, working together to document and preserve traditional folk medicine.
           </p>
         </motion.div>
 

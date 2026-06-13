@@ -41,7 +41,21 @@ export default function DashboardLayout({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-4 px-2">
+        <nav className="flex-1 py-4 px-2 space-y-2">
+          {/* Dashboard Link */}
+          <Link
+            href="/admin/dashboard"
+            className={cn(
+              "flex items-center px-4 py-2 text-sm rounded-md transition-colors",
+              pathname === "/admin/dashboard"
+                ? "bg-gradient-to-r from-emerald-900/50 to-green-900/30 text-white font-medium"
+                : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+            )}
+          >
+            <LayoutDashboard className="w-5 h-5 text-emerald-500 mr-3" />
+            {!collapsed && <span>Dashboard</span>}
+          </Link>
+
           {/* User Management */}
           <div>
             <button
@@ -94,74 +108,6 @@ export default function DashboardLayout({
                 </Link>
               </div>
             )}
-          </div>
-
-          {/* Data Management */}
-          {/* Data Management not provided to the admin*/}
-
-          <div>
-            {/* <button
-              onClick={() => setDataManagementOpen(!dataManagementOpen)}
-              className={cn(
-                "flex items-center justify-center w-full px-2 py-2 text-sm rounded-md transition-colors",
-                "hover:bg-gradient-to-r hover:from-emerald-900/50 hover:to-green-900/30",
-                dataManagementOpen
-                  ? "bg-gradient-to-r from-emerald-900/50 to-green-900/30 text-white"
-                  : "text-zinc-400",
-              )}
-            >
-              <Database className="w-5 h-5 text-emerald-500" />
-              {!collapsed && (
-                <>
-                  <span className="flex-1 text-left ml-3">Data Management</span>
-                  <ChevronRight
-                    className={cn("w-4 h-4 transition-transform", dataManagementOpen ? "rotate-90" : "")}
-                  />
-                </>
-              )}
-            </button> */}
-
-            {/* Submenu */}
-            {/* {dataManagementOpen && !collapsed && (
-              <div className="ml-6 mt-1 space-y-1">
-                <Link
-                  href="/admin/dashboard/data/insert"
-                  className={cn(
-                    "flex items-center px-2 py-2 text-sm rounded-md transition-colors",
-                    pathname === "/admin/dashboard/data/insert"
-                      ? "bg-zinc-800 text-emerald-400"
-                      : "text-zinc-400 hover:bg-zinc-800 hover:text-white",
-                  )}
-                >
-                  <Database className="w-4 h-4 mr-3" />
-                  <span>Insert Data</span>
-                </Link>
-                <Link
-                  href="/admin/dashboard/data/insert/author"
-                  className={cn(
-                    "flex items-center px-2 py-2 text-sm rounded-md transition-colors",
-                    pathname === "/admin/dashboard/data/insert/author"
-                      ? "bg-zinc-800 text-emerald-400"
-                      : "text-zinc-400 hover:bg-zinc-800 hover:text-white",
-                  )}
-                >
-                  <BookOpen className="w-4 h-4 mr-3" />
-                  <span>Add Authors</span>
-                </Link>
-                <Link
-                  href="/admin/dashboard/data/view"
-                  className={cn(
-                    "flex items-center px-2 py-2 text-sm rounded-md transition-colors",
-                    pathname === "/admin/dashboard/data/view"
-                      ? "bg-zinc-800 text-emerald-400"
-                      : "text-zinc-400 hover:bg-zinc-800 hover:text-white",
-                  )}
-                >
-                  <FileSpreadsheet className="w-4 h-4 mr-3" />
-                  <span>View Data</span>
-                </Link>
-              </div>
-            )} */}
           </div>
         </nav>
 

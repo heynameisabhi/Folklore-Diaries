@@ -17,7 +17,6 @@ import {
   Search,
   Brain,
   BrainCog,
-  Radar,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -60,156 +59,34 @@ export default function DashboardLayout({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-4 px-2">
-          {/* Data Management */}
-          <div>
-            <button
-              onClick={() => setDataManagementOpen(!dataManagementOpen)}
-              className={cn(
-                "flex items-center justify-center w-full px-2 py-2 text-sm rounded-md transition-colors",
-                "hover:bg-gradient-to-r hover:from-emerald-900/50 hover:to-green-900/30",
-                dataManagementOpen
-                  ? "bg-gradient-to-r from-emerald-900/50 to-green-900/30 text-white"
-                  : "text-zinc-400"
-              )}
-            >
-              <Database className="w-5 h-5 text-emerald-500" />
-              {!collapsed && (
-                <>
-                  <span className="flex-1 text-left ml-3">Data Management</span>
-                  <ChevronRight
-                    className={cn(
-                      "w-4 h-4 transition-transform",
-                      dataManagementOpen ? "rotate-90" : ""
-                    )}
-                  />
-                </>
-              )}
-            </button>
-
-            {/* Submenu */}
-            {dataManagementOpen && !collapsed && (
-              <div className="ml-6 mt-1 space-y-1">
-                <Link
-                  href="/dashboard/data/insert"
-                  className={cn(
-                    "flex items-center px-2 py-2 text-sm rounded-md transition-colors",
-                    pathname === "/dashboard/data/insert"
-                      ? "bg-zinc-800 text-emerald-400"
-                      : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
-                  )}
-                >
-                  <Database className="w-4 h-4 mr-3" />
-                  <span>Insert Data</span>
-                </Link>
-                <Link
-                  href="/dashboard/data/insert/bulk-insertion"
-                  className={cn(
-                    "flex items-center px-2 py-2 text-sm rounded-md transition-colors",
-                    pathname === "/dashboard/data/insert/bulk-insertion"
-                      ? "bg-zinc-800 text-emerald-400"
-                      : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
-                  )}
-                >
-                  <DatabaseZap className="w-4 h-4 mr-3" />
-                  <span>Bulk Insertion</span>
-                </Link>
-                <Link
-                  href="/dashboard/data/insert/author"
-                  className={cn(
-                    "flex items-center px-2 py-2 text-sm rounded-md transition-colors",
-                    pathname === "/dashboard/data/insert/author"
-                      ? "bg-zinc-800 text-emerald-400"
-                      : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
-                  )}
-                >
-                  <BookOpen className="w-4 h-4 mr-3" />
-                  <span>Add Authors</span>
-                </Link>
-                <Link
-                  href="/dashboard/data/view"
-                  className={cn(
-                    "flex items-center px-2 py-2 text-sm rounded-md transition-colors",
-                    pathname === "/dashboard/data/view"
-                      ? "bg-zinc-800 text-emerald-400"
-                      : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
-                  )}
-                >
-                  <FileSpreadsheet className="w-4 h-4 mr-3" />
-                  <span>View Data</span>
-                </Link>
-                <Link
-                  href="/dashboard/data/insert/scanner-model"
-                  className={cn(
-                    "flex items-center px-2 py-2 text-sm rounded-md transition-colors",
-                    pathname === "/dashboard/data/insert/scanner-model"
-                      ? "bg-zinc-800 text-emerald-400"
-                      : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
-                  )}
-                >
-                  <Radar className="w-4 h-4 mr-3" />
-                  <span>Add Scanner Models</span>
-                </Link>
-              </div>
+        <nav className="flex-1 py-4 px-2 space-y-2">
+          {/* Dashboard Link */}
+          <Link
+            href="/dashboard"
+            className={cn(
+              "flex items-center px-4 py-2 text-sm rounded-md transition-colors",
+              pathname === "/dashboard"
+                ? "bg-gradient-to-r from-emerald-900/50 to-green-900/30 text-white font-medium"
+                : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
             )}
-          </div>
+          >
+            <LayoutDashboard className="w-5 h-5 text-emerald-500 mr-3" />
+            {!collapsed && <span>Dashboard</span>}
+          </Link>
 
-          {/* Search */}
-          <div className="mt-2">
-            <button
-              onClick={() => setSearchOpen(!searchOpen)}
-              className={cn(
-                "flex items-center justify-center w-full px-2 py-2 text-sm rounded-md transition-colors",
-                "hover:bg-gradient-to-r hover:from-purple-900/50 hover:to-violet-900/30",
-                searchOpen
-                  ? "bg-gradient-to-r from-purple-900/50 to-violet-900/30 text-white"
-                  : "text-zinc-400"
-              )}
-            >
-              <Search className="w-5 h-5 text-purple-500" />
-              {!collapsed && (
-                <>
-                  <span className="flex-1 text-left ml-3">Search</span>
-                  <ChevronRight
-                    className={cn(
-                      "w-4 h-4 transition-transform",
-                      searchOpen ? "rotate-90" : ""
-                    )}
-                  />
-                </>
-              )}
-            </button>
-
-            {/* Search Submenu */}
-            {searchOpen && !collapsed && (
-              <div className="ml-6 mt-1 space-y-1">
-                <Link
-                  href="/dashboard/data/search/ai"
-                  className={cn(
-                    "flex items-center px-2 py-2 text-sm rounded-md transition-colors",
-                    pathname === "/dashboard/data/search/ai"
-                      ? "bg-zinc-800 text-purple-400"
-                      : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
-                  )}
-                >
-                  <Brain className="w-4 h-4 mr-3" />
-                  <span>AI Search</span>
-                </Link>
-                <Link
-                  href="/dashboard/data/search/manual"
-                  className={cn(
-                    "flex items-center px-2 py-2 text-sm rounded-md transition-colors",
-                    pathname === "/dashboard/data/search/manual"
-                      ? "bg-zinc-800 text-purple-400"
-                      : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
-                  )}
-                >
-                  <FileSearch className="w-4 h-4 mr-3" />
-                  <span>Manual Search</span>
-                </Link>
-              </div>
+          {/* Insert Drug Data Link */}
+          <Link
+            href="/dashboard/data/insert"
+            className={cn(
+              "flex items-center px-4 py-2 text-sm rounded-md transition-colors",
+              pathname === "/dashboard/data/insert"
+                ? "bg-gradient-to-r from-emerald-900/50 to-green-900/30 text-white font-medium"
+                : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
             )}
-          </div>
+          >
+            <Database className="w-5 h-5 text-emerald-500 mr-3" />
+            {!collapsed && <span>Insert Drug Data</span>}
+          </Link>
         </nav>
 
         {/* Collapse button */}

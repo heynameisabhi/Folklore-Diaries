@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "Email not found!" }, { status: 400 });
         }
 
-        const user = await db.userAccount.findFirst({
+        const user = await db.users.findFirst({
             where: {
                 email
             }
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
         // send the forgotpasswordemail if the user with email exists
         await sendEmail({
             email,
-            userId: user.user_id,
+            userId: user.id,
         });
             
         return NextResponse.json(

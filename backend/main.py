@@ -1,6 +1,14 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import os
+import sys
+import io
+
+# Force UTF-8 encoding for stdout and stderr on Windows to prevent UnicodeEncodeError
+if sys.platform == "win32":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
 from PIL import Image
 from fastapi.middleware.cors import CORSMiddleware
 from bulk_insertion import add_bulk_insertion_routes, get_color_depth, is_valid_image_file, is_valid_directory

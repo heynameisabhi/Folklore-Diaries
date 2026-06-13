@@ -79,39 +79,39 @@ export default function FeaturesSection() {
   const features = [
     {
       icon: <ScanSearch className="h-6 w-6 text-white" />,
-      title: "Advanced OCR Technology",
+      title: "Drug Documentation",
       description:
-        "Our state-of-the-art OCR system is specifically trained to recognize ancient palm leaf script with high accuracy.",
+        "Catalog traditional medicinal drugs with botanical descriptions, multiple names (Sanskrit, Vernacular), and source types.",
     },
     {
       icon: <FileText className="h-6 w-6 text-white" />,
-      title: "Multilingual Support",
+      title: "Disease & Usage Mapping",
       description:
-        "Transcribe manuscripts in multiple languages and scripts, preserving the linguistic diversity of historical texts.",
+        "Link drugs to diseases with detailed usage methods, preserving the traditional knowledge of folk healing practices.",
     },
     {
       icon: <Database className="h-6 w-6 text-white" />,
-      title: "Digital Preservation",
+      title: "Contributor Records",
       description:
-        "Create digital archives of fragile manuscripts, ensuring their content survives for future generations.",
+        "Document knowledge contributors — their lineage, practice duration, and guru connections to trace the oral tradition.",
     },
     {
       icon: <Search className="h-6 w-6 text-white" />,
-      title: "Searchable Archives",
+      title: "Research & Articles",
       description:
-        "Convert handwritten texts into fully searchable digital documents, making research faster and more efficient.",
+        "Link published research articles and theses to drugs, bridging traditional knowledge with modern scientific validation.",
     },
     {
       icon: <Share2 className="h-6 w-6 text-white" />,
       title: "Collaborative Platform",
       description:
-        "Work together with scholars worldwide to verify and improve transcriptions through our collaborative tools.",
+        "Work together with researchers and practitioners worldwide to verify and expand the folk medicine knowledge base.",
     },
     {
       icon: <BarChart3 className="h-6 w-6 text-white" />,
       title: "Analytics & Insights",
       description:
-        "Gain valuable insights into manuscript collections with comprehensive analytics and visualization tools.",
+        "Gain valuable insights into drug collections with comprehensive analytics and visualization tools.",
     },
   ]
 
@@ -125,12 +125,12 @@ export default function FeaturesSection() {
           <h2 className="text-3xl text-white md:text-4xl font-bold mb-4">
             Powerful{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-green-400">
-              OCR Features
+              Features
             </span>
           </h2>
           <p className="text-zinc-400 text-lg">
-            Our platform combines cutting-edge technology with scholarly expertise to unlock the knowledge contained in
-            ancient palm leaf manuscripts.
+            Our platform combines technology with traditional knowledge to document and preserve
+            folk medicine practices for future generations.
           </p>
         </div>
 

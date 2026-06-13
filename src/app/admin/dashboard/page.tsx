@@ -27,19 +27,11 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 
 type UserActivity = {
-  user_id: string;
-  user_name: string;
+  id: string;
+  name: string;
   email: string;
   role: string;
   status: string;
-  total_decks: number;
-  last_activity: string;
-  recent_decks: {
-    grantha_deck_id: string;
-    grantha_deck_name: string;
-    createdAt: string;
-    total_granthas: number;
-  }[];
 };
 
 type DashboardData = {
@@ -366,16 +358,16 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        {/* Recent Activity */}
+        {/* Users List */}
         <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
           <CardHeader className="border-b border-zinc-800 pb-4">
             <div className="flex justify-between items-center">
               <div>
                 <CardTitle className="text-xl text-zinc-100">
-                  Recent User Activity
+                  Registered Users
                 </CardTitle>
                 <CardDescription className="text-zinc-400">
-                  Latest Grantha Deck records by users
+                  Manage the registered users in the system
                 </CardDescription>
               </div>
             </div>
@@ -385,37 +377,24 @@ export default function AdminDashboard() {
               {dashboardData.users.length > 0 ? (
                 dashboardData.users.map((user) => (
                   <div
-                    key={user.user_id}
+                    key={user.id}
                     className="p-4 hover:bg-zinc-800/30 transition-colors cursor-pointer"
                     onClick={() =>
-                      router.push(`/admin/dashboard/users/${user.user_id}`)
+                      router.push(`/admin/dashboard/users/manage`)
                     }
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-4">
                         <div className="p-2 rounded-lg bg-blue-500 bg-opacity-20 text-white">
-                          <FileText className="w-5 h-5" />
+                          <Users className="w-5 h-5" />
                         </div>
                         <div>
                           <h3 className="font-medium text-zinc-100">
-                            {user.user_name}
+                            {user.name}
                           </h3>
                           <p className="text-sm text-zinc-400 mt-1">
-                            Total Decks: {user.total_decks} | Last Activity:{" "}
-                            {formatDate(user.last_activity)}
+                            Email: {user.email} | Role: {user.role}
                           </p>
-                          <div className="mt-2 space-y-1">
-                            {user.recent_decks.map((deck) => (
-                              <p
-                                key={deck.grantha_deck_id}
-                                className="text-xs text-zinc-500"
-                              >
-                                • {deck.grantha_deck_name} (
-                                {deck.total_granthas} granthas) -{" "}
-                                {formatDate(deck.createdAt)}
-                              </p>
-                            ))}
-                          </div>
                         </div>
                       </div>
                       <Badge
@@ -433,7 +412,7 @@ export default function AdminDashboard() {
                 ))
               ) : (
                 <div className="p-8 text-center text-zinc-500">
-                  No user activity found.
+                  No users found.
                 </div>
               )}
             </div>

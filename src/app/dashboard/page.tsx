@@ -15,7 +15,7 @@ import { BarChart, Bar, ResponsiveContainer, XAxis, Tooltip } from "recharts";
 import { Clock, Database, FileText, TrendingUp, User } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { GranthaDeck } from "@prisma/client";
+import { drug } from "@prisma/client";
 
 import { getWeeklyChartData } from "@/helpers/getWeeklyChartData";
 
@@ -35,11 +35,11 @@ export default function Dashboard() {
   const { data: session, status } = useSession();
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["granthaDeckRecords"],
+    queryKey: ["drugRecords"],
     queryFn: async () => {
       const response = await axios.get("/api/users/records/get");
 
-      chartData = getWeeklyChartData(response.data.firstFiveGranthaDeckRecords);
+      chartData = getWeeklyChartData(response.data.recentDrugRecords);
 
       TotalRecordsThisWeek = chartData.reduce(
         (sum, day) => sum + day.records,
@@ -62,7 +62,7 @@ export default function Dashboard() {
     refetchOnWindowFocus: false,
   });
 
-  const records = data?.firstFiveGranthaDeckRecords || [];
+  const records = data?.recentDrugRecords || [];
   const recordCount = data?.recordCount || 0;
 
   if (status === "loading" || isLoading) {
@@ -103,6 +103,7 @@ export default function Dashboard() {
   }
 
   const formatDate = (dateString: any) => {
+    if (!dateString) return "N/A";
     const date = new Date(dateString);
     return new Intl.DateTimeFormat("en-US", {
       month: "short",
@@ -123,7 +124,7 @@ export default function Dashboard() {
                 Welcome, {session.user?.email?.split("@")[0]}!
               </h1>
             </div>
-            <p className="text-zinc-400 mt-1">Your Grantha Deck Dashboard</p>
+            <p className="text-zinc-400 mt-1">Your Drug Database Dashboard</p>
           </div>
           <div className="mt-4 md:mt-0 flex items-center gap-2">
             <Badge
@@ -145,7 +146,7 @@ export default function Dashboard() {
           <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm hover:bg-zinc-900/80 transition-all">
             <CardHeader className="pb-2">
               <CardDescription className="text-zinc-400">
-                Total Records
+                Total Drugs
               </CardDescription>
               <CardTitle className="text-3xl text-white flex items-center">
                 {recordCount}
@@ -205,7 +206,7 @@ export default function Dashboard() {
                 Weekly Activity
               </CardTitle>
               <CardDescription className="text-zinc-400">
-                Records created over time
+                Drug records created over time
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -268,7 +269,7 @@ export default function Dashboard() {
                 Quick Stats
               </CardTitle>
               <CardDescription className="text-zinc-400">
-                Your Grantha Deck metrics
+                Your Drug Database metrics
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -296,7 +297,7 @@ export default function Dashboard() {
                   <div
                     className="bg-blue-500 h-1.5 rounded-full"
                     style={{
-                      width: `${(records.length / recordCount) * 100}%`,
+                      width: `${recordCount > 0 ? (records.length / recordCount) * 100 : 0}%`,
                     }}
                   ></div>
                 </div>
@@ -311,7 +312,7 @@ export default function Dashboard() {
             <div className="flex justify-between items-center">
               <div>
                 <CardTitle className="text-xl text-zinc-100">
-                  Recent Grantha Deck Records
+                  Recent Drug Records
                 </CardTitle>
                 <CardDescription className="text-zinc-400">
                   Your latest {records.length} entries
@@ -325,9 +326,9 @@ export default function Dashboard() {
           <CardContent className="p-0">
             <div className="divide-y divide-zinc-800">
               {records.length > 0 ? (
-                records.map((record: GranthaDeck) => (
+                records.map((record: drug) => (
                   <div
-                    key={record.grantha_deck_id}
+                    key={record.id}
                     className="p-4 hover:bg-zinc-800/30 transition-colors"
                   >
                     <div className="flex items-start justify-between">
@@ -337,10 +338,10 @@ export default function Dashboard() {
                         </div>
                         <div>
                           <h3 className="font-medium text-zinc-100">
-                            {record.grantha_deck_name || "Untitled Record"}
+                            {record.primary_name || "Untitled Drug"}
                           </h3>
                           <p className="text-xs text-zinc-400 mt-1">
-                            Created on {formatDate(record.createdAt)}
+                            Created on {formatDate(record.created_at)}
                           </p>
                         </div>
                       </div>
@@ -349,7 +350,7 @@ export default function Dashboard() {
                 ))
               ) : (
                 <div className="p-8 text-center text-zinc-500">
-                  No records found. Create your first Grantha Deck record to get
+                  No records found. Create your first drug record to get
                   started.
                 </div>
               )}

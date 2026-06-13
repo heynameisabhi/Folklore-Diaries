@@ -90,16 +90,15 @@ export default function HeroSection() {
           </div>
 
           <h1 ref={headingRef} className="text-5xl tracking-wide text-white md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-            Vedic E - {" "}
+            Folklore{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-green-400">
-              Documentation
-            </span>{" "}
-            Archival System
+              Diaries
+            </span>
           </h1>
 
           <p ref={textRef} className="text-lg md:text-xl text-zinc-300 mb-8 max-w-3xl mx-auto">
-            Preserving ancient knowledge through advanced OCR technology. Our cutting-edge platform digitizes and
-            transcribes historical palm leaf manuscripts, making centuries of wisdom accessible to the world.
+            Documenting traditional folk medicine knowledge. Our platform preserves ancestral wisdom about medicinal
+            drugs, diseases, usage methods, and research — making centuries of healing traditions accessible to the world.
           </p>
 
           <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4 justify-center">

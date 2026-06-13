@@ -29,9 +29,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const user = await db.userAccount.findUnique({
-      where: { user_id: session.user.id },
-      select: { user_id: true, password: true }
+    const user = await db.users.findUnique({
+      where: { id: session.user.id },
+      select: { id: true, password: true }
     });
 
     if (!user) {
@@ -61,8 +61,8 @@ export async function POST(request: NextRequest) {
     const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
 
     // Update the user's new password in the database
-    await db.userAccount.update({
-      where: { user_id: session.user.id },
+    await db.users.update({
+      where: { id: session.user.id },
       data: { password: hashedNewPassword }
     });
 

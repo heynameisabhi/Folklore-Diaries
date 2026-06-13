@@ -30,12 +30,10 @@ export default function Page() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const [user, setUser] = useState<RegisterUserAccount>({
-    username: "",
+    name: "",
     email: "",
     password: "",
     role: "",
-    phoneNo: "",
-    address: "",
   });
 
   const { mutate: addUser, isPending } = useMutation({
@@ -69,12 +67,12 @@ export default function Page() {
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="name">Name</Label>
               <Input
-                id="username"
-                value={user.username}
-                onChange={(e) => setUser({ ...user, username: e.target.value })}
-                placeholder="Enter username"
+                id="name"
+                value={user.name}
+                onChange={(e) => setUser({ ...user, name: e.target.value })}
+                placeholder="Enter name"
                 className="bg-zinc-800 border-zinc-700"
               />
             </div>
@@ -126,43 +124,20 @@ export default function Page() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={user.phoneNo}
-                onChange={(e) => setUser({ ...user, phoneNo: e.target.value })}
-                placeholder="Enter phone no."
-                className="bg-zinc-800 border-zinc-700"
-              />
+              <Label htmlFor="role">Role</Label>
+              <Select
+                value={user.role}
+                onValueChange={(value) => setUser({ ...user, role: value })}
+              >
+                <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="user">User</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
-            <Input
-              id="address"
-              placeholder="Enter full address"
-              className="bg-zinc-800 border-zinc-700"
-              value={user.address}
-              onChange={(e) => setUser({ ...user, address: e.target.value })}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="role">Role</Label>
-            <Select
-              value={user.role}
-              onValueChange={(value) => setUser({ ...user, role: value })}
-            >
-              <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
-                <SelectValue placeholder="Select role" />
-              </SelectTrigger>
-              <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="user">User</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </CardContent>
         <CardFooter className="flex justify-end">
@@ -170,11 +145,9 @@ export default function Page() {
             onClick={() => addUser()}
             disabled={
               isPending ||
-              !user.username ||
+              !user.name ||
               !user.email ||
               !user.password ||
-              !user.phoneNo ||
-              !user.address ||
               !user.role
             }
             className="px-6 py-2 bg-gradient-to-r cursor-pointer from-emerald-700 to-green-600 hover:from-emerald-800 hover:to-green-700 rounded-lg shadow-md"

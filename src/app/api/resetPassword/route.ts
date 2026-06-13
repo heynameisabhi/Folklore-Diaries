@@ -15,7 +15,7 @@ export async function PUT(request: NextRequest) {
     
         console.log("Token: ", token);
 
-        const user = await db.userAccount.findFirst({
+        const user = await db.users.findFirst({
             where: {
                 forgotPasswordToken: token,
                 forgotPasswordTokenExpiry: {
@@ -38,9 +38,9 @@ export async function PUT(request: NextRequest) {
         const salt = await bcryptjs.genSalt(10) 
         const hashedPassword = await bcryptjs.hash(newPassword, salt);
     
-        await db.userAccount.update({
+        await db.users.update({
             where: {
-                user_id: user.user_id,
+                id: user.id,
             },
             data: {
                 password: hashedPassword,

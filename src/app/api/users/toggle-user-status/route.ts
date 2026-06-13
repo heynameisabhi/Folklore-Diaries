@@ -10,9 +10,9 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({error: "User Id or Status not found!"}, {status: 400});
         }
 
-        const user = await db.userAccount.findFirst({
+        const user = await db.users.findFirst({
             where: {
-                user_id: userId
+                id: userId
             }
         })
 
@@ -20,19 +20,19 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({error: "User not found!"}, {status: 400});
         }
 
-        const validStatuses = ["ACTIVE", "BLOCKED", "SUSPENDED"]
+        const validStatuses = ["ACTIVE", "BLOCKED"]
 
         if(!validStatuses.includes(status)) {
             return NextResponse.json({error: "Invalid status!"}, {status: 400});
         }
 
         // update the new status
-        await db.userAccount.update({
+        await db.users.update({
             where: {
-                user_id: userId,
+                id: userId,
             },
             data: {
-                status
+                status: status as any
             }
         })
 
