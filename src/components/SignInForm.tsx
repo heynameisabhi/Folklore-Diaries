@@ -127,7 +127,7 @@ export function SignInForm() {
                   Password
                 </Label>
                 <Link
-                  href="#"
+                  href="/forgot-password"
                   className="text-sm text-emerald-500 hover:text-emerald-400"
                 >
                   Forgot password?
@@ -167,7 +167,7 @@ export function SignInForm() {
             <Button
               type="submit"
               disabled={
-                isLoading || !user.username || !user.email || !user.password
+                isLoading || (!user.username && !user.email) || !user.password
               }
               className={cn(
                 "w-full font-semibold cursor-pointer",

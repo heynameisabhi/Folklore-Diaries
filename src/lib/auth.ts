@@ -1,7 +1,7 @@
 import { NextAuthOptions, getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "@/lib/db";
-import bcrypt from "bcryptjs";
+import { supabaseAdmin } from "@/lib/supabase";
 import { user_status } from "@prisma/client";
 
 export const authOptions: NextAuthOptions = {
@@ -20,18 +20,19 @@ export const authOptions: NextAuthOptions = {
         username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      
+
       async authorize(credentials) {
         if (!credentials?.username && !credentials?.email) {
           throw new Error("Email or username is required.");
         }
-        
+
         if (!credentials?.password) {
           throw new Error("Password is required.");
         }
-        
+
         console.log("Credentials:", credentials);
 
+        // Look up the user profile in our DB (by email or username)
         const user = await db.users.findFirst({
           where: {
             OR: [
@@ -51,8 +52,13 @@ export const authOptions: NextAuthOptions = {
           throw new Error("User is blocked. Contact admin.");
         }
 
-        const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password);
-        if (!isPasswordCorrect) {
+        // Verify the password via Supabase Auth — no bcrypt, no password in DB
+        const { error } = await supabaseAdmin.auth.signInWithPassword({
+          email: user.email,
+          password: credentials.password,
+        });
+
+        if (error) {
           throw new Error("Invalid credentials. Please try again.");
         }
 

@@ -1,44 +1,38 @@
 import { getAuthSession } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { supabaseAdmin } from "@/lib/supabase";
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 
 export async function GET(request: Request) {
     try {
         const session = await getAuthSession();
-        if (!session) {
+        if (!session || session.user.role?.toUpperCase() !== "ADMIN") {
             return NextResponse.json("Unauthorized", { status: 401 });
         }
 
         const { searchParams } = new URL(request.url);
-        const searchQuery = searchParams.get('search')?.toLowerCase() || '';
+        const searchQuery = searchParams.get("search")?.trim() || "";
 
-        const whereClause: Prisma.usersWhereInput = {
-            OR: [
-                { name: { contains: searchQuery, mode: Prisma.QueryMode.insensitive } },
-                { email: { contains: searchQuery, mode: Prisma.QueryMode.insensitive } }
-            ]
-        };
+        // Use supabaseAdmin to bypass RLS on the users table
+        let query = supabaseAdmin
+            .from("users")
+            .select("id, name, email, role, status");
 
-        // Fetch users with search filter if search query is provided
-        const users = await db.users.findMany({
-            where: searchQuery ? whereClause : undefined,
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                status: true
-            }
-        });
-
-        if (!users.length) {
-            return NextResponse.json([], { status: 200 });
+        if (searchQuery) {
+            query = query.or(
+                `name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`
+            );
         }
 
-        return NextResponse.json(users, { status: 200 });
+        const { data: users, error } = await query;
+
+        if (error) {
+            console.error("Error fetching users:", error);
+            return NextResponse.json({ message: error.message }, { status: 500 });
+        }
+
+        return NextResponse.json(users ?? [], { status: 200 });
 
     } catch (error: any) {
-        return NextResponse.json(error.message, { status: 500 });
+        return NextResponse.json({ message: error.message }, { status: 500 });
     }
 }

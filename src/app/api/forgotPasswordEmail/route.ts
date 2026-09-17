@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { sendEmail } from "@/helpers/mailer";
-
+import { supabase } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
     try {
@@ -12,31 +11,32 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "Email not found!" }, { status: 400 });
         }
 
+        // Verify the user exists in our profile table
         const user = await db.users.findFirst({
-            where: {
-                email
-            }
+            where: { email }
         });
 
         if (!user) {
             return NextResponse.json({ error: "User not found!" }, { status: 402 });
         }
 
-        // send the forgotpasswordemail if the user with email exists
-        await sendEmail({
-            email,
-            userId: user.id,
+        // Trigger Supabase Auth's built-in password reset email
+        // Supabase will send the reset link automatically — no Nodemailer or custom tokens needed
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${process.env.DOMAIN}/resetPassword`,
         });
-            
+
+        if (error) {
+            console.error("Supabase reset password error:", error);
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+
         return NextResponse.json(
             {
-                message: "User exists and forgot password Email sent successfully!",
+                message: "Password reset email sent successfully!",
                 success: true,
-                user,
-            }, 
-            {
-                status: 200
-            }
+            },
+            { status: 200 }
         );
 
     } catch (error: any) {

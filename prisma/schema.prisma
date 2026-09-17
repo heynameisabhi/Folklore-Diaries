@@ -99,14 +99,11 @@ model usage_method {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model users {
-  id                        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                      String?
-  email                     String       @unique
-  password                  String
-  role                      user_role?   @default(USER)
-  status                    user_status? @default(ACTIVE)
-  forgotPasswordToken       String?
-  forgotPasswordTokenExpiry DateTime?
+  id     String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name   String?
+  email  String       @unique
+  role   user_role?   @default(USER)
+  status user_status? @default(ACTIVE)
 }
 
 enum drug_name_type {

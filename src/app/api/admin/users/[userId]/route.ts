@@ -4,21 +4,22 @@ import { NextResponse } from "next/server";
 
 export async function GET(
     request: Request,
-    { params }: { params: { userId: string } }
+    { params }: { params: Promise<{ userId: string }> }
 ) {
     try {
+        const { userId } = await params;
         const session = await getAuthSession();
         if (!session) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        if (!params.userId) {
+        if (!userId) {
             return NextResponse.json({ error: "User ID is required" }, { status: 400 });
         }
 
         const user = await db.users.findUnique({
             where: {
-                id: params.userId,
+                id: userId,
             },
         });
 

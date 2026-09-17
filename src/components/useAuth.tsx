@@ -14,9 +14,22 @@ export const useAuth = (allowedRoles: string[]) => {
     console.log("Current user role:", session?.user?.role);
     console.log("Allowed roles:", allowedRoles);
     
+    // If no session at all, redirect to sign-in
+    if (!session) {
+      router.push("/sign-in");
+      return;
+    }
+
     // Check if user is authorized
     const userRole = session?.user?.role?.toLowerCase();
-    const authorized = !!(session && userRole && allowedRoles.map(r => r.toLowerCase()).includes(userRole));
+
+    // Guard: if role is missing from session, don't redirect yet
+    if (!userRole) {
+      console.warn("Role not found in session — check NextAuth JWT callback");
+      return;
+    }
+
+    const authorized = allowedRoles.map(r => r.toLowerCase()).includes(userRole);
     setIsAuthorized(authorized);
     
     // If not authorized, redirect

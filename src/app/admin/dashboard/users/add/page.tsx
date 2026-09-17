@@ -25,8 +25,10 @@ import { RegisterUserAccount } from "@/lib/validators/useraccount";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
+import { useAuth } from "@/components/useAuth";
 
 export default function Page() {
+  useAuth(["admin"]); // Only admins can access this page
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const [user, setUser] = useState<RegisterUserAccount>({
@@ -45,17 +47,34 @@ export default function Page() {
     },
 
     onError: (error: any) => {
-      toast.error("There was an error adding the user.", error.message);
+      // Extract the actual server error message from axios response
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "There was an error adding the user.";
+      toast.error(message);
     },
 
     onSuccess: () => {
       toast.success("User added successfully.");
+      // Reset form so it's clear the action completed
+      setUser({ name: "", email: "", password: "", role: "" });
     },
   });
 
+  // Password validation rules
+  const passwordRules = {
+    length: user.password.length >= 8,
+    uppercase: /[A-Z]/.test(user.password),
+    lowercase: /[a-z]/.test(user.password),
+    number: /[0-9]/.test(user.password),
+    special: /[\W_]/.test(user.password),
+  };
+  const isPasswordValid = Object.values(passwordRules).every(Boolean);
+
   return (
     <div className="flex flex-col gap-6 px-6 md:px-10 py-10 max-w-3xl mx-auto">
-      <h1 className="text-3xl font-bold text-zinc-300">Add New User</h1>
+      <h1 className="text-3xl font-bold text-zinc-300">Add New User / Admin</h1>
 
       <Card className="bg-zinc-900 border border-zinc-800 text-white shadow-lg rounded-lg">
         <CardHeader>
@@ -122,6 +141,31 @@ export default function Page() {
                   </span>
                 </Button>
               </div>
+              
+              {user.password.length > 0 && (
+                <div className="text-xs mt-2 space-y-1 bg-zinc-950/50 p-2 rounded-md border border-zinc-800">
+                  <p className={passwordRules.length ? "text-emerald-500" : "text-zinc-500"}>
+                    {passwordRules.length ? "✓" : "○"} At least 8 characters
+                  </p>
+                  <p className={passwordRules.uppercase ? "text-emerald-500" : "text-zinc-500"}>
+                    {passwordRules.uppercase ? "✓" : "○"} Uppercase letter
+                  </p>
+                  <p className={passwordRules.lowercase ? "text-emerald-500" : "text-zinc-500"}>
+                    {passwordRules.lowercase ? "✓" : "○"} Lowercase letter
+                  </p>
+                  <p className={passwordRules.number ? "text-emerald-500" : "text-zinc-500"}>
+                    {passwordRules.number ? "✓" : "○"} Number
+                  </p>
+                  <p className={passwordRules.special ? "text-emerald-500" : "text-zinc-500"}>
+                    {passwordRules.special ? "✓" : "○"} Special character
+                  </p>
+                </div>
+              )}
+              {user.password.length === 0 && (
+                <p className="text-xs text-zinc-500 mt-1">
+                  Min 8 chars · uppercase · lowercase · number · special
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="role">Role</Label>
@@ -147,7 +191,7 @@ export default function Page() {
               isPending ||
               !user.name ||
               !user.email ||
-              !user.password ||
+              !isPasswordValid ||
               !user.role
             }
             className="px-6 py-2 bg-gradient-to-r cursor-pointer from-emerald-700 to-green-600 hover:from-emerald-800 hover:to-green-700 rounded-lg shadow-md"

@@ -87,6 +87,34 @@ export default function DashboardLayout({
             <Database className="w-5 h-5 text-emerald-500 mr-3" />
             {!collapsed && <span>Insert Drug Data</span>}
           </Link>
+
+          {/* Manual Search Link */}
+          <Link
+            href="/dashboard/manual-search"
+            className={cn(
+              "flex items-center px-4 py-2 text-sm rounded-md transition-colors",
+              pathname === "/dashboard/manual-search"
+                ? "bg-gradient-to-r from-emerald-900/50 to-green-900/30 text-white font-medium"
+                : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+            )}
+          >
+            <Search className="w-5 h-5 text-emerald-500 mr-3" />
+            {!collapsed && <span>Manual Search</span>}
+          </Link>
+
+          {/* AI Search Link */}
+          <Link
+            href="/dashboard/ai-search"
+            className={cn(
+              "flex items-center px-4 py-2 text-sm rounded-md transition-colors",
+              pathname === "/dashboard/ai-search"
+                ? "bg-gradient-to-r from-emerald-900/50 to-green-900/30 text-white font-medium"
+                : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+            )}
+          >
+            <BrainCircuit className="w-5 h-5 text-emerald-500 mr-3" />
+            {!collapsed && <span>AI Search</span>}
+          </Link>
         </nav>
 
         {/* Collapse button */}
