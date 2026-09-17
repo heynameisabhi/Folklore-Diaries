@@ -76,10 +76,10 @@ export async function POST(request: NextRequest) {
     let totalInserted = 0;
     let totalUpdated = 0;
 
-    // Process each drug row in a transaction
-    await db.$transaction(
-      async (tx) => {
-        for (const row of drugs) {
+    // Process each drug row individually to prevent Vercel Serverless / PgBouncer transaction timeouts
+    for (const row of drugs) {
+      await db.$transaction(
+        async (tx) => {
           const primaryNameTrimmed = row.primary_name.trim();
 
           // 1. Check if the drug already exists
@@ -349,13 +349,13 @@ export async function POST(request: NextRequest) {
               });
             }
           }
+        },
+        {
+          timeout: 20000,
+          maxWait: 5000,
         }
-      },
-      {
-        timeout: 60000,
-        maxWait: 10000,
-      }
-    );
+      );
+    }
 
     return NextResponse.json(
       {
