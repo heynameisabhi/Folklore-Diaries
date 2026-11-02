@@ -12,10 +12,11 @@ import {
 } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { BarChart, Bar, ResponsiveContainer, XAxis, Tooltip } from "recharts";
-import { Clock, Database, FileText, TrendingUp, User } from "lucide-react";
+import { Clock, Database, FileText, TrendingUp, User, PlusCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { drug } from "@prisma/client";
+import Link from "next/link";
 
 import { getWeeklyChartData } from "@/helpers/getWeeklyChartData";
 
@@ -126,7 +127,14 @@ export default function Dashboard() {
             </div>
             <p className="text-zinc-400 mt-1">Your Drug Database Dashboard</p>
           </div>
-          <div className="mt-4 md:mt-0 flex items-center gap-2">
+          <div className="mt-4 md:mt-0 flex flex-wrap items-center gap-3">
+            <Link
+              href="/dashboard/data/insert"
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-emerald-700 to-green-600 hover:from-emerald-800 hover:to-green-700 text-white shadow-md transition-all cursor-pointer"
+            >
+              <PlusCircle className="w-4 h-4" />
+              Insert Drug
+            </Link>
             <Badge
               variant="outline"
               className="bg-zinc-800 text-zinc-300 border-zinc-700 px-3 py-1"
@@ -349,9 +357,15 @@ export default function Dashboard() {
                   </div>
                 ))
               ) : (
-                <div className="p-8 text-center text-zinc-500">
-                  No records found. Create your first drug record to get
-                  started.
+                <div className="p-8 text-center text-zinc-500 space-y-3">
+                  <p>No records found. Create your first drug record to get started.</p>
+                  <Link
+                    href="/dashboard/data/insert"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium rounded-md bg-emerald-700 hover:bg-emerald-600 text-white transition-all cursor-pointer"
+                  >
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    Insert First Drug Record
+                  </Link>
                 </div>
               )}
             </div>

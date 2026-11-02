@@ -79,7 +79,7 @@ export default function DashboardLayout({
             href="/dashboard/data/insert"
             className={cn(
               "flex items-center px-4 py-2 text-sm rounded-md transition-colors",
-              pathname === "/dashboard/data/insert"
+              pathname.startsWith("/dashboard/data/insert")
                 ? "bg-gradient-to-r from-emerald-900/50 to-green-900/30 text-white font-medium"
                 : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
             )}

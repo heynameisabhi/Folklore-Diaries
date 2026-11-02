@@ -15,6 +15,9 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  FileText,
+  Sparkles,
+  Layers,
 } from "lucide-react";
 import {
   Card,
@@ -27,11 +30,12 @@ import {
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
-import { ScrollArea } from "@/components/ui/ScrollArea";
 import { Badge } from "@/components/ui/Badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useDropzone } from "react-dropzone";
+import { SingleDrugInsertForm } from "@/components/SingleDrugInsertForm";
 
 // All columns from the CSV
 const COLUMNS = [
@@ -204,6 +208,7 @@ function parseCSVLine(line: string): string[] {
 }
 
 const InsertDataPage: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<string>("single");
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [tableData, setTableData] = useState<DrugRow[]>([]);
   const [isInserting, setIsInserting] = useState(false);
@@ -334,341 +339,393 @@ const InsertDataPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center min-h-[calc(100vh-80px)] bg-gradient-to-tl from-zinc-950 via-black/30 to-emerald-950/80 p-6">
-      <Card className="w-full max-w-[95vw] border-[#1a1a1a] bg-black shadow-xl backdrop-blur-md">
-        <CardHeader className="border-b border-[#1a1a1a] bg-black">
-          <CardTitle className="text-white flex items-center gap-2">
-            <FileSpreadsheet className="h-5 w-5 text-green-400" />
-            Insert Drug Data
-          </CardTitle>
-          <CardDescription className="text-gray-400">
-            Upload a CSV file to preview, edit, and insert drug records into the
-            database. Multi-value fields (names, diseases, etc.) should be
-            separated by semicolons (;).
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent className="pt-6">
-          {/* Upload Zone */}
-          {!showTable && (
-            <div
-              {...getRootProps()}
-              className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-300
-                ${
-                  isDragActive
-                    ? "border-green-500 bg-green-500/10"
-                    : csvFile
-                    ? "border-green-400 bg-green-400/5"
-                    : "border-gray-700 hover:border-gray-500 hover:bg-zinc-900/50"
-                }`}
-            >
-              <input {...getInputProps()} />
-              <div className="flex flex-col items-center justify-center gap-3">
-                {csvFile ? (
-                  <>
-                    <Check className="h-12 w-12 text-green-400" />
-                    <p className="text-green-400 font-medium text-lg">
-                      {csvFile.name}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      {(csvFile.size / 1024).toFixed(2)} KB
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <div className="h-16 w-16 rounded-full bg-green-900/20 flex items-center justify-center">
-                      <Upload className="h-8 w-8 text-green-500" />
-                    </div>
-                    <p className="text-gray-300 text-lg font-medium">
-                      {isDragActive
-                        ? "Drop the CSV file here"
-                        : "Drag & drop a CSV file, or click to browse"}
-                    </p>
-                    <div className="text-xs text-gray-500 mt-2 space-y-1">
-                      <p>
-                        Expected columns: primary_name, source_type,
-                        botanical_description, botanical_names, sanskrit_names,
-                        vernacular_names, diseases, usage_methods,
-                        research_articles, research_thesis, photo_urls,
-                        contributor_names, contributor_ages, contributor_addresses,
-                        contributor_gurus, contributor_practice_durations
-                      </p>
-                      <p>
-                        Use semicolons (;) to separate multiple values in a
-                        single field
-                      </p>
-                    </div>
-                  </>
-                )}
+    <div className="flex flex-col items-center min-h-[calc(100vh-80px)] bg-gradient-to-tl from-zinc-950 via-black/40 to-emerald-950/70 p-4 md:p-8">
+      <div className="w-full max-w-5xl space-y-6">
+        {/* Navigation Tabs */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-zinc-900/80 p-2 rounded-xl border border-zinc-800 backdrop-blur-md">
+          <div className="flex items-center gap-3 px-3 py-1">
+            <div className="h-9 w-9 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+              <Layers className="h-5 w-5" />
             </div>
-              <input
-                id="test-file-input"
-                type="file"
-                accept=".csv"
-                className="mt-4 p-2 bg-zinc-800 text-white rounded border border-zinc-700 w-full cursor-pointer"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    onDrop([file]);
-                  }
-                }}
-              />
+            <div>
+              <h1 className="text-base font-semibold text-white">Drug Data Ingestion</h1>
+              <p className="text-xs text-zinc-400">Choose single form entry or bulk CSV file upload</p>
             </div>
-          )}
+          </div>
 
-          {/* Error */}
-          {error && (
-            <Alert
-              variant="destructive"
-              className="mt-4 bg-red-950/30 border-red-500/50 text-red-300"
+          <div className="flex items-center bg-zinc-950 p-1 rounded-lg border border-zinc-800 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={() => setActiveTab("single")}
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all cursor-pointer ${
+                activeTab === "single"
+                  ? "bg-emerald-600 text-white shadow-md"
+                  : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
+              }`}
             >
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription className="whitespace-pre-line">
-                {error}
-              </AlertDescription>
-            </Alert>
-          )}
+              <Sparkles className="w-4 h-4" />
+              Single Entry Form
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("bulk")}
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all cursor-pointer ${
+                activeTab === "bulk"
+                  ? "bg-emerald-600 text-white shadow-md"
+                  : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
+              }`}
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              Bulk CSV Upload
+            </button>
+          </div>
+        </div>
 
-          {/* Success */}
-          {success && (
-            <Alert className="mt-4 bg-green-950/30 border-green-500/50 text-green-300">
-              <Check className="h-4 w-4" />
-              <AlertTitle>Success</AlertTitle>
-              <AlertDescription>
-                {stats ? (
-                  <span>
-                    Processed data successfully. Created{" "}
-                    <strong>{stats.inserted}</strong> new drug record(s) and
-                    merged information into <strong>{stats.updated}</strong>{" "}
-                    existing drug record(s) without duplicating database
-                    records.
-                  </span>
-                ) : (
-                  <span>
-                    Drug records with all related data (names, diseases, usage
-                    methods, research, photos, contributors) have been inserted
-                    successfully.
-                  </span>
-                )}
-              </AlertDescription>
-            </Alert>
-          )}
+        {/* Tab 1: Single Entry Form */}
+        {activeTab === "single" && (
+          <div className="animate-in fade-in-50 duration-300">
+            <SingleDrugInsertForm />
+          </div>
+        )}
 
-          {/* Editable Table */}
-          {showTable && tableData.length > 0 && (
-            <div className="mt-4 space-y-4">
-              {/* Controls */}
-              <div className="flex items-center justify-between flex-wrap gap-3">
-                <div className="flex items-center gap-3">
-                  <Badge
-                    variant="secondary"
-                    className="bg-green-500/20 text-green-300 border-none px-3 py-1"
-                  >
-                    <Pencil className="w-3 h-3 mr-1" />
-                    {tableData.length} row(s) · {COLUMNS.length} columns
-                  </Badge>
-                  <p className="text-sm text-gray-400">
-                    Edit data below · Use{" "}
-                    <code className="text-green-400 bg-zinc-800 px-1 rounded text-xs">
-                      ;
-                    </code>{" "}
-                    for multiple values
-                  </p>
+        {/* Tab 2: Bulk CSV Upload */}
+        {activeTab === "bulk" && (
+          <Card className="w-full border-[#1a1a1a] bg-black shadow-xl backdrop-blur-md animate-in fade-in-50 duration-300">
+            <CardHeader className="border-b border-[#1a1a1a] bg-black">
+              <CardTitle className="text-white flex items-center gap-2">
+                <FileSpreadsheet className="h-5 w-5 text-green-400" />
+                Bulk CSV Upload & Preview
+              </CardTitle>
+              <CardDescription className="text-gray-400">
+                Upload a CSV file to preview, edit, and insert multiple drug records into the
+                database. Multi-value fields (names, diseases, etc.) should be
+                separated by semicolons (;).
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="pt-6">
+              {/* Upload Zone */}
+              {!showTable && (
+                <div
+                  {...getRootProps()}
+                  className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-300
+                    ${
+                      isDragActive
+                        ? "border-green-500 bg-green-500/10"
+                        : csvFile
+                        ? "border-green-400 bg-green-400/5"
+                        : "border-gray-700 hover:border-gray-500 hover:bg-zinc-900/50"
+                    }`}
+                >
+                  <input {...getInputProps()} />
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    {csvFile ? (
+                      <>
+                        <Check className="h-12 w-12 text-green-400" />
+                        <p className="text-green-400 font-medium text-lg">
+                          {csvFile.name}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {(csvFile.size / 1024).toFixed(2)} KB
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <div className="h-16 w-16 rounded-full bg-green-900/20 flex items-center justify-center">
+                          <Upload className="h-8 w-8 text-green-500" />
+                        </div>
+                        <p className="text-gray-300 text-lg font-medium">
+                          {isDragActive
+                            ? "Drop the CSV file here"
+                            : "Drag & drop a CSV file, or click to browse"}
+                        </p>
+                        <div className="text-xs text-gray-500 mt-2 space-y-1">
+                          <p>
+                            Expected columns: primary_name, source_type,
+                            botanical_description, botanical_names, sanskrit_names,
+                            vernacular_names, diseases, usage_methods,
+                            research_articles, research_thesis, photo_urls,
+                            contributor_names, contributor_ages, contributor_addresses,
+                            contributor_gurus, contributor_practice_durations
+                          </p>
+                          <p>
+                            Use semicolons (;) to separate multiple values in a
+                            single field
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <input
+                    id="test-file-input"
+                    type="file"
+                    accept=".csv"
+                    className="mt-4 p-2 bg-zinc-800 text-white rounded border border-zinc-700 w-full cursor-pointer"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        onDrop([file]);
+                      }
+                    }}
+                  />
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => scrollTable("left")}
-                    className="text-gray-300 border-zinc-700 bg-zinc-800 hover:bg-zinc-700 hover:text-white cursor-pointer"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => scrollTable("right")}
-                    className="text-gray-300 border-zinc-700 bg-zinc-800 hover:bg-zinc-700 hover:text-white cursor-pointer"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={resetForm}
-                    className="text-gray-300 border-zinc-700 bg-zinc-800 hover:bg-zinc-700 hover:text-white cursor-pointer"
-                  >
-                    <X className="w-4 h-4 mr-1" />
-                    Reset
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={addRow}
-                    className="bg-green-600 hover:bg-green-700 text-white cursor-pointer"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add Row
-                  </Button>
-                </div>
-              </div>
+              )}
 
-              {/* Scrollable Table */}
-              <div className="rounded-md border border-[#1a1a1a] overflow-hidden">
-                <div className="max-h-[500px] overflow-y-auto">
-                  <div
-                    className="overflow-x-auto"
-                    ref={(el) => setScrollContainerRef(el)}
-                  >
-                    <table className="w-max min-w-full">
-                      <thead className="sticky top-0 z-10">
-                        <tr className="bg-zinc-900 border-b border-zinc-800">
-                          <th className="text-left text-xs font-semibold text-gray-400 px-3 py-3 w-10 sticky left-0 bg-zinc-900 z-20">
-                            #
-                          </th>
-                          {COLUMNS.map((col) => (
-                            <th
-                              key={col.key}
-                              className="text-left text-xs font-semibold text-gray-400 px-2 py-3 min-w-[180px]"
-                            >
-                              <div>{col.label}</div>
-                              {"hint" in col && col.hint && (
-                                <div className="text-[10px] text-gray-600 font-normal mt-0.5">
-                                  {col.hint}
-                                </div>
-                              )}
-                            </th>
-                          ))}
-                          <th className="text-center text-xs font-semibold text-gray-400 px-3 py-3 w-16 sticky right-0 bg-zinc-900 z-20">
-                            Del
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {tableData.map((row, rowIdx) => (
-                          <tr
-                            key={rowIdx}
-                            className="border-b border-zinc-800/50 hover:bg-zinc-900/50 transition-colors"
-                          >
-                            <td className="px-3 py-1.5 text-xs text-gray-500 font-mono sticky left-0 bg-black z-10">
-                              {rowIdx + 1}
-                            </td>
-                            {COLUMNS.map((col) => (
-                              <td key={col.key} className="px-2 py-1.5">
-                                {"type" in col && col.type === "select" ? (
-                                  <select
-                                    value={row[col.key]}
-                                    onChange={(e) =>
-                                      updateCell(
-                                        rowIdx,
-                                        col.key,
-                                        e.target.value
-                                      )
-                                    }
-                                    className="w-full bg-zinc-800/50 border border-zinc-700 text-white text-sm rounded-md px-2 h-8 focus:ring-green-500 focus:border-green-500 appearance-none cursor-pointer"
-                                  >
-                                    <option value="">Select...</option>
-                                    {SOURCE_TYPES.map((t) => (
-                                      <option key={t} value={t}>
-                                        {t}
-                                      </option>
-                                    ))}
-                                  </select>
-                                ) : (
-                                  <Input
-                                    value={row[col.key]}
-                                    onChange={(e) =>
-                                      updateCell(
-                                        rowIdx,
-                                        col.key,
-                                        e.target.value
-                                      )
-                                    }
-                                    placeholder={col.label.replace(" *", "")}
-                                    className="bg-zinc-800/50 border-zinc-700 text-white text-sm h-8 focus-visible:ring-green-500 focus-visible:ring-1 min-w-[160px]"
-                                  />
-                                )}
-                              </td>
-                            ))}
-                            <td className="px-3 py-1.5 text-center sticky right-0 bg-black z-10">
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => deleteRow(rowIdx)}
-                                className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-900/30 cursor-pointer"
+              {/* Error */}
+              {error && (
+                <Alert
+                  variant="destructive"
+                  className="mt-4 bg-red-950/30 border-red-500/50 text-red-300"
+                >
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription className="whitespace-pre-line">
+                    {error}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Success */}
+              {success && (
+                <Alert className="mt-4 bg-green-950/30 border-green-500/50 text-green-300">
+                  <Check className="h-4 w-4" />
+                  <AlertTitle>Success</AlertTitle>
+                  <AlertDescription>
+                    {stats ? (
+                      <span>
+                        Processed data successfully. Created{" "}
+                        <strong>{stats.inserted}</strong> new drug record(s) and
+                        merged information into <strong>{stats.updated}</strong>{" "}
+                        existing drug record(s) without duplicating database
+                        records.
+                      </span>
+                    ) : (
+                      <span>
+                        Drug records with all related data (names, diseases, usage
+                        methods, research, photos, contributors) have been inserted
+                        successfully.
+                      </span>
+                    )}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Editable Table */}
+              {showTable && tableData.length > 0 && (
+                <div className="mt-4 space-y-4">
+                  {/* Controls */}
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    <div className="flex items-center gap-3">
+                      <Badge
+                        variant="secondary"
+                        className="bg-green-500/20 text-green-300 border-none px-3 py-1"
+                      >
+                        <Pencil className="w-3 h-3 mr-1" />
+                        {tableData.length} row(s) · {COLUMNS.length} columns
+                      </Badge>
+                      <p className="text-sm text-gray-400">
+                        Edit data below · Use{" "}
+                        <code className="text-green-400 bg-zinc-800 px-1 rounded text-xs">
+                          ;
+                        </code>{" "}
+                        for multiple values
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => scrollTable("left")}
+                        className="text-gray-300 border-zinc-700 bg-zinc-800 hover:bg-zinc-700 hover:text-white cursor-pointer"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => scrollTable("right")}
+                        className="text-gray-300 border-zinc-700 bg-zinc-800 hover:bg-zinc-700 hover:text-white cursor-pointer"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={resetForm}
+                        className="text-gray-300 border-zinc-700 bg-zinc-800 hover:bg-zinc-700 hover:text-white cursor-pointer"
+                      >
+                        <X className="w-4 h-4 mr-1" />
+                        Reset
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={addRow}
+                        className="bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Add Row
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Scrollable Table */}
+                  <div className="rounded-md border border-[#1a1a1a] overflow-hidden">
+                    <div className="max-h-[500px] overflow-y-auto">
+                      <div
+                        className="overflow-x-auto"
+                        ref={(el) => setScrollContainerRef(el)}
+                      >
+                        <table className="w-max min-w-full">
+                          <thead className="sticky top-0 z-10">
+                            <tr className="bg-zinc-900 border-b border-zinc-800">
+                              <th className="text-left text-xs font-semibold text-gray-400 px-3 py-3 w-10 sticky left-0 bg-zinc-900 z-20">
+                                #
+                              </th>
+                              {COLUMNS.map((col) => (
+                                <th
+                                  key={col.key}
+                                  className="text-left text-xs font-semibold text-gray-400 px-2 py-3 min-w-[180px]"
+                                >
+                                  <div>{col.label}</div>
+                                  {"hint" in col && col.hint && (
+                                    <div className="text-[10px] text-gray-600 font-normal mt-0.5">
+                                      {col.hint}
+                                    </div>
+                                  )}
+                                </th>
+                              ))}
+                              <th className="text-center text-xs font-semibold text-gray-400 px-3 py-3 w-16 sticky right-0 bg-zinc-900 z-20">
+                                Del
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {tableData.map((row, rowIdx) => (
+                              <tr
+                                key={rowIdx}
+                                className="border-b border-zinc-800/50 hover:bg-zinc-900/50 transition-colors"
                               >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                                <td className="px-3 py-1.5 text-xs text-gray-500 font-mono sticky left-0 bg-black z-10">
+                                  {rowIdx + 1}
+                                </td>
+                                {COLUMNS.map((col) => (
+                                  <td key={col.key} className="px-2 py-1.5">
+                                    {"type" in col && col.type === "select" ? (
+                                      <select
+                                        value={row[col.key]}
+                                        onChange={(e) =>
+                                          updateCell(
+                                            rowIdx,
+                                            col.key,
+                                            e.target.value
+                                          )
+                                        }
+                                        className="w-full bg-zinc-800/50 border border-zinc-700 text-white text-sm rounded-md px-2 h-8 focus:ring-green-500 focus:border-green-500 appearance-none cursor-pointer"
+                                      >
+                                        <option value="">Select...</option>
+                                        {SOURCE_TYPES.map((t) => (
+                                          <option key={t} value={t}>
+                                            {t}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    ) : (
+                                      <Input
+                                        value={row[col.key]}
+                                        onChange={(e) =>
+                                          updateCell(
+                                            rowIdx,
+                                            col.key,
+                                            e.target.value
+                                          )
+                                        }
+                                        placeholder={col.label.replace(" *", "")}
+                                        className="bg-zinc-800/50 border-zinc-700 text-white text-sm h-8 focus-visible:ring-green-500 focus-visible:ring-1 min-w-[160px]"
+                                      />
+                                    )}
+                                  </td>
+                                ))}
+                                <td className="px-3 py-1.5 text-center sticky right-0 bg-black z-10">
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => deleteRow(rowIdx)}
+                                    className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-900/30 cursor-pointer"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Column legend */}
+                  <div className="flex flex-wrap gap-2 text-[10px] text-gray-500 px-1">
+                    <span className="bg-zinc-800 px-2 py-0.5 rounded">
+                      drug → primary_name, source_type, botanical_description
+                    </span>
+                    <span className="bg-zinc-800 px-2 py-0.5 rounded">
+                      drug_names → botanical, sanskrit, vernacular names
+                    </span>
+                    <span className="bg-zinc-800 px-2 py-0.5 rounded">
+                      disease → diseases
+                    </span>
+                    <span className="bg-zinc-800 px-2 py-0.5 rounded">
+                      usage_method → usage methods
+                    </span>
+                    <span className="bg-zinc-800 px-2 py-0.5 rounded">
+                      research → articles, thesis
+                    </span>
+                    <span className="bg-zinc-800 px-2 py-0.5 rounded">
+                      drug_photos → photo URLs
+                    </span>
+                    <span className="bg-zinc-800 px-2 py-0.5 rounded">
+                      contributor → names, ages, addresses, gurus, practice durations
+                    </span>
+                  </div>
+
+                  {/* Insert Button */}
+                  <div className="flex justify-end gap-3 pt-2">
+                    <Button
+                      onClick={handleInsert}
+                      disabled={isInserting || tableData.length === 0}
+                      className="bg-gradient-to-r from-green-950 to-green-600 hover:from-green-900 hover:to-green-700 text-white font-semibold px-8 py-2 cursor-pointer"
+                    >
+                      {isInserting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Inserting into database...
+                        </>
+                      ) : (
+                        <>
+                          <Check className="mr-2 h-4 w-4" />
+                          Insert {tableData.length} Record(s) to Database
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
-              </div>
+              )}
+            </CardContent>
 
-              {/* Column legend */}
-              <div className="flex flex-wrap gap-2 text-[10px] text-gray-500 px-1">
-                <span className="bg-zinc-800 px-2 py-0.5 rounded">
-                  drug → primary_name, source_type, botanical_description
-                </span>
-                <span className="bg-zinc-800 px-2 py-0.5 rounded">
-                  drug_names → botanical, sanskrit, vernacular names
-                </span>
-                <span className="bg-zinc-800 px-2 py-0.5 rounded">
-                  disease → diseases
-                </span>
-                <span className="bg-zinc-800 px-2 py-0.5 rounded">
-                  usage_method → usage methods
-                </span>
-                <span className="bg-zinc-800 px-2 py-0.5 rounded">
-                  research → articles, thesis
-                </span>
-                <span className="bg-zinc-800 px-2 py-0.5 rounded">
-                  drug_photos → photo URLs
-                </span>
-                <span className="bg-zinc-800 px-2 py-0.5 rounded">
-                  contributor → names, ages, addresses, gurus, practice durations
-                </span>
+            <CardFooter className="border-t border-[#1a1a1a] bg-black flex justify-center">
+              <div className="text-xs text-gray-500 flex items-center">
+                <AlertCircle className="h-3 w-3 mr-1" /> Multi-value fields use
+                semicolons (;) as separators
               </div>
-
-              {/* Insert Button */}
-              <div className="flex justify-end gap-3 pt-2">
-                <Button
-                  onClick={handleInsert}
-                  disabled={isInserting || tableData.length === 0}
-                  className="bg-gradient-to-r from-green-950 to-green-600 hover:from-green-900 hover:to-green-700 text-white font-semibold px-8 py-2 cursor-pointer"
-                >
-                  {isInserting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Inserting into database...
-                    </>
-                  ) : (
-                    <>
-                      <Check className="mr-2 h-4 w-4" />
-                      Insert {tableData.length} Record(s) to Database
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          )}
-        </CardContent>
-
-        <CardFooter className="border-t border-[#1a1a1a] bg-black flex justify-center">
-          <div className="text-xs text-gray-500 flex items-center">
-            <AlertCircle className="h-3 w-3 mr-1" /> Multi-value fields use
-            semicolons (;) as separators
-          </div>
-        </CardFooter>
-      </Card>
+            </CardFooter>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };

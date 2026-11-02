@@ -13,60 +13,73 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { Checkbox } from "@/components/ui/checkbox"; 
-import { FileText, Download, ArrowLeft, Calendar, User, Image, BookOpen, Settings, Database } from "lucide-react";
+import {
+    FileText,
+    Download,
+    ArrowLeft,
+    Calendar,
+    User,
+    Image,
+    BookOpen,
+    Database,
+    HeartPulse,
+    UserCheck,
+    Leaf,
+    RotateCcw
+} from "lucide-react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 type TimeRange = "week" | "month" | "year" | "all";
 
-interface ReportOptions {
-    // Deck Information
-    deckBasicInfo: boolean;
-    deckPhysicalProperties: boolean;
-    deckCreationDetails: boolean;
-    
-    // User Information
+export interface ReportOptions {
+    // Drug Registry Information
+    drugBasicInfo: boolean;
+    drugDescription: boolean;
+    drugNames: boolean;
+
+    // Medical & Therapeutic Information
+    diseases: boolean;
+    usageMethods: boolean;
+
+    // Traditional Knowledge & Contributors
+    contributorInfo: boolean;
+    contributorDetails: boolean;
+
+    // Research & Scientific Literature
+    researchArticles: boolean;
+    researchThesis: boolean;
+
+    // Media & Documentation
+    photoCount: boolean;
+    photoUrls: boolean;
+
+    // User Administration
     userBasicInfo: boolean;
-    userContactInfo: boolean;
     userPermissions: boolean;
-    
-    // Grantha Content
-    granthaBasicInfo: boolean;
-    granthaDescriptions: boolean;
-    
-    // Author & Language
-    authorDetails: boolean;
-    authorBio: boolean;
-    languageInfo: boolean;
-    
-    // Image Information
-    imageCount: boolean;
-    imageDetails: boolean;
-    scanningProperties: boolean;
-    
+
     // Additional Options
     statisticalSummary: boolean;
     exportMetadata: boolean;
 }
 
 const defaultOptions: ReportOptions = {
-    deckBasicInfo: true,
-    deckPhysicalProperties: false,
-    deckCreationDetails: true,
+    drugBasicInfo: true,
+    drugDescription: true,
+    drugNames: true,
+    diseases: true,
+    usageMethods: true,
+    contributorInfo: true,
+    contributorDetails: true,
+    researchArticles: true,
+    researchThesis: true,
+    photoCount: true,
+    photoUrls: false,
     userBasicInfo: true,
-    userContactInfo: false,
-    userPermissions: false,
-    granthaBasicInfo: true,
-    granthaDescriptions: false,
-    authorDetails: true,
-    authorBio: false,
-    languageInfo: true,
-    imageCount: true,
-    imageDetails: false,
-    scanningProperties: false,
+    userPermissions: true,
     statisticalSummary: true,
-    exportMetadata: false,
+    exportMetadata: true,
 };
 
 export default function GenerateReport() {
@@ -86,11 +99,12 @@ export default function GenerateReport() {
 
     const selectAllInCategory = (category: string) => {
         const categoryOptions: Record<string, (keyof ReportOptions)[]> = {
-            deck: ['deckBasicInfo', 'deckPhysicalProperties', 'deckCreationDetails'],
-            user: ['userBasicInfo', 'userContactInfo', 'userPermissions'],
-            grantha: ['granthaBasicInfo', 'granthaDescriptions'],
-            author: ['authorDetails', 'authorBio', 'languageInfo'],
-            image: ['imageCount', 'imageDetails', 'scanningProperties'],
+            drugs: ['drugBasicInfo', 'drugDescription', 'drugNames'],
+            medical: ['diseases', 'usageMethods'],
+            contributors: ['contributorInfo', 'contributorDetails'],
+            research: ['researchArticles', 'researchThesis'],
+            media: ['photoCount', 'photoUrls'],
+            user: ['userBasicInfo', 'userPermissions'],
             additional: ['statisticalSummary', 'exportMetadata']
         };
 
@@ -103,8 +117,19 @@ export default function GenerateReport() {
         }
     };
 
+    const selectAllOptions = () => {
+        const allSelected = Object.keys(reportOptions).reduce((acc, key) => {
+            acc[key as keyof ReportOptions] = true;
+            return acc;
+        }, {} as ReportOptions);
+        setReportOptions(allSelected);
+    };
+
+    const resetToDefaults = () => {
+        setReportOptions(defaultOptions);
+    };
+
     const handleGenerateReport = async () => {
-        // Check if at least one option is selected
         const hasSelectedOptions = Object.values(reportOptions).some(option => option);
         if (!hasSelectedOptions) {
             toast.error("Please select at least one report option!");
@@ -124,19 +149,31 @@ export default function GenerateReport() {
             const blob = new Blob([response.data], { type: 'application/pdf' });
             const url = window.URL.createObjectURL(blob);
             
-            // Create a temporary link and trigger download
+            // Trigger download
             const link = document.createElement('a');
             link.href = url;
-            link.download = `grantha-report-${timeRange}-${new Date().toISOString().split('T')[0]}.pdf`;
+            link.download = `folklore-registry-report-${timeRange}-${new Date().toISOString().split('T')[0]}.pdf`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
 
-            toast.success("🟢 Report downloaded successfully!")
-        } catch (error) {
+            toast.success("Report generated and downloaded successfully!");
+        } catch (error: any) {
             console.error('Error generating report:', error);
-            toast.error("🔴 Error generating report!")
+            let errorMessage = "Failed to generate report.";
+            if (error.response?.data instanceof Blob) {
+                try {
+                    const text = await error.response.data.text();
+                    const parsed = JSON.parse(text);
+                    if (parsed.error) errorMessage = parsed.error;
+                } catch {
+                    // Blob was not JSON
+                }
+            } else if (error.response?.data?.error) {
+                errorMessage = error.response.data.error;
+            }
+            toast.error(errorMessage);
         } finally {
             setIsGenerating(false);
         }
@@ -188,7 +225,7 @@ export default function GenerateReport() {
                 <label htmlFor={id} className="text-sm font-medium text-zinc-200 cursor-pointer">
                     {label}
                 </label>
-                <p className="text-xs text-zinc-400 mt-1">{description}</p>
+                <p className="text-xs text-zinc-400 mt-0.5">{description}</p>
             </div>
         </div>
     );
@@ -202,14 +239,34 @@ export default function GenerateReport() {
                         <Button
                             variant="ghost"
                             onClick={() => router.back()}
-                            className="text-zinc-400 bg-zinc-800 hover:text-white hover:bg-zinc-500 transition-colors cursor-pointer"
+                            className="text-zinc-400 bg-zinc-800 hover:text-white hover:bg-zinc-700 transition-colors cursor-pointer"
                         >
                             <ArrowLeft className="w-5 h-5" />
                         </Button>
                         <div>
                             <h1 className="text-2xl font-semibold text-gray-200">Generate Custom Report</h1>
-                            <p className="text-zinc-400 mt-1">Create detailed reports with your selected data fields</p>
+                            <p className="text-zinc-400 mt-1">Export detailed PDF reports from the Folklore Diaries repository</p>
                         </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={selectAllOptions}
+                            className="border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800 cursor-pointer text-xs"
+                        >
+                            Select All
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={resetToDefaults}
+                            className="border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800 cursor-pointer text-xs"
+                        >
+                            <RotateCcw className="w-3.5 h-3.5 mr-1" />
+                            Defaults
+                        </Button>
                     </div>
                 </div>
 
@@ -220,41 +277,44 @@ export default function GenerateReport() {
                         <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm text-white">
                             <CardHeader>
                                 <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
-                                    <Calendar className="w-5 h-5" />
-                                    Time Range
+                                    <Calendar className="w-5 h-5 text-emerald-400" />
+                                    Time Range Filter
                                 </CardTitle>
+                                <CardDescription className="text-zinc-400">
+                                    Filter records by creation or entry timestamp
+                                </CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <Select
                                     value={timeRange}
                                     onValueChange={(value: TimeRange) => setTimeRange(value)}
                                 >
-                                    <SelectTrigger className="w-full bg-zinc-800 border-zinc-700">
+                                    <SelectTrigger className="w-full bg-zinc-800 border-zinc-700 text-white">
                                         <SelectValue placeholder="Select time range" />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-zinc-800 border-none text-white">
-                                        <SelectItem value="week">Last Week</SelectItem>
-                                        <SelectItem value="month">Last Month</SelectItem>
-                                        <SelectItem value="year">Last Year</SelectItem>
-                                        <SelectItem value="all">All Time</SelectItem>
+                                    <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+                                        <SelectItem value="week">Last 7 Days</SelectItem>
+                                        <SelectItem value="month">Last 30 Days</SelectItem>
+                                        <SelectItem value="year">Last 1 Year</SelectItem>
+                                        <SelectItem value="all">All Time (Full Repository)</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </CardContent>
                         </Card>
 
-                        {/* Deck Information */}
+                        {/* Drug Registry Information */}
                         <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
                             <CardHeader>
                                 <div className="flex items-center justify-between">
                                     <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
-                                        <FileText className="w-5 h-5" />
-                                        Deck Information
+                                        <Leaf className="w-5 h-5 text-emerald-400" />
+                                        Drug & Medicine Data
                                     </CardTitle>
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => selectAllInCategory('deck')}
-                                        className="cursor-pointer text-xs bg-gray-300/10 text-blue-400 hover:bg-gray-300/20 hover:text-white"
+                                        onClick={() => selectAllInCategory('drugs')}
+                                        className="cursor-pointer text-xs bg-gray-300/10 text-emerald-400 hover:bg-gray-300/20 hover:text-white"
                                     >
                                         Select All
                                     </Button>
@@ -262,42 +322,186 @@ export default function GenerateReport() {
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <CheckboxItem
-                                    id="deckBasicInfo"
-                                    label="Basic Deck Information"
-                                    description="Deck name, ID, and creation timestamp"
-                                    checked={reportOptions.deckBasicInfo}
-                                    onChange={(checked) => handleOptionChange('deckBasicInfo', checked)}
+                                    id="drugBasicInfo"
+                                    label="Basic Drug Identification"
+                                    description="Primary name, source classification (Plant/Animal/Mineral), creation date"
+                                    checked={reportOptions.drugBasicInfo}
+                                    onChange={(checked) => handleOptionChange('drugBasicInfo', checked)}
                                 />
                                 <CheckboxItem
-                                    id="deckPhysicalProperties"
-                                    label="Physical Properties"
-                                    description="Length, width, total leaves, stitch type, physical condition"
-                                    checked={reportOptions.deckPhysicalProperties}
-                                    onChange={(checked) => handleOptionChange('deckPhysicalProperties', checked)}
+                                    id="drugDescription"
+                                    label="Botanical & Morphological Description"
+                                    description="Habit, habitat, plant parts, morphology and physical characteristics"
+                                    checked={reportOptions.drugDescription}
+                                    onChange={(checked) => handleOptionChange('drugDescription', checked)}
                                 />
                                 <CheckboxItem
-                                    id="deckCreationDetails"
-                                    label="Creation Details"
-                                    description="Owner name, source address, creation date"
-                                    checked={reportOptions.deckCreationDetails}
-                                    onChange={(checked) => handleOptionChange('deckCreationDetails', checked)}
+                                    id="drugNames"
+                                    label="Taxonomic & Regional Names"
+                                    description="Botanical (Latin), Sanskrit, and Vernacular/Common names"
+                                    checked={reportOptions.drugNames}
+                                    onChange={(checked) => handleOptionChange('drugNames', checked)}
                                 />
                             </CardContent>
                         </Card>
 
-                        {/* User Information */}
+                        {/* Medical & Therapeutic Information */}
                         <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
                             <CardHeader>
                                 <div className="flex items-center justify-between">
                                     <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
-                                        <User className="w-5 h-5" />
-                                        User Information
+                                        <HeartPulse className="w-5 h-5 text-emerald-400" />
+                                        Therapeutic Indications & Usage
+                                    </CardTitle>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => selectAllInCategory('medical')}
+                                        className="cursor-pointer text-xs bg-gray-300/10 text-emerald-400 hover:bg-gray-300/20 hover:text-white"
+                                    >
+                                        Select All
+                                    </Button>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <CheckboxItem
+                                    id="diseases"
+                                    label="Diseases & Indications"
+                                    description="Target diseases, conditions, and Ayurvedic diagnoses treated"
+                                    checked={reportOptions.diseases}
+                                    onChange={(checked) => handleOptionChange('diseases', checked)}
+                                />
+                                <CheckboxItem
+                                    id="usageMethods"
+                                    label="Preparation & Usage Methods"
+                                    description="Formulations, decoctions, dosage, and administration protocols"
+                                    checked={reportOptions.usageMethods}
+                                    onChange={(checked) => handleOptionChange('usageMethods', checked)}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        {/* Traditional Knowledge & Contributors */}
+                        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
+                            <CardHeader>
+                                <div className="flex items-center justify-between">
+                                    <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
+                                        <UserCheck className="w-5 h-5 text-emerald-400" />
+                                        Folk Healers & Traditional Contributors
+                                    </CardTitle>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => selectAllInCategory('contributors')}
+                                        className="cursor-pointer text-xs bg-gray-300/10 text-emerald-400 hover:bg-gray-300/20 hover:text-white"
+                                    >
+                                        Select All
+                                    </Button>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <CheckboxItem
+                                    id="contributorInfo"
+                                    label="Contributor Basic Details"
+                                    description="Traditional practitioner name, age, and geographical address/region"
+                                    checked={reportOptions.contributorInfo}
+                                    onChange={(checked) => handleOptionChange('contributorInfo', checked)}
+                                />
+                                <CheckboxItem
+                                    id="contributorDetails"
+                                    label="Lineage & Experience"
+                                    description="Guru/teacher name and total duration/years of clinical practice"
+                                    checked={reportOptions.contributorDetails}
+                                    onChange={(checked) => handleOptionChange('contributorDetails', checked)}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        {/* Research & Scientific Literature */}
+                        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
+                            <CardHeader>
+                                <div className="flex items-center justify-between">
+                                    <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
+                                        <BookOpen className="w-5 h-5 text-emerald-400" />
+                                        Research & Scientific References
+                                    </CardTitle>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => selectAllInCategory('research')}
+                                        className="cursor-pointer text-xs bg-gray-300/10 text-emerald-400 hover:bg-gray-300/20 hover:text-white"
+                                    >
+                                        Select All
+                                    </Button>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <CheckboxItem
+                                    id="researchArticles"
+                                    label="Research Articles & Publications"
+                                    description="Published scientific papers and peer-reviewed journal articles"
+                                    checked={reportOptions.researchArticles}
+                                    onChange={(checked) => handleOptionChange('researchArticles', checked)}
+                                />
+                                <CheckboxItem
+                                    id="researchThesis"
+                                    label="Academic Theses & Dissertations"
+                                    description="Postgraduate and doctoral theses related to the drug"
+                                    checked={reportOptions.researchThesis}
+                                    onChange={(checked) => handleOptionChange('researchThesis', checked)}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        {/* Media & Documentation */}
+                        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
+                            <CardHeader>
+                                <div className="flex items-center justify-between">
+                                    <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
+                                        <Image className="w-5 h-5 text-emerald-400" />
+                                        Photographs & Media
+                                    </CardTitle>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => selectAllInCategory('media')}
+                                        className="cursor-pointer text-xs bg-gray-300/10 text-emerald-400 hover:bg-gray-300/20 hover:text-white"
+                                    >
+                                        Select All
+                                    </Button>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <CheckboxItem
+                                    id="photoCount"
+                                    label="Photographic Documentation Count"
+                                    description="Include total count of specimen photos cataloged per drug"
+                                    checked={reportOptions.photoCount}
+                                    onChange={(checked) => handleOptionChange('photoCount', checked)}
+                                />
+                                <CheckboxItem
+                                    id="photoUrls"
+                                    label="Direct Image URLs"
+                                    description="List raw photo resource URLs in the appendix"
+                                    checked={reportOptions.photoUrls}
+                                    onChange={(checked) => handleOptionChange('photoUrls', checked)}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        {/* User Administration */}
+                        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
+                            <CardHeader>
+                                <div className="flex items-center justify-between">
+                                    <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
+                                        <User className="w-5 h-5 text-emerald-400" />
+                                        User Directory & Roles
                                     </CardTitle>
                                     <Button
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => selectAllInCategory('user')}
-                                        className="cursor-pointer text-xs bg-gray-300/10 text-blue-400 hover:bg-gray-300/20 hover:text-white"
+                                        className="cursor-pointer text-xs bg-gray-300/10 text-emerald-400 hover:bg-gray-300/20 hover:text-white"
                                     >
                                         Select All
                                     </Button>
@@ -306,146 +510,17 @@ export default function GenerateReport() {
                             <CardContent className="space-y-4">
                                 <CheckboxItem
                                     id="userBasicInfo"
-                                    label="Basic User Info"
-                                    description="Username and email address"
+                                    label="Registered User Directory"
+                                    description="Include list of system user accounts and email addresses"
                                     checked={reportOptions.userBasicInfo}
                                     onChange={(checked) => handleOptionChange('userBasicInfo', checked)}
                                 />
                                 <CheckboxItem
-                                    id="userContactInfo"
-                                    label="Contact Information"
-                                    description="Phone number and address"
-                                    checked={reportOptions.userContactInfo}
-                                    onChange={(checked) => handleOptionChange('userContactInfo', checked)}
-                                />
-                                <CheckboxItem
                                     id="userPermissions"
-                                    label="Access Controls"
-                                    description="User role and permission levels"
+                                    label="Roles & Account Status"
+                                    description="Include access levels (Admin / User) and account standing (Active / Blocked)"
                                     checked={reportOptions.userPermissions}
                                     onChange={(checked) => handleOptionChange('userPermissions', checked)}
-                                />
-                            </CardContent>
-                        </Card>
-
-                        {/* Grantha Content */}
-                        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
-                                        <BookOpen className="w-5 h-5" />
-                                        Grantha Content
-                                    </CardTitle>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => selectAllInCategory('grantha')}
-                                        className="cursor-pointer text-xs bg-gray-300/10 text-blue-400 hover:bg-gray-300/20 hover:text-white"
-                                    >
-                                        Select All
-                                    </Button>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <CheckboxItem
-                                    id="granthaBasicInfo"
-                                    label="Basic Grantha Info"
-                                    description="Grantha names and IDs"
-                                    checked={reportOptions.granthaBasicInfo}
-                                    onChange={(checked) => handleOptionChange('granthaBasicInfo', checked)}
-                                />
-                                <CheckboxItem
-                                    id="granthaDescriptions"
-                                    label="Descriptions & Remarks"
-                                    description="Detailed descriptions and additional remarks"
-                                    checked={reportOptions.granthaDescriptions}
-                                    onChange={(checked) => handleOptionChange('granthaDescriptions', checked)}
-                                />
-                            </CardContent>
-                        </Card>
-
-                        {/* Author & Language */}
-                        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
-                                        <Settings className="w-5 h-5" />
-                                        Author & Language Details
-                                    </CardTitle>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => selectAllInCategory('author')}
-                                        className="cursor-pointer text-xs bg-gray-300/10 text-blue-400 hover:bg-gray-300/20 hover:text-white"
-                                    >
-                                        Select All
-                                    </Button>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <CheckboxItem
-                                    id="authorDetails"
-                                    label="Author Information"
-                                    description="Author names, birth/death years, scribe details"
-                                    checked={reportOptions.authorDetails}
-                                    onChange={(checked) => handleOptionChange('authorDetails', checked)}
-                                />
-                                <CheckboxItem
-                                    id="authorBio"
-                                    label="Author Biography"
-                                    description="Include detailed author biographies"
-                                    checked={reportOptions.authorBio}
-                                    onChange={(checked) => handleOptionChange('authorBio', checked)}
-                                />
-                                <CheckboxItem
-                                    id="languageInfo"
-                                    label="Language Information"
-                                    description="Language names and details"
-                                    checked={reportOptions.languageInfo}
-                                    onChange={(checked) => handleOptionChange('languageInfo', checked)}
-                                />
-                            </CardContent>
-                        </Card>
-
-                        {/* Image Information */}
-                        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
-                                        <Image className="w-5 h-5" />
-                                        Image Information
-                                    </CardTitle>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => selectAllInCategory('image')}
-                                        className="cursor-pointer text-xs bg-gray-300/10 text-blue-400 hover:bg-gray-300/20 hover:text-white"
-                                    >
-                                        Select All
-                                    </Button>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <CheckboxItem
-                                    id="imageCount"
-                                    label="Image Counts"
-                                    description="Total number of images per grantha"
-                                    checked={reportOptions.imageCount}
-                                    onChange={(checked) => handleOptionChange('imageCount', checked)}
-                                />
-                                <CheckboxItem
-                                    id="imageDetails"
-                                    label="Image Details"
-                                    description="Image names, URLs, and metadata"
-                                    checked={reportOptions.imageDetails}
-                                    onChange={(checked) => handleOptionChange('imageDetails', checked)}
-                                />
-                                <CheckboxItem
-                                    id="scanningProperties"
-                                    label="Scanning Properties"
-                                    description="Scanner details, resolution, dates, format information"
-                                    checked={reportOptions.scanningProperties}
-                                    onChange={(checked) => handleOptionChange('scanningProperties', checked)}
                                 />
                             </CardContent>
                         </Card>
@@ -455,14 +530,14 @@ export default function GenerateReport() {
                             <CardHeader>
                                 <div className="flex items-center justify-between">
                                     <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
-                                        <Database className="w-5 h-5" />
-                                        Additional Options
+                                        <Database className="w-5 h-5 text-emerald-400" />
+                                        Summary & Metadata
                                     </CardTitle>
                                     <Button
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => selectAllInCategory('additional')}
-                                        className="cursor-pointer text-xs bg-gray-300/10 text-blue-400 hover:bg-gray-300/20 hover:text-white"
+                                        className="cursor-pointer text-xs bg-gray-300/10 text-emerald-400 hover:bg-gray-300/20 hover:text-white"
                                     >
                                         Select All
                                     </Button>
@@ -471,15 +546,15 @@ export default function GenerateReport() {
                             <CardContent className="space-y-4">
                                 <CheckboxItem
                                     id="statisticalSummary"
-                                    label="Statistical Summary"
-                                    description="Overview statistics and data counts"
+                                    label="Executive Summary Table"
+                                    description="High-level metric totals (drugs, diseases, contributors, research, users)"
                                     checked={reportOptions.statisticalSummary}
                                     onChange={(checked) => handleOptionChange('statisticalSummary', checked)}
                                 />
                                 <CheckboxItem
                                     id="exportMetadata"
-                                    label="Export Metadata"
-                                    description="Report generation details and timestamps"
+                                    label="Export Metadata & Pagination"
+                                    description="Include generation timestamp, administrative footer, and page numbers"
                                     checked={reportOptions.exportMetadata}
                                     onChange={(checked) => handleOptionChange('exportMetadata', checked)}
                                 />
@@ -489,60 +564,51 @@ export default function GenerateReport() {
 
                     {/* Action Panel */}
                     <div className="space-y-6">
-                        {/* Generate Button */}
-                        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
+                        {/* Generate Button Card */}
+                        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm sticky top-24">
                             <CardHeader>
-                                <CardTitle className="text-xl text-zinc-100">Generate Report</CardTitle>
+                                <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
+                                    <FileText className="w-5 h-5 text-emerald-400" />
+                                    Export Document
+                                </CardTitle>
                                 <CardDescription className="text-zinc-400">
-                                    Click to create and download your custom report
+                                    Compiles selected repository data into a formatted PDF
                                 </CardDescription>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="space-y-4">
                                 <Button
                                     onClick={handleGenerateReport}
                                     disabled={isGenerating}
-                                    className="w-full bg-gradient-to-r from-violet-800 to-blue-700 cursor-pointer text-white"
+                                    className="w-full bg-gradient-to-r from-emerald-700 to-green-600 hover:from-emerald-800 hover:to-green-700 cursor-pointer text-white font-medium py-2.5 shadow-lg shadow-emerald-950/40"
                                 >
                                     {isGenerating ? (
                                         <>
                                             <div className="w-4 h-4 border-t-2 border-white border-solid rounded-full animate-spin mr-2"></div>
-                                            Generating Report...
+                                            Compiling PDF Report...
                                         </>
                                     ) : (
                                         <>
-                                            <Download className="w-4 h-4 mr-2 cursor-pointer" />
-                                            Generate & Download Report
+                                            <Download className="w-4 h-4 mr-2" />
+                                            Generate & Download PDF
                                         </>
                                     )}
                                 </Button>
-                            </CardContent>
-                        </Card>
 
-                        {/* Selection Summary */}
-                        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
-                            <CardHeader>
-                                <CardTitle className="text-xl text-zinc-100">Selection Summary</CardTitle>
-                                <CardDescription className="text-zinc-400">
-                                    {Object.values(reportOptions).filter(Boolean).length} options selected
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-2">
-                                <div className="text-sm">
-                                    <div className="flex justify-between py-1">
-                                        <span className="text-zinc-300">Time Range:</span>
-                                        <span className="text-zinc-100 capitalize">{timeRange}</span>
+                                <div className="border-t border-zinc-800 pt-4 space-y-2 text-xs text-zinc-400">
+                                    <div className="flex justify-between">
+                                        <span>Selected Period:</span>
+                                        <span className="text-zinc-200 capitalize font-medium">{timeRange}</span>
                                     </div>
-                                    <div className="flex justify-between py-1">
-                                        <span className="text-zinc-300">Selected Fields:</span>
-                                        <span className="text-zinc-100">
-                                            {Object.values(reportOptions).filter(Boolean).length}
+                                    <div className="flex justify-between">
+                                        <span>Selected Fields:</span>
+                                        <span className="text-emerald-400 font-semibold">
+                                            {Object.values(reportOptions).filter(Boolean).length} / {Object.keys(reportOptions).length}
                                         </span>
                                     </div>
-                                </div>
-                                <div className="pt-2 border-t border-zinc-800">
-                                    <p className="text-xs text-zinc-400">
-                                        Your report will include all selected data fields for the chosen time period.
-                                    </p>
+                                    <div className="flex justify-between">
+                                        <span>Format:</span>
+                                        <span className="text-zinc-200 font-mono">PDF (.pdf)</span>
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
