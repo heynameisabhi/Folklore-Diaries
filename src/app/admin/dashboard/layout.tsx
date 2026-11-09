@@ -28,14 +28,14 @@ export default function DashboardLayout({
       {mobileOpen && (
         <div
           onClick={() => setMobileOpen(false)}
-          className="fixed inset-0 bg-black/70 backdrop-blur-xs z-40 md:hidden transition-opacity"
+          className="fixed inset-0 top-[64px] bg-black/70 backdrop-blur-sm z-40 md:hidden transition-opacity"
         />
       )}
 
       {/* Sidebar */}
       <div
         className={cn(
-          "h-[calc(100vh-64px)] bg-black flex flex-col border-r border-zinc-800 transition-all duration-300 fixed z-50",
+          "h-[calc(100vh-64px)] top-[64px] bg-black flex flex-col border-r border-zinc-800 transition-all duration-300 fixed z-50",
           // Mobile state
           mobileOpen ? "left-0 w-[280px]" : "-left-full md:left-0",
           // Desktop state
