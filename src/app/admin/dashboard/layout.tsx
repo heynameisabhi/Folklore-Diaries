@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Users, UserPlus, Database, FileSpreadsheet, ChevronRight, LayoutDashboard, BookOpen } from "lucide-react"
+import { Users, UserPlus, Database, FileSpreadsheet, ChevronRight, LayoutDashboard, BookOpen, FileText, Search, BrainCircuit, PlusCircle } from "lucide-react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -16,7 +16,6 @@ export default function DashboardLayout({
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
   const [userManagementOpen, setUserManagementOpen] = useState(false)
-  const [dataManagementOpen, setDataManagementOpen] = useState(false)
 
   return (
     <div className="flex h-[calc(100vh-64px)] bg-black/50 mt-[64px]">
@@ -54,6 +53,34 @@ export default function DashboardLayout({
           >
             <LayoutDashboard className="w-5 h-5 text-emerald-500 mr-3" />
             {!collapsed && <span>Dashboard</span>}
+          </Link>
+
+          {/* View Drug Data */}
+          <Link
+            href="/admin/dashboard/data"
+            className={cn(
+              "flex items-center px-4 py-2 text-sm rounded-md transition-colors",
+              pathname === "/admin/dashboard/data" || pathname === "/admin/dashboard/data/view"
+                ? "bg-gradient-to-r from-emerald-900/50 to-green-900/30 text-white font-medium"
+                : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+            )}
+          >
+            <Database className="w-5 h-5 text-emerald-500 mr-3" />
+            {!collapsed && <span>View Drug Data</span>}
+          </Link>
+
+          {/* Insert Drug Data (Single & Bulk) */}
+          <Link
+            href="/admin/dashboard/data/insert"
+            className={cn(
+              "flex items-center px-4 py-2 text-sm rounded-md transition-colors",
+              pathname.startsWith("/admin/dashboard/data/insert")
+                ? "bg-gradient-to-r from-emerald-900/50 to-green-900/30 text-white font-medium"
+                : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+            )}
+          >
+            <PlusCircle className="w-5 h-5 text-emerald-500 mr-3" />
+            {!collapsed && <span>Insert Drug Data</span>}
           </Link>
 
           {/* User Management */}
@@ -109,6 +136,47 @@ export default function DashboardLayout({
               </div>
             )}
           </div>
+
+          {/* Generate Report Link */}
+          <Link
+            href="/admin/dashboard/generate-report"
+            className={cn(
+              "flex items-center px-4 py-2 text-sm rounded-md transition-colors",
+              pathname === "/admin/dashboard/generate-report"
+                ? "bg-gradient-to-r from-emerald-900/50 to-green-900/30 text-white font-medium"
+                : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+            )}
+          >
+            <FileText className="w-5 h-5 text-emerald-500 mr-3" />
+            {!collapsed && <span>Generate Report</span>}
+          </Link>
+
+          {/* Search Links */}
+          <Link
+            href="/dashboard/manual-search"
+            className={cn(
+              "flex items-center px-4 py-2 text-sm rounded-md transition-colors",
+              pathname === "/dashboard/manual-search"
+                ? "bg-gradient-to-r from-emerald-900/50 to-green-900/30 text-white font-medium"
+                : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+            )}
+          >
+            <Search className="w-5 h-5 text-emerald-500 mr-3" />
+            {!collapsed && <span>Manual Search</span>}
+          </Link>
+
+          <Link
+            href="/dashboard/ai-search"
+            className={cn(
+              "flex items-center px-4 py-2 text-sm rounded-md transition-colors",
+              pathname === "/dashboard/ai-search"
+                ? "bg-gradient-to-r from-emerald-900/50 to-green-900/30 text-white font-medium"
+                : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+            )}
+          >
+            <BrainCircuit className="w-5 h-5 text-emerald-500 mr-3" />
+            {!collapsed && <span>AI Search</span>}
+          </Link>
         </nav>
 
         {/* Collapse button */}

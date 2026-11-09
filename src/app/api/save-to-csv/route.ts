@@ -4,13 +4,21 @@ import path from "path";
 import { parse } from "json2csv";
 import { getAuthSession } from "@/lib/auth";
 
-const outputDir = path.join(process.cwd(), "public", "csv");
-if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
+function getOutputDir() {
+    const dir = path.join(process.cwd(), "public", "csv");
+    try {
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+    } catch (e) {
+        console.warn("Could not create csv output directory:", e);
+    }
+    return dir;
 }
 
 export async function POST(request: NextRequest) {
     try {
+        const outputDir = getOutputDir();
         // Get the authenticated user's ID
         const session = await getAuthSession();
         if (!session?.user) {

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { BarChart, Bar, ResponsiveContainer, XAxis, Tooltip } from "recharts";
-import { Clock, Database, FileText, TrendingUp, User, PlusCircle } from "lucide-react";
+import { Clock, Database, FileText, TrendingUp, User, Search, BrainCircuit } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { drug } from "@prisma/client";
@@ -129,11 +129,25 @@ export default function Dashboard() {
           </div>
           <div className="mt-4 md:mt-0 flex flex-wrap items-center gap-3">
             <Link
-              href="/dashboard/data/insert"
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-emerald-700 to-green-600 hover:from-emerald-800 hover:to-green-700 text-white shadow-md transition-all cursor-pointer"
+              href="/dashboard/data"
+              className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition-all cursor-pointer"
             >
-              <PlusCircle className="w-4 h-4" />
-              Insert Drug
+              <Database className="w-3.5 h-3.5" />
+              View All Data
+            </Link>
+            <Link
+              href="/dashboard/manual-search"
+              className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 shadow-sm transition-all cursor-pointer"
+            >
+              <Search className="w-3.5 h-3.5 text-emerald-400" />
+              Manual Search
+            </Link>
+            <Link
+              href="/dashboard/ai-search"
+              className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-zinc-800 hover:bg-zinc-700 text-emerald-400 border border-zinc-700 shadow-sm transition-all cursor-pointer"
+            >
+              <BrainCircuit className="w-3.5 h-3.5" />
+              AI Search
             </Link>
             <Badge
               variant="outline"
@@ -358,13 +372,13 @@ export default function Dashboard() {
                 ))
               ) : (
                 <div className="p-8 text-center text-zinc-500 space-y-3">
-                  <p>No records found. Create your first drug record to get started.</p>
+                  <p>No records found in the repository.</p>
                   <Link
-                    href="/dashboard/data/insert"
+                    href="/dashboard/manual-search"
                     className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium rounded-md bg-emerald-700 hover:bg-emerald-600 text-white transition-all cursor-pointer"
                   >
-                    <PlusCircle className="w-3.5 h-3.5" />
-                    Insert First Drug Record
+                    <Search className="w-3.5 h-3.5" />
+                    Explore Repository Search
                   </Link>
                 </div>
               )}

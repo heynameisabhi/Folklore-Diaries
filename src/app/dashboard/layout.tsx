@@ -74,18 +74,18 @@ export default function DashboardLayout({
             {!collapsed && <span>Dashboard</span>}
           </Link>
 
-          {/* Insert Drug Data Link */}
+          {/* View Drug Data */}
           <Link
-            href="/dashboard/data/insert"
+            href="/dashboard/data"
             className={cn(
               "flex items-center px-4 py-2 text-sm rounded-md transition-colors",
-              pathname.startsWith("/dashboard/data/insert")
+              pathname === "/dashboard/data" || pathname === "/dashboard/data/view"
                 ? "bg-gradient-to-r from-emerald-900/50 to-green-900/30 text-white font-medium"
                 : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
             )}
           >
             <Database className="w-5 h-5 text-emerald-500 mr-3" />
-            {!collapsed && <span>Insert Drug Data</span>}
+            {!collapsed && <span>View Drug Data</span>}
           </Link>
 
           {/* Manual Search Link */}

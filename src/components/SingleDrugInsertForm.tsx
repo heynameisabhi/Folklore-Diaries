@@ -78,7 +78,11 @@ const initialFormData: SingleDrugFormData = {
   contributor_practice_durations: "",
 };
 
-export function SingleDrugInsertForm() {
+export function SingleDrugInsertForm({
+  returnHref = "/admin/dashboard",
+}: {
+  returnHref?: string;
+}) {
   const [formData, setFormData] = useState<SingleDrugFormData>(initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -230,7 +234,7 @@ export function SingleDrugInsertForm() {
                   asChild
                   className="text-zinc-400 hover:text-white cursor-pointer"
                 >
-                  <Link href="/dashboard">Return to Dashboard</Link>
+                  <Link href={returnHref}>Return to Dashboard</Link>
                 </Button>
               </div>
             </AlertDescription>

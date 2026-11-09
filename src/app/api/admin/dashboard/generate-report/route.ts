@@ -43,29 +43,61 @@ interface ReportOptions {
     exportMetadata?: boolean;
 }
 
+export const dynamic = "force-dynamic";
+export const maxDuration = 60;
+
 // In-memory cache for NotoSans Devanagari font (supports Sanskrit & Hindi)
 let cachedFontBinary: string | null = null;
 
-function loadNotoSansFont(): string | null {
+function bufferToBinary(buffer: Buffer | ArrayBuffer): string {
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    let binaryString = "";
+    const chunkSize = 8192;
+    for (let i = 0; i < len; i += chunkSize) {
+        const chunk = bytes.subarray(i, Math.min(i + chunkSize, len));
+        binaryString += String.fromCharCode.apply(null, chunk as unknown as number[]);
+    }
+    return binaryString;
+}
+
+async function loadNotoSansFont(requestUrl?: string): Promise<string | null> {
     if (cachedFontBinary) return cachedFontBinary;
+    // 1. Try local disk (Docker, standalone, local dev)
     try {
         const fontPath = path.join(process.cwd(), "public", "NotoSans.ttf");
         if (fs.existsSync(fontPath)) {
             const buffer = fs.readFileSync(fontPath);
-            const bytes = new Uint8Array(buffer);
-            const len = bytes.byteLength;
-            let binaryString = "";
-            const chunkSize = 8192;
-            for (let i = 0; i < len; i += chunkSize) {
-                const chunk = bytes.subarray(i, Math.min(i + chunkSize, len));
-                binaryString += String.fromCharCode.apply(null, chunk as unknown as number[]);
-            }
-            cachedFontBinary = binaryString;
+            cachedFontBinary = bufferToBinary(buffer);
             return cachedFontBinary;
         }
     } catch (err) {
-        console.error("Failed to load NotoSans font from disk:", err);
+        console.warn("Could not read NotoSans font from filesystem:", err);
     }
+
+    // 2. Fallback to origin URL in serverless / CDN
+    try {
+        let origin = "";
+        if (requestUrl) {
+            origin = new URL(requestUrl).origin;
+        } else if (process.env.NEXTAUTH_URL) {
+            origin = process.env.NEXTAUTH_URL;
+        } else if (process.env.VERCEL_URL) {
+            origin = `https://${process.env.VERCEL_URL}`;
+        }
+
+        if (origin) {
+            const res = await fetch(`${origin}/NotoSans.ttf`);
+            if (res.ok) {
+                const arrayBuffer = await res.arrayBuffer();
+                cachedFontBinary = bufferToBinary(arrayBuffer);
+                return cachedFontBinary;
+            }
+        }
+    } catch (err) {
+        console.warn("Could not fetch NotoSans font from origin:", err);
+    }
+
     return null;
 }
 
@@ -150,7 +182,7 @@ export async function POST(request: Request) {
             format: "a4"
         });
 
-        const fontBinary = loadNotoSansFont();
+        const fontBinary = await loadNotoSansFont(request.url);
         const fontName = fontBinary ? "NotoSans" : "helvetica";
 
         if (fontBinary) {

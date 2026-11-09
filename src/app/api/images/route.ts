@@ -17,16 +17,23 @@ export async function GET(request: Request) {
       return new NextResponse('Image path is required', { status: 400 });
     }
 
-    // Ensure the path exists
-    if (!fs.existsSync(imagePath)) {
-      return new NextResponse(`Image not found: ${imagePath}`, { status: 404 });
+    // Path traversal protection: ensure the path is within the project workspace
+    const resolvedPath = path.resolve(process.cwd(), imagePath.replace(/^(\.\.(\/|\\|$))+/, ''));
+    const allowedRoot = path.resolve(process.cwd());
+    if (!resolvedPath.startsWith(allowedRoot)) {
+      return new NextResponse('Access denied: Invalid image path', { status: 403 });
+    }
+
+    // Ensure the path exists and is a file
+    if (!fs.existsSync(resolvedPath) || !fs.statSync(resolvedPath).isFile()) {
+      return new NextResponse(`Image not found`, { status: 404 });
     }
 
     // Read the file using sharp
-    let sharpImage: Sharp = sharp(imagePath);
+    let sharpImage: Sharp = sharp(resolvedPath);
 
     // Get file extension
-    const ext = path.extname(imagePath).toLowerCase();
+    const ext = path.extname(resolvedPath).toLowerCase();
     
     // Default output format is jpeg
     let outputFormat = 'jpeg';
@@ -42,7 +49,7 @@ export async function GET(request: Request) {
         contentType = 'image/webp';
       } else if (ext === '.gif') {
         // For GIFs, let's read directly since sharp doesn't handle animated GIFs well
-        const fileData = fs.readFileSync(imagePath);
+        const fileData = fs.readFileSync(resolvedPath);
         return new NextResponse(fileData, {
           headers: {
             'Content-Type': 'image/gif',
@@ -51,7 +58,7 @@ export async function GET(request: Request) {
         });
       } else if (ext === '.svg') {
         // For SVGs, just return directly
-        const fileData = fs.readFileSync(imagePath);
+        const fileData = fs.readFileSync(resolvedPath);
         return new NextResponse(fileData, {
           headers: {
             'Content-Type': 'image/svg+xml',

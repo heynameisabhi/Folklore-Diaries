@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { Search, Loader2, Eye, X, BrainCircuit, Sparkles } from "lucide-react";
+import { Search, Loader2, Eye, X, BrainCircuit, Sparkles, Info } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -91,11 +91,24 @@ export default function AISearchPage() {
             )}
           </div>
 
+          {/* Character threshold note */}
+          <div className="mt-2.5 flex items-center justify-between text-xs text-zinc-500">
+            <span className="flex items-center gap-1.5">
+              <Info className="h-3.5 w-3.5 text-emerald-400/80 shrink-0" />
+              <span>Enter at least <b>3 characters</b> to trigger AI search (avoids incomplete requests while typing).</span>
+            </span>
+            {query.length > 0 && query.length < 3 && (
+              <span className="text-amber-400 font-medium">
+                {3 - query.length} more character{3 - query.length === 1 ? "" : "s"} needed
+              </span>
+            )}
+          </div>
+
           {/* Show how AI understood the query */}
           {aiFilters && Object.values(aiFilters).some((val) => val) && !isFetching && (
             <div className="mt-4 flex items-center gap-2 flex-wrap text-sm">
               <span className="flex items-center gap-1 text-zinc-500 mr-2">
-                <Sparkles className="h-4 w-4 text-cyan-500" /> AI extracted:
+                <Sparkles className="h-4 w-4 text-cyan-500" /> {aiFilters.fallback ? "Search terms:" : "AI extracted:"}
               </span>
               {aiFilters.keyword && (
                 <span className="bg-zinc-800 text-zinc-300 px-2 py-1 rounded border border-zinc-700">
@@ -110,6 +123,11 @@ export default function AISearchPage() {
               {aiFilters.sourceType && (
                 <span className="bg-zinc-800 text-zinc-300 px-2 py-1 rounded border border-zinc-700">
                   Source: <b className="text-white">{aiFilters.sourceType}</b>
+                </span>
+              )}
+              {aiFilters.fallback && (
+                <span className="bg-amber-900/30 text-amber-300 px-2 py-0.5 rounded border border-amber-800 text-xs">
+                  Keyword Mode
                 </span>
               )}
             </div>
@@ -133,7 +151,7 @@ export default function AISearchPage() {
           </div>
         ) : isError ? (
           <div className="p-4 bg-red-900/20 border border-red-900 rounded-lg text-red-400">
-            Failed to load search results: {(error as any)?.message}
+            Failed to load search results: {(error as any)?.response?.data?.error || (error as any)?.message}
           </div>
         ) : debouncedQuery.length > 2 && results.length === 0 ? (
           <div className="text-center py-20 text-zinc-500 border border-dashed border-zinc-800 rounded-lg">
@@ -141,7 +159,7 @@ export default function AISearchPage() {
           </div>
         ) : debouncedQuery.length <= 2 ? (
           <div className="text-center py-20 text-zinc-600 border border-dashed border-zinc-800 rounded-lg">
-            Start typing a natural sentence above to search. (e.g., "Herbs for cold")
+            Start typing a natural sentence above to search (minimum 3 characters). (e.g., &quot;Herbs for cold&quot;)
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4">

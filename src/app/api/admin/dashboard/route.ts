@@ -79,9 +79,31 @@ export async function GET() {
             })
         );
 
+        const [totalDrugs, totalDiseases, totalContributors, recentDrugs] = await Promise.all([
+            db.drug.count(),
+            db.disease.count(),
+            db.contributor.count(),
+            db.drug.findMany({
+                take: 5,
+                orderBy: {
+                    created_at: "desc",
+                },
+                select: {
+                    id: true,
+                    primary_name: true,
+                    source_type: true,
+                    created_at: true,
+                },
+            }),
+        ]);
+
         return NextResponse.json({
             users: formattedUsers,
-            userActivityChart
+            userActivityChart,
+            totalDrugs,
+            totalDiseases,
+            totalContributors,
+            recentDrugs,
         }, { status: 200 });
 
     } catch (error: any) {
