@@ -30,9 +30,9 @@ export function Navbar() {
             <span className="text-xl text-transparent bg-clip-text bg-gradient-to-tr from-gray-600 to-white font-bold tracking-widest">Folklore Diaries</span>
           </Link>
 
-          <div className="hidden md:block">
+          <div className="flex items-center">
             {status === "loading" ? (
-              <p className="text-white">Loading...</p>
+              <p className="text-white text-xs sm:text-sm">Loading...</p>
             ) : session?.user ? (
               <UserAccountNav user={{
                 name: session.user.name,
@@ -43,7 +43,8 @@ export function Navbar() {
             ) : (
               <Button
                 asChild
-                className="bg-gradient-to-r from-emerald-800 to-green-700 hover:from-emerald-900 hover:to-green-800 text-white shadow-md"
+                size="sm"
+                className="bg-gradient-to-r from-emerald-800 to-green-700 hover:from-emerald-900 hover:to-green-800 text-white shadow-md text-xs sm:text-sm"
               >
                 <Link href="/sign-in">Sign In</Link>
               </Button>

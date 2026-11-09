@@ -337,16 +337,16 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
   };
 
   return (
-    <div className="flex flex-col gap-6 pt-8 text-zinc-300 px-6 pb-20 max-w-7xl mx-auto h-full overflow-y-auto">
+    <div className="flex flex-col gap-5 sm:gap-6 pt-4 sm:pt-8 text-zinc-300 px-3 sm:px-6 pb-20 max-w-7xl mx-auto h-full overflow-y-auto">
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800/80 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800/80 pb-5 sm:pb-6">
         <div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+            <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 shrink-0">
               <Database className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white tracking-tight">
                 {isAdmin ? "Folklore Drug Repository" : "View Drug Repository"}
               </h1>
               <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
@@ -359,39 +359,39 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
           {isAdmin ? (
             <>
               <Link
                 href="/admin/dashboard/data/insert"
-                className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white shadow-md shadow-emerald-950/50 transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-lg bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white shadow-md shadow-emerald-950/50 transition-all cursor-pointer"
               >
                 <PlusCircle className="w-4 h-4" />
-                Insert New Record
+                <span>Insert Record</span>
               </Link>
               <Link
                 href="/admin/dashboard/generate-report"
-                className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition-all cursor-pointer"
               >
                 <FileText className="w-4 h-4 text-emerald-400" />
-                Generate Report
+                <span>Report</span>
               </Link>
             </>
           ) : (
             <>
               <Link
                 href="/dashboard/ai-search"
-                className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg bg-zinc-800 hover:bg-zinc-700 text-emerald-400 border border-zinc-700 transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-lg bg-zinc-800 hover:bg-zinc-700 text-emerald-400 border border-zinc-700 transition-all cursor-pointer"
               >
                 <Sparkles className="w-4 h-4" />
-                AI Search
+                <span>AI Search</span>
               </Link>
               <Link
                 href="/dashboard/manual-search"
-                className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition-all cursor-pointer"
               >
                 <Search className="w-4 h-4 text-zinc-400" />
-                Manual Search
+                <span>Manual Search</span>
               </Link>
             </>
           )}
@@ -399,15 +399,15 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
       </div>
 
       {/* Stats Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         <Card className="bg-zinc-900/60 border-zinc-800 text-white">
-          <CardContent className="p-4 flex items-center justify-between">
+          <CardContent className="p-3 sm:p-4 flex items-center justify-between">
             <div>
-              <p className="text-xs uppercase tracking-wider text-zinc-500 font-medium">Total Formulations</p>
-              <h3 className="text-2xl font-bold text-white mt-1">{stats.totalAll}</h3>
+              <p className="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-500 font-medium">Total Records</p>
+              <h3 className="text-xl sm:text-2xl font-bold text-white mt-0.5 sm:mt-1">{stats.totalAll}</h3>
             </div>
-            <div className="p-2.5 rounded-lg bg-zinc-800/80 border border-zinc-700 text-zinc-400">
-              <Database className="w-5 h-5" />
+            <div className="p-2 sm:p-2.5 rounded-lg bg-zinc-800/80 border border-zinc-700 text-zinc-400 shrink-0">
+              <Database className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </CardContent>
         </Card>
@@ -421,13 +421,13 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
             sourceType === "PLANT" ? "border-emerald-500 ring-1 ring-emerald-500" : ""
           }`}
         >
-          <CardContent className="p-4 flex items-center justify-between">
+          <CardContent className="p-3 sm:p-4 flex items-center justify-between">
             <div>
-              <p className="text-xs uppercase tracking-wider text-emerald-500/80 font-medium">Plant Remedies</p>
-              <h3 className="text-2xl font-bold text-emerald-400 mt-1">{stats.plants}</h3>
+              <p className="text-[10px] sm:text-xs uppercase tracking-wider text-emerald-500/80 font-medium">Plants</p>
+              <h3 className="text-xl sm:text-2xl font-bold text-emerald-400 mt-0.5 sm:mt-1">{stats.plants}</h3>
             </div>
-            <div className="p-2.5 rounded-lg bg-emerald-950/60 border border-emerald-900 text-emerald-400">
-              <Leaf className="w-5 h-5" />
+            <div className="p-2 sm:p-2.5 rounded-lg bg-emerald-950/60 border border-emerald-900 text-emerald-400 shrink-0">
+              <Leaf className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </CardContent>
         </Card>
@@ -441,13 +441,13 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
             sourceType === "ANIMAL" ? "border-amber-500 ring-1 ring-amber-500" : ""
           }`}
         >
-          <CardContent className="p-4 flex items-center justify-between">
+          <CardContent className="p-3 sm:p-4 flex items-center justify-between">
             <div>
-              <p className="text-xs uppercase tracking-wider text-amber-500/80 font-medium">Animal Sources</p>
-              <h3 className="text-2xl font-bold text-amber-400 mt-1">{stats.animals}</h3>
+              <p className="text-[10px] sm:text-xs uppercase tracking-wider text-amber-500/80 font-medium">Animals</p>
+              <h3 className="text-xl sm:text-2xl font-bold text-amber-400 mt-0.5 sm:mt-1">{stats.animals}</h3>
             </div>
-            <div className="p-2.5 rounded-lg bg-amber-950/60 border border-amber-900 text-amber-400">
-              <PawPrint className="w-5 h-5" />
+            <div className="p-2 sm:p-2.5 rounded-lg bg-amber-950/60 border border-amber-900 text-amber-400 shrink-0">
+              <PawPrint className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </CardContent>
         </Card>
@@ -461,13 +461,13 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
             sourceType === "MINERAL" ? "border-cyan-500 ring-1 ring-cyan-500" : ""
           }`}
         >
-          <CardContent className="p-4 flex items-center justify-between">
+          <CardContent className="p-3 sm:p-4 flex items-center justify-between">
             <div>
-              <p className="text-xs uppercase tracking-wider text-cyan-500/80 font-medium">Mineral Sources</p>
-              <h3 className="text-2xl font-bold text-cyan-400 mt-1">{stats.minerals}</h3>
+              <p className="text-[10px] sm:text-xs uppercase tracking-wider text-cyan-500/80 font-medium">Minerals</p>
+              <h3 className="text-xl sm:text-2xl font-bold text-cyan-400 mt-0.5 sm:mt-1">{stats.minerals}</h3>
             </div>
-            <div className="p-2.5 rounded-lg bg-cyan-950/60 border border-cyan-900 text-cyan-400">
-              <Gem className="w-5 h-5" />
+            <div className="p-2 sm:p-2.5 rounded-lg bg-cyan-950/60 border border-cyan-900 text-cyan-400 shrink-0">
+              <Gem className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </CardContent>
         </Card>
@@ -709,14 +709,14 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
                   </div>
 
                   {/* Card Actions */}
-                  <div className="flex items-center gap-2 shrink-0 self-end md:self-center flex-wrap">
+                  <div className="flex items-center gap-2 shrink-0 self-stretch sm:self-end md:self-center justify-end flex-wrap pt-2 sm:pt-0 border-t sm:border-0 border-zinc-800/80">
                     <Button
                       onClick={() => setSelectedRecord(drug)}
                       variant="outline"
                       size="sm"
-                      className="border-zinc-700 bg-zinc-950 hover:bg-zinc-800 text-zinc-200 hover:text-white cursor-pointer"
+                      className="border-zinc-700 bg-zinc-950 hover:bg-zinc-800 text-zinc-200 hover:text-white cursor-pointer text-xs"
                     >
-                      <Eye className="w-4 h-4 mr-1 text-emerald-400" />
+                      <Eye className="w-3.5 h-3.5 mr-1 text-emerald-400" />
                       View
                     </Button>
 
@@ -726,7 +726,7 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
                           onClick={() => handleStartEdit(drug)}
                           variant="outline"
                           size="sm"
-                          className="border-blue-900/60 bg-blue-950/30 hover:bg-blue-900/60 text-blue-300 hover:text-white cursor-pointer"
+                          className="border-blue-900/60 bg-blue-950/30 hover:bg-blue-900/60 text-blue-300 hover:text-white cursor-pointer text-xs"
                           title="Edit Formulation"
                         >
                           <Pencil className="w-3.5 h-3.5 mr-1 text-blue-400" />
@@ -736,7 +736,7 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
                           onClick={() => setRecordToDelete(drug)}
                           variant="outline"
                           size="sm"
-                          className="border-red-900/60 bg-red-950/30 hover:bg-red-900/60 text-red-300 hover:text-white cursor-pointer"
+                          className="border-red-900/60 bg-red-950/30 hover:bg-red-900/60 text-red-300 hover:text-white cursor-pointer text-xs"
                           title="Delete Formulation"
                         >
                           <Trash2 className="w-3.5 h-3.5 mr-1 text-red-400" />
@@ -789,12 +789,12 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
 
       {/* Detailed Modal View */}
       {selectedRecord && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xs p-4">
-          <div className="bg-zinc-900 border border-zinc-700 rounded-xl max-w-3xl w-full max-h-[85vh] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xs p-2 sm:p-4">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-xl max-w-3xl w-full max-h-[92vh] sm:max-h-[85vh] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
-            <div className="p-5 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/90">
-              <div className="flex items-center gap-3">
-                <h2 className="text-xl font-bold text-white tracking-tight">
+            <div className="p-3.5 sm:p-5 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/90 shrink-0">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">
                   {selectedRecord.primary_name || "Record Details"}
                 </h2>
                 {getSourceBadge(selectedRecord.source_type)}
@@ -803,12 +803,12 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
                 onClick={() => setSelectedRecord(null)}
                 className="p-1 rounded-md hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
               >
-                <X className="h-6 w-6" />
+                <X className="h-5 w-5 sm:h-6 sm:w-6" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 overflow-y-auto space-y-6 text-sm">
+            <div className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-6 text-xs sm:text-sm">
               {/* Botanical Description */}
               {selectedRecord.botanical_description && (
                 <div>
@@ -962,7 +962,7 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 border-t border-zinc-800 flex items-center justify-between bg-zinc-900/90">
+            <div className="p-3 sm:p-4 border-t border-zinc-800 flex flex-wrap items-center justify-between gap-2 bg-zinc-900/90 shrink-0">
               <div className="flex items-center gap-2">
                 {isAdmin && (
                   <>
@@ -974,7 +974,7 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
                       }}
                       variant="outline"
                       size="sm"
-                      className="border-blue-900 bg-blue-950/40 text-blue-300 hover:bg-blue-900/60 cursor-pointer"
+                      className="border-blue-900 bg-blue-950/40 text-blue-300 hover:bg-blue-900/60 cursor-pointer text-xs"
                     >
                       <Pencil className="w-3.5 h-3.5 mr-1" />
                       Edit Record
@@ -986,7 +986,7 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
                       }}
                       variant="outline"
                       size="sm"
-                      className="border-red-900 bg-red-950/40 text-red-300 hover:bg-red-900/60 cursor-pointer"
+                      className="border-red-900 bg-red-950/40 text-red-300 hover:bg-red-900/60 cursor-pointer text-xs"
                     >
                       <Trash2 className="w-3.5 h-3.5 mr-1" />
                       Delete Record
@@ -994,7 +994,7 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
                   </>
                 )}
               </div>
-              <Button onClick={() => setSelectedRecord(null)} className="cursor-pointer">
+              <Button onClick={() => setSelectedRecord(null)} size="sm" className="cursor-pointer text-xs">
                 Close
               </Button>
             </div>
@@ -1004,46 +1004,48 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
 
       {/* Delete Confirmation Modal */}
       {recordToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-xs p-4">
-          <div className="bg-zinc-900 border border-red-900/60 rounded-xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-xs p-3 sm:p-4">
+          <div className="bg-zinc-900 border border-red-900/60 rounded-xl max-w-md w-full p-4 sm:p-6 space-y-4 sm:space-y-5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-full bg-red-950 text-red-400 border border-red-800/80">
-                <AlertTriangle className="w-6 h-6" />
+              <div className="p-2 sm:p-2.5 rounded-full bg-red-950 text-red-400 border border-red-800/80 shrink-0">
+                <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">Delete Formulation</h3>
+                <h3 className="text-base sm:text-lg font-bold text-white">Delete Formulation</h3>
                 <p className="text-xs text-zinc-400">This action cannot be undone.</p>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-sm text-zinc-300 leading-relaxed">
+            <div className="p-3 sm:p-3.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-xs sm:text-sm text-zinc-300 leading-relaxed">
               Are you sure you want to permanently delete{" "}
               <b className="text-red-400 font-semibold">{recordToDelete.primary_name || "this formulation"}</b>?
               All linked names, disease associations, research citations, and methods will be removed.
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2">
+            <div className="flex items-center justify-end gap-2 sm:gap-3 pt-2">
               <Button
                 variant="outline"
+                size="sm"
                 onClick={() => setRecordToDelete(null)}
                 disabled={isDeleting}
-                className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 cursor-pointer"
+                className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 cursor-pointer text-xs"
               >
                 Cancel
               </Button>
               <Button
+                size="sm"
                 onClick={handleConfirmDelete}
                 disabled={isDeleting}
-                className="bg-red-600 hover:bg-red-700 text-white cursor-pointer"
+                className="bg-red-600 hover:bg-red-700 text-white cursor-pointer text-xs"
               >
                 {isDeleting ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
                     Deleting...
                   </>
                 ) : (
                   <>
-                    <Trash2 className="w-4 h-4 mr-1.5" />
+                    <Trash2 className="w-3.5 h-3.5 mr-1" />
                     Yes, Delete
                   </>
                 )}
@@ -1055,29 +1057,29 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
 
       {/* Edit Formulation Modal */}
       {recordToEdit && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-xs p-4">
-          <div className="bg-zinc-900 border border-zinc-700 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-xs p-2 sm:p-4">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-xl max-w-4xl w-full max-h-[92vh] sm:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
-            <div className="p-5 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/90">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400">
+            <div className="p-3.5 sm:p-5 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/90 shrink-0">
+              <div className="flex items-center gap-2 sm:gap-2.5">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400 shrink-0">
                   <Pencil className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white tracking-tight">Edit Formulation Record</h2>
-                  <p className="text-xs text-zinc-400">Modify formulation attributes, names, diseases, and research.</p>
+                  <h2 className="text-base sm:text-xl font-bold text-white tracking-tight">Edit Formulation Record</h2>
+                  <p className="text-[11px] sm:text-xs text-zinc-400">Modify formulation attributes, names, diseases, and research.</p>
                 </div>
               </div>
               <button
                 onClick={() => setRecordToEdit(null)}
                 className="p-1 rounded-md hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
               >
-                <X className="h-6 w-6" />
+                <X className="h-5 w-5 sm:h-6 sm:w-6" />
               </button>
             </div>
 
             {/* Modal Body / Form */}
-            <form onSubmit={handleSaveEdit} className="p-6 overflow-y-auto space-y-5 text-sm">
+            <form onSubmit={handleSaveEdit} className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5 text-xs sm:text-sm flex-1">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs uppercase text-zinc-400 font-semibold block mb-1.5">
@@ -1267,29 +1269,31 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
               </div>
 
               {/* Form Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-800">
+              <div className="flex items-center justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-zinc-800 shrink-0">
                 <Button
                   type="button"
                   variant="outline"
+                  size="sm"
                   onClick={() => setRecordToEdit(null)}
                   disabled={isSaving}
-                  className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 cursor-pointer"
+                  className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 cursor-pointer text-xs"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
+                  size="sm"
                   disabled={isSaving}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer px-6"
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer px-5 sm:px-6 text-xs"
                 >
                   {isSaving ? (
                     <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
                       Saving Changes...
                     </>
                   ) : (
                     <>
-                      <CheckCircle2 className="w-4 h-4 mr-1.5" />
+                      <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
                       Save Changes
                     </>
                   )}
