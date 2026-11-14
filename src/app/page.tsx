@@ -5,6 +5,7 @@ import ContributorsSection from "@/components/landing/ContributorsSection";
 import FeaturesSection from "@/components/landing/FeaturesSection";
 import Footer from "@/components/landing/Footer";
 import HeroSection from "@/components/landing/HeroSection";
+import SourceTaxonomySection from "@/components/landing/SourceTaxonomySection";
 
 const ScrollProgress = () => {
   const { scrollYProgress } = useScroll();
@@ -52,6 +53,10 @@ export default function Home() {
         >
           <HeroSection />
         </motion.div>
+
+        <section id="taxonomy">
+          <SourceTaxonomySection />
+        </section>
 
         <motion.div
           initial={{ opacity: 0 }}
