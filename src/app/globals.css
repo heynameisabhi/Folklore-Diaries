@@ -155,4 +155,19 @@
   scrollbar-color: #525252 black;
 }
 
+/* Ayurvedic ambient page tint — very subtle warm-to-cool gradient across the page */
+html {
+  background: #000;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection colour — emerald-green Ayurvedic feel */
+::selection {
+  background: #14532d;
+  color: #d1fae5;
+}
 
