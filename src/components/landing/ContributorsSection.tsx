@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion"
 import { Database, Code, Cpu } from "lucide-react"
-import AyurvedicIllustration from "@/components/AyurvedicIllustration"
 
 interface TeamSectionProps {
   title: string
@@ -84,13 +83,8 @@ export default function ContributorsSection() {
   return (
     <section className="py-20 relative overflow-hidden">
       {/* Background decorations */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#0f4c3f25,transparent_50%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,#78350f15,transparent_50%)]" />
-
-      {/* Decorative mandala watermark */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] opacity-[0.03] pointer-events-none">
-        <AyurvedicIllustration variant="hero" className="w-full h-full" />
-      </div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#0f4c3f20,transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,#0f4c3f20,transparent_50%)]" />
 
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
@@ -99,17 +93,14 @@ export default function ContributorsSection() {
           viewport={{ once: true }}
           className="text-center max-w-3xl mx-auto mb-16"
         >
-          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase border border-emerald-700/40 bg-emerald-900/15 text-emerald-400 mb-4">
-            The Team
-          </span>
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
             Our{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-amber-300">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-green-400">
               Contributors
             </span>
           </h2>
-          <p className="text-zinc-400 text-base">
-            Meet the dedicated team behind Folklore Diaries, working together to document and preserve traditional folk medicine for future generations.
+          <p className="text-zinc-400 text-lg">
+            Meet the dedicated contributors behind Folklore Diaries, working together to document and preserve traditional folk medicine.
           </p>
         </motion.div>
 
