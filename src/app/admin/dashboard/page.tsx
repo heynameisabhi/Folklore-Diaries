@@ -6,26 +6,29 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { BarChart, Bar, ResponsiveContainer, XAxis, Tooltip } from "recharts";
 import {
-  Clock,
   Database,
   FileText,
-  TrendingUp,
-  User,
   Users,
   UserCheck,
   UserX,
   PlusCircle,
+  BrainCircuit,
+  ArrowRight,
+  ShieldCheck,
+  FileSpreadsheet,
+  Activity,
+  HeartPulse,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type UserActivity = {
   id: string;
@@ -73,8 +76,6 @@ export default function AdminDashboard() {
     userActivityChart: [],
   };
 
-  console.log("🟢Dashboard data: ", dashboardData);
-
   const totalUsers = dashboardData.users.length;
   const activeUsers = dashboardData.users.filter(
     (user) => user.status === "ACTIVE"
@@ -85,22 +86,24 @@ export default function AdminDashboard() {
 
   if (status === "loading" || isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center w-full h-screen bg-black">
-        <div className="w-16 h-16 border-t-4 border-green-500 border-solid rounded-full animate-spin"></div>
-        <p className="mt-4 text-green-500">Loading dashboard...</p>
+      <div className="flex flex-col items-center justify-center w-full min-h-[60vh] text-zinc-400">
+        <div className="w-10 h-10 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mb-4" />
+        <p className="text-xs font-mono tracking-wider uppercase text-zinc-500">
+          Loading Admin Curator Console...
+        </p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center w-full h-screen bg-black">
-        <div className="p-8 text-center bg-zinc-900 rounded-xl border border-zinc-800">
-          <h2 className="text-2xl font-bold text-red-500 mb-2">
-            Error Loading Data
+      <div className="flex flex-col items-center justify-center w-full min-h-[60vh] p-4">
+        <div className="p-8 text-center bg-zinc-950 rounded-xl border border-red-900/50 max-w-md">
+          <h2 className="text-lg font-semibold text-red-400 mb-2">
+            Failed to Load Metrics
           </h2>
-          <p className="text-zinc-400">
-            Could not fetch dashboard data. Please try again later.
+          <p className="text-zinc-400 text-xs">
+            Could not fetch curator data. Please verify your connection or refresh.
           </p>
         </div>
       </div>
@@ -109,353 +112,347 @@ export default function AdminDashboard() {
 
   if (!session) {
     return (
-      <div className="flex flex-col items-center justify-center w-full h-screen bg-black">
-        <div className="p-8 text-center bg-zinc-900 rounded-xl border border-zinc-800">
-          <h2 className="text-2xl font-bold text-red-500 mb-2">
-            Access Denied
-          </h2>
-          <p className="text-zinc-400">Please log in to view the dashboard.</p>
+      <div className="flex flex-col items-center justify-center w-full min-h-[60vh] p-4">
+        <div className="p-8 text-center bg-zinc-950 rounded-xl border border-zinc-800 max-w-md">
+          <h2 className="text-lg font-semibold text-zinc-200 mb-2">Access Denied</h2>
+          <p className="text-zinc-400 text-xs">Administrator privileges required.</p>
         </div>
       </div>
     );
   }
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "N/A";
     const date = new Date(dateString);
     return new Intl.DateTimeFormat("en-US", {
       month: "short",
       day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+      year: "numeric",
     }).format(date);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black to-zinc-900 text-zinc-100 p-4 sm:p-6">
-      <div className="w-full">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+    <div className="min-h-screen bg-black text-zinc-100 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-6xl mx-auto space-y-8">
+        {/* Editorial Header Banner */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-6 border-b border-zinc-900">
           <div>
-            <div className="flex justify-center px-2 py-2 bg-zinc-900 rounded-md">
-              <h1 className="text-2xl font-semibold bg-clip-text text-gray-200">
-                Admin Dashboard
-              </h1>
+            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 text-[11px] font-mono tracking-wider mb-3">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span>CURATOR ARCHIVE CONSOLE • ELEVATED PRIVILEGES</span>
             </div>
-            <p className="text-zinc-400 mt-1">
-              User Management, Drug Ingestion & Analytics
+            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">
+              Archive Curator Dashboard
+            </h1>
+            <p className="text-zinc-400 text-xs sm:text-sm mt-1 max-w-xl">
+              System governance, drug ingestion pipelines, oral tradition lineages, and user access oversight.
             </p>
           </div>
-          <div className="mt-4 md:mt-0 flex flex-wrap items-center gap-2">
-            <button
-              onClick={() => router.push("/admin/dashboard/data")}
-              className="flex items-center gap-2 px-3 py-2 text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 rounded-md transition-colors cursor-pointer"
+
+          {/* Quick Actions */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Link
+              href="/admin/dashboard/data/insert"
+              className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white shadow-sm transition-all"
             >
-              <Database className="w-4 h-4 text-emerald-400" />
-              View Drug Data
-            </button>
-            <button
-              onClick={() => router.push("/admin/dashboard/data/insert")}
-              className="flex items-center gap-2 px-3 py-2 text-xs bg-gradient-to-r from-emerald-700 to-green-600 cursor-pointer hover:from-emerald-800 hover:to-green-700 text-white rounded-md transition-colors shadow-md"
+              <PlusCircle className="w-3.5 h-3.5" />
+              <span>Ingest Formulations</span>
+            </Link>
+            <Link
+              href="/admin/dashboard/data"
+              className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-800 transition-all"
             >
-              <PlusCircle className="w-4 h-4" />
-              Insert Drug Data
-            </button>
-            <button
-              onClick={() => router.push("/admin/dashboard/generate-report")}
-              className="flex items-center gap-2 px-3 py-2 text-xs bg-gradient-to-br from-blue-700 to-violet-700 cursor-pointer hover:bg-blue-700 text-white rounded-md transition-colors"
+              <Database className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Manage Repository</span>
+            </Link>
+            <Link
+              href="/admin/dashboard/generate-report"
+              className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 transition-all"
             >
-              <FileText className="w-4 h-4" />
-              Generate Report
-            </button>
-            <Badge
-              variant="outline"
-              className="bg-zinc-800 text-zinc-300 border-zinc-700 px-3 py-1"
-            >
-              <User className="w-4 h-4 mr-1" />
-              Admin
-            </Badge>
+              <FileText className="w-3.5 h-3.5 text-blue-400" />
+              <span>Export Report</span>
+            </Link>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card 
-            className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm hover:bg-zinc-900/80 transition-all cursor-pointer"
-            onClick={() => router.push("/admin/dashboard/data/insert")}
+        {/* 4 Primary Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card
+            onClick={() => router.push("/admin/dashboard/data")}
+            className="bg-zinc-950/70 border-zinc-800/80 hover:border-zinc-700 transition-all cursor-pointer group"
           >
-            <CardHeader className="pb-2">
-              <CardDescription className="text-zinc-400">
-                Total Drugs
-              </CardDescription>
-              <CardTitle className="text-3xl text-white flex items-center">
+            <CardHeader className="pb-2 pt-5 px-5">
+              <div className="flex items-center justify-between text-zinc-400">
+                <CardDescription className="text-xs uppercase tracking-wider font-mono">
+                  Total Formulations
+                </CardDescription>
+                <Database className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+              </div>
+              <CardTitle className="text-3xl font-bold text-white mt-1">
                 {dashboardData.totalDrugs ?? 0}
-                <Database className="ml-2 text-emerald-500 w-5 h-5" />
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-xs text-zinc-500">
-                <span className="text-emerald-500 font-medium">Single & Bulk</span> insertion enabled
+            <CardContent className="px-5 pb-5">
+              <div className="text-[11px] text-zinc-400 font-mono flex items-center justify-between">
+                <span>Single & Bulk Ingestion</span>
+                <ArrowRight className="w-3 h-3 text-zinc-600 group-hover:text-emerald-400" />
               </div>
             </CardContent>
           </Card>
 
-          <Card 
-            className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm hover:bg-zinc-900/80 transition-all cursor-pointer"
-            onClick={() => router.push("/admin/dashboard/users/manage")}
+          <Card
+            onClick={() => router.push("/admin/dashboard/data")}
+            className="bg-zinc-950/70 border-zinc-800/80 hover:border-zinc-700 transition-all cursor-pointer group"
           >
-            <CardHeader className="pb-2">
-              <CardDescription className="text-zinc-400">
-                Total Users
-              </CardDescription>
-              <CardTitle className="text-3xl text-white flex items-center">
+            <CardHeader className="pb-2 pt-5 px-5">
+              <div className="flex items-center justify-between text-zinc-400">
+                <CardDescription className="text-xs uppercase tracking-wider font-mono">
+                  Diseases Mapped
+                </CardDescription>
+                <HeartPulse className="w-4 h-4 text-teal-400 group-hover:scale-110 transition-transform" />
+              </div>
+              <CardTitle className="text-3xl font-bold text-white mt-1">
+                {dashboardData.totalDiseases ?? 0}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-5 pb-5">
+              <div className="text-[11px] text-zinc-400 font-mono flex items-center justify-between">
+                <span>Indications & Usage Links</span>
+                <ArrowRight className="w-3 h-3 text-zinc-600 group-hover:text-teal-400" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card
+            onClick={() => router.push("/admin/dashboard/data")}
+            className="bg-zinc-950/70 border-zinc-800/80 hover:border-zinc-700 transition-all cursor-pointer group"
+          >
+            <CardHeader className="pb-2 pt-5 px-5">
+              <div className="flex items-center justify-between text-zinc-400">
+                <CardDescription className="text-xs uppercase tracking-wider font-mono">
+                  Lineage Healers
+                </CardDescription>
+                <UserCheck className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+              </div>
+              <CardTitle className="text-3xl font-bold text-white mt-1">
+                {dashboardData.totalContributors ?? 0}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-5 pb-5">
+              <div className="text-[11px] text-zinc-400 font-mono flex items-center justify-between">
+                <span>Guru & Oral Lineages</span>
+                <ArrowRight className="w-3 h-3 text-zinc-600 group-hover:text-amber-400" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card
+            onClick={() => router.push("/admin/dashboard/users/manage")}
+            className="bg-zinc-950/70 border-zinc-800/80 hover:border-zinc-700 transition-all cursor-pointer group"
+          >
+            <CardHeader className="pb-2 pt-5 px-5">
+              <div className="flex items-center justify-between text-zinc-400">
+                <CardDescription className="text-xs uppercase tracking-wider font-mono">
+                  System Accounts
+                </CardDescription>
+                <Users className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
+              </div>
+              <CardTitle className="text-3xl font-bold text-white mt-1">
                 {totalUsers}
-                <Users className="ml-2 text-blue-500 w-5 h-5" />
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-xs text-zinc-500">
-                <TrendingUp className="inline w-3 h-3 mr-1 text-blue-500" />
-                <span className="text-blue-500">
-                  {totalUsers > 0 ? Math.round((activeUsers / totalUsers) * 100) : 0}%
-                </span>{" "}
-                active accounts
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm hover:bg-zinc-900/80 transition-all">
-            <CardHeader className="pb-2">
-              <CardDescription className="text-zinc-400">
-                Active Users
-              </CardDescription>
-              <CardTitle className="text-3xl text-white flex items-center">
-                {activeUsers}
-                <UserCheck className="ml-2 text-green-500 w-5 h-5" />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-xs text-zinc-500">
-                <span className="text-green-500">Currently active</span> users
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm hover:bg-zinc-900/80 transition-all">
-            <CardHeader className="pb-2">
-              <CardDescription className="text-zinc-400">
-                Blocked Users
-              </CardDescription>
-              <CardTitle className="text-3xl text-white flex items-center">
-                {blockedUsers}
-                <UserX className="ml-2 text-red-500 w-5 h-5" />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-xs text-zinc-500">
-                <span className="text-red-500">Currently blocked</span> users
+            <CardContent className="px-5 pb-5">
+              <div className="text-[11px] text-zinc-400 font-mono flex items-center justify-between">
+                <span>{activeUsers} Active · {blockedUsers} Blocked</span>
+                <ArrowRight className="w-3 h-3 text-zinc-600 group-hover:text-blue-400" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Activity Chart */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm col-span-2">
-            <CardHeader>
-              <CardTitle className="text-xl text-zinc-100">
-                User Activity Overview
-              </CardTitle>
-              <CardDescription className="text-zinc-400">
-                Active vs Blocked users over time
-              </CardDescription>
+        {/* Activity Chart & Curator Action Center */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* User Status Bar Chart */}
+          <Card className="bg-zinc-950/60 border-zinc-800/80 lg:col-span-2">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-base font-semibold text-white">
+                    Access & User Governance
+                  </CardTitle>
+                  <CardDescription className="text-xs text-zinc-400 mt-0.5">
+                    Active vs. Blocked system accounts over time
+                  </CardDescription>
+                </div>
+                <Badge variant="outline" className="border-zinc-800 text-zinc-400 text-[10px] font-mono">
+                  ACCOUNT HEALTH
+                </Badge>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="h-[240px] w-full">
+              <div className="h-[220px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={dashboardData.userActivityChart}>
-                    <XAxis dataKey="name" stroke="#71717a" />
+                    <XAxis
+                      dataKey="name"
+                      stroke="#52525b"
+                      fontSize={11}
+                      tickLine={false}
+                      axisLine={{ stroke: "#27272a" }}
+                    />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#27272a",
-                        border: "1px solid #3f3f46",
+                        backgroundColor: "#09090b",
+                        border: "1px solid #27272a",
                         borderRadius: "8px",
+                        fontSize: "12px",
                       }}
-                      labelStyle={{
-                        color: "#ffffff",
-                      }}
-                      itemStyle={{
-                        color: "#ffffff",
-                      }}
-                      labelFormatter={(label, payload) => {
-                        if (payload && payload.length > 0) {
-                          const activeUsers =
-                            payload.find((item) => item.dataKey === "active")
-                              ?.value || 0;
-                          const blockedUsers =
-                            payload.find((item) => item.dataKey === "blocked")
-                              ?.value || 0;
-                        //   const total = activeUsers + blockedUsers;
-                        //   return `${label} | Total: ${total}`;
-                        }
-                        return label;
-                      }}
-                      formatter={(value, name) => {
-                        if (name === "active") {
-                          return [`${value}`, "Active"];
-                        } else if (name === "blocked") {
-                          return [`${value}`, "Blocked"];
-                        }
-                        return [value, name];
-                      }}
+                      labelStyle={{ color: "#e4e4e7" }}
                     />
                     <Bar
                       dataKey="active"
-                      fill="url(#activeGradient)"
-                      radius={[5, 5, 0, 0]}
+                      name="Active"
+                      fill="#059669"
+                      radius={[4, 4, 0, 0]}
                     />
                     <Bar
                       dataKey="blocked"
-                      fill="url(#blockedGradient)"
-                      radius={[5, 5, 0, 0]}
+                      name="Blocked"
+                      fill="#e11d48"
+                      radius={[4, 4, 0, 0]}
                     />
-                    <defs>
-                      <linearGradient
-                        id="activeGradient"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop
-                          offset="0%"
-                          stopColor="#10b981"
-                          stopOpacity={0.8}
-                        />
-                        <stop
-                          offset="100%"
-                          stopColor="#10b981"
-                          stopOpacity={0.2}
-                        />
-                      </linearGradient>
-                      <linearGradient
-                        id="blockedGradient"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop
-                          offset="0%"
-                          stopColor="#ef4444"
-                          stopOpacity={0.8}
-                        />
-                        <stop
-                          offset="100%"
-                          stopColor="#ef4444"
-                          stopOpacity={0.2}
-                        />
-                      </linearGradient>
-                    </defs>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="text-xl text-zinc-100">
-                User Distribution
-              </CardTitle>
-              <CardDescription className="text-zinc-400">
-                Current user status breakdown
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-zinc-400">Active users</span>
-                  <span className="text-zinc-100">{activeUsers}</span>
-                </div>
-                <div className="w-full bg-zinc-800 rounded-full h-1.5">
-                  <div
-                    className="bg-green-500 h-1.5 rounded-full"
-                    style={{ width: `${(activeUsers / totalUsers) * 100}%` }}
-                  ></div>
-                </div>
+          {/* Curator Quick Operations */}
+          <Card className="bg-zinc-950/60 border-zinc-800/80 p-5 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-mono uppercase text-zinc-400">
+                  Curator Tools
+                </span>
+                <Activity className="w-3.5 h-3.5 text-emerald-400" />
               </div>
 
               <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-zinc-400">Blocked users</span>
-                  <span className="text-zinc-100">{blockedUsers}</span>
-                </div>
-                <div className="w-full bg-zinc-800 rounded-full h-1.5">
-                  <div
-                    className="bg-red-500 h-1.5 rounded-full"
-                    style={{ width: `${(blockedUsers / totalUsers) * 100}%` }}
-                  ></div>
-                </div>
+                <Link
+                  href="/admin/dashboard/data/insert"
+                  className="p-3 rounded-lg border border-zinc-850 hover:border-zinc-700 bg-zinc-900/40 hover:bg-zinc-900 transition-all flex items-center justify-between group block"
+                >
+                  <div className="flex items-center gap-3">
+                    <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+                    <div>
+                      <div className="text-xs font-medium text-zinc-200">Single & CSV Ingestion</div>
+                      <div className="text-[11px] text-zinc-400">Catalog folk drugs with merge logic</div>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-zinc-600 group-hover:text-emerald-400" />
+                </Link>
+
+                <Link
+                  href="/admin/dashboard/ai-search"
+                  className="p-3 rounded-lg border border-zinc-850 hover:border-zinc-700 bg-zinc-900/40 hover:bg-zinc-900 transition-all flex items-center justify-between group block"
+                >
+                  <div className="flex items-center gap-3">
+                    <BrainCircuit className="w-4 h-4 text-emerald-400" />
+                    <div>
+                      <div className="text-xs font-medium text-zinc-200">Admin AI Query</div>
+                      <div className="text-[11px] text-zinc-400">Search with lineage details</div>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-zinc-600 group-hover:text-emerald-400" />
+                </Link>
+
+                <Link
+                  href="/admin/dashboard/users/manage"
+                  className="p-3 rounded-lg border border-zinc-850 hover:border-zinc-700 bg-zinc-900/40 hover:bg-zinc-900 transition-all flex items-center justify-between group block"
+                >
+                  <div className="flex items-center gap-3">
+                    <Users className="w-4 h-4 text-blue-400" />
+                    <div>
+                      <div className="text-xs font-medium text-zinc-200">User Access Control</div>
+                      <div className="text-[11px] text-zinc-400">Activate or restrict accounts</div>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-zinc-600 group-hover:text-blue-400" />
+                </Link>
               </div>
-            </CardContent>
+            </div>
+
+            <div className="pt-4 border-t border-zinc-900 mt-4 text-[11px] text-zinc-400 font-mono flex items-center justify-between">
+              <span>Security: TLS & Row-Level</span>
+              <span className="text-emerald-400">Encrypted</span>
+            </div>
           </Card>
         </div>
 
-        {/* Users List */}
-        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
-          <CardHeader className="border-b border-zinc-800 pb-4">
-            <div className="flex justify-between items-center">
+        {/* Recent Registered Users Feed */}
+        <Card className="bg-zinc-950/60 border-zinc-800/80 overflow-hidden">
+          <CardHeader className="border-b border-zinc-900 pb-4 pt-5 px-6">
+            <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-xl text-zinc-100">
-                  Registered Users
+                <CardTitle className="text-base font-semibold text-white">
+                  Registered User Accounts
                 </CardTitle>
-                <CardDescription className="text-zinc-400">
-                  Manage the registered users in the system
+                <CardDescription className="text-xs text-zinc-400 mt-0.5">
+                  Platform researchers and administrators
                 </CardDescription>
               </div>
+              <Link
+                href="/admin/dashboard/users/manage"
+                className="inline-flex items-center gap-1.5 text-xs font-mono text-emerald-400 hover:text-emerald-300 transition-colors"
+              >
+                <span>Manage All ({totalUsers})</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
           </CardHeader>
+
           <CardContent className="p-0">
-            <div className="divide-y divide-zinc-800">
+            <div className="divide-y divide-zinc-900">
               {dashboardData.users.length > 0 ? (
-                dashboardData.users.map((user) => (
+                dashboardData.users.slice(0, 6).map((user) => (
                   <div
                     key={user.id}
-                    className="p-4 hover:bg-zinc-800/30 transition-colors cursor-pointer"
-                    onClick={() =>
-                      router.push(`/admin/dashboard/users/manage`)
-                    }
+                    onClick={() => router.push(`/admin/dashboard/users/manage`)}
+                    className="p-4 sm:px-6 hover:bg-zinc-900/40 transition-colors flex items-center justify-between group cursor-pointer"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-4">
-                        <div className="p-2 rounded-lg bg-blue-500 bg-opacity-20 text-white">
-                          <Users className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-zinc-100">
-                            {user.name}
-                          </h3>
-                          <p className="text-sm text-zinc-400 mt-1">
-                            Email: {user.email} | Role: {user.role}
-                          </p>
+                    <div className="flex items-center space-x-3.5 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 shrink-0">
+                        <Users className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-sm font-medium text-zinc-200 group-hover:text-emerald-400 transition-colors truncate">
+                          {user.name || "Anonymous User"}
+                        </h4>
+                        <div className="flex items-center gap-2 text-[11px] text-zinc-400 font-mono mt-0.5">
+                          <span>{user.email}</span>
+                          <span>•</span>
+                          <span className="text-zinc-400 uppercase">{user.role}</span>
                         </div>
                       </div>
-                      <Badge
-                        variant="outline"
-                        className={`${
+                    </div>
+
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span
+                        className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
                           user.status === "ACTIVE"
-                            ? "bg-green-500/20 text-green-400 border-green-500/30"
-                            : "bg-red-500/20 text-red-400 border-red-500/30"
+                            ? "bg-emerald-950/50 text-emerald-400 border-emerald-900/60"
+                            : "bg-red-950/50 text-red-400 border-red-900/60"
                         }`}
                       >
                         {user.status}
-                      </Badge>
+                      </span>
+                      <ArrowRight className="w-3.5 h-3.5 text-zinc-600 group-hover:text-emerald-400 transition-colors" />
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="p-8 text-center text-zinc-500">
-                  No users found.
+                <div className="p-8 text-center text-zinc-500 text-sm">
+                  No registered users cataloged.
                 </div>
               )}
             </div>
