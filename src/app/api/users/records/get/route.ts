@@ -10,13 +10,28 @@ export async function GET() {
             return NextResponse.json("Unauthorized", { status: 401 });
         }
 
-        // Fetch recent drug records (drugs are not user-scoped in new schema)
+        // Fetch all verified drug records added by the admin with complete relations
         const recentDrugRecords = await db.drug.findMany({
             orderBy: {
                 created_at: "desc",
             },
-            take: 5,
-        })
+            take: 100,
+            include: {
+                drug_names: true,
+                drug_disease: {
+                    include: {
+                        disease: true,
+                    },
+                },
+                usage_method: {
+                    include: {
+                        disease: true,
+                    },
+                },
+                research: true,
+                drug_photos: true,
+            },
+        });
 
         const recordCount = await db.drug.count()
 

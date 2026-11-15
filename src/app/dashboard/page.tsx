@@ -220,9 +220,9 @@ const SOURCES: Record<string, [string, string, string]> = {
   oral: ["Oral tradition", "voice", "var(--oral)"],
 };
 
-/* ── Baseline Classical Formulations from HTML Wireframe ── */
+/* ── Formulation type ── */
 type Formulation = {
-  id?: string;
+  id: string;
   n: string;
   s: string;
   src: "plant" | "organic" | "mineral" | "oral";
@@ -234,14 +234,6 @@ type Formulation = {
   when: string;
 };
 
-const BASE_FORMULATIONS: Formulation[] = [
-  { n: "Triphala Churna", s: "त्रिफला चूर्ण", src: "plant", form: "mortar", d: ["Vata", "Pitta", "Kapha"], use: "Digestive health", ing: "Amalaki, Bibhitaki, Haritaki", ref: "Classical texts, widely cited", when: "2 days ago" },
-  { n: "Brahmi Ghrita", s: "ब्राह्मी घृत", src: "plant", form: "jar", d: ["Vata", "Pitta"], use: "Memory and focus", ing: "Brahmi, cow’s ghee", ref: "Ashtanga Hridaya, Uttarasthana", when: "3 days ago" },
-  { n: "Shilajit Rasayana", s: "शिलाजीत रसायन", src: "mineral", form: "gem", d: ["Kapha"], use: "Vitality", ing: "Purified shilajit", ref: "Charaka Samhita, Chikitsasthana", when: "Saturday" },
-  { n: "Ashwagandha Taila", s: "अश्वगन्धा तैल", src: "oral", form: "bottle", d: ["Vata"], use: "Joint pain", ing: "Ashwagandha, sesame oil", ref: "Oral lineage, healer interviews", when: "Saturday" },
-  { n: "Panchagavya Ghrita", s: "पञ्चगव्य घृत", src: "organic", form: "jar", d: ["Vata", "Pitta"], use: "Nourishment", ing: "Five cow products, ghee", ref: "Charaka Samhita, Chikitsasthana", when: "Friday" },
-];
-
 export default function Dashboard() {
   useAuth(["user"]);
 
@@ -251,7 +243,7 @@ export default function Dashboard() {
   const [selectedDosha, setSelectedDosha] = useState<string | null>(null);
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [savedIndices, setSavedIndices] = useState<number[]>([]);
+  const [savedIds, setSavedIds] = useState<string[]>([]);
   const [activeDrawerItem, setActiveDrawerItem] = useState<Formulation | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [searchMode, setSearchMode] = useState<"ai" | "filters">("ai");
@@ -273,33 +265,89 @@ export default function Dashboard() {
     refetchOnWindowFocus: false,
   });
 
-  const dbRecords: drug[] = data?.recentDrugRecords || [];
+  const dbRecords: any[] = data?.recentDrugRecords || [];
   const recordCount = data?.recordCount || 0;
 
-  // Merge DB records with the baseline formulations
+  // Map exclusively the records that the admin has added to the database
   const formulations: Formulation[] = useMemo(() => {
-    const list: Formulation[] = [...BASE_FORMULATIONS];
-    dbRecords.forEach((r) => {
-      // Avoid duplicate names
-      if (!list.some((item) => item.n.toLowerCase() === (r.primary_name || "").toLowerCase())) {
-        const rawSrc = (r.source_type || "plant").toLowerCase();
-        const validSrc: "plant" | "organic" | "mineral" | "oral" =
-          rawSrc.includes("mineral") ? "mineral" : rawSrc.includes("organic") ? "organic" : rawSrc.includes("oral") ? "oral" : "plant";
-        list.push({
-          id: r.id,
-          n: r.primary_name || "Botanical Formulation",
-          s: "आयुर्वेदिक योग",
-          src: validSrc,
-          form: "mortar",
-          d: ["Vata", "Pitta"],
-          use: "Traditional therapeutic formulation",
-          ing: "Herbal compounds, active extracts",
-          ref: "Folklore Archive Cataloged Entry",
-          when: r.created_at ? new Date(r.created_at).toLocaleDateString() : "Recently",
+    if (!dbRecords || dbRecords.length === 0) return [];
+
+    return dbRecords.map((r: any) => {
+      const rawSrc = (r.source_type || "PLANT").toUpperCase();
+      const validSrc: "plant" | "organic" | "mineral" | "oral" =
+        rawSrc === "MINERAL"
+          ? "mineral"
+          : rawSrc === "ANIMAL"
+          ? "organic"
+          : "plant";
+
+      const formIcon =
+        validSrc === "mineral" ? "gem" : validSrc === "organic" ? "jar" : "leaf";
+
+      const namesList: { name: string | null; type: string | null }[] = r.drug_names || [];
+      const sanskrit = namesList.find((n) => n.type === "SANSKRIT")?.name;
+      const botanical = namesList.find((n) => n.type === "BOTANICAL")?.name;
+      const vernacular = namesList.find((n) => n.type === "VERNACULAR")?.name;
+
+      const subtitle = sanskrit || botanical || vernacular || "आयुर्वेदिक योग";
+
+      const diseaseSet = new Set<string>();
+      if (Array.isArray(r.drug_disease)) {
+        r.drug_disease.forEach((dd: any) => {
+          if (dd.disease?.name) diseaseSet.add(dd.disease.name);
         });
       }
+      if (Array.isArray(r.usage_method)) {
+        r.usage_method.forEach((um: any) => {
+          if (um.disease?.name) diseaseSet.add(um.disease.name);
+        });
+      }
+      if (Array.isArray(r.diseases)) {
+        r.diseases.forEach((dis: string) => diseaseSet.add(dis));
+      }
+
+      const diseaseNames = Array.from(diseaseSet);
+      const useText =
+        diseaseNames.length > 0
+          ? diseaseNames.join(", ")
+          : r.usage_method?.[0]?.method_description || "Traditional therapeutic formulation";
+
+      const descParts = [botanical, r.botanical_description].filter(Boolean);
+      const ingredientsText = descParts.length > 0 ? descParts.join(" · ") : "Medicinal herbal botanical";
+
+      const refText =
+        r.research?.[0]?.title || "Folklore Repository Cataloged Entry";
+
+      const whenText = r.created_at
+        ? new Date(r.created_at).toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })
+        : "Recently";
+
+      const searchBlob = `${r.primary_name || ""} ${r.botanical_description || ""} ${useText}`.toLowerCase();
+      const doshas: string[] = [];
+      if (searchBlob.includes("vata") || searchBlob.includes("वात")) doshas.push("Vata");
+      if (searchBlob.includes("pitta") || searchBlob.includes("पित्त")) doshas.push("Pitta");
+      if (searchBlob.includes("kapha") || searchBlob.includes("कफ")) doshas.push("Kapha");
+      if (doshas.length === 0) {
+        doshas.push("Vata", "Pitta", "Kapha");
+      }
+
+      return {
+        id: r.id || r.primary_name || Math.random().toString(),
+        n: r.primary_name || "Botanical Formulation",
+        s: subtitle,
+        src: validSrc,
+        form: formIcon,
+        d: doshas,
+        use: useText,
+        ing: ingredientsText,
+        ref: refText,
+        when: whenText,
+      };
     });
-    return list;
   }, [dbRecords]);
 
   // Filtered formulations
@@ -348,19 +396,34 @@ export default function Dashboard() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const toggleSave = (index: number, e?: React.MouseEvent) => {
+  const toggleSave = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    setSavedIndices((prev) => {
-      const exists = prev.includes(index);
+    setSavedIds((prev) => {
+      const exists = prev.includes(id);
       if (exists) {
         showToast(`Removed from saved`);
-        return prev.filter((i) => i !== index);
+        return prev.filter((item) => item !== id);
       } else {
-        showToast(`Saved “${formulations[index].n}”`);
-        return [...prev, index];
+        const found = formulations.find((f) => f.id === id);
+        showToast(`Saved “${found?.n || "formulation"}”`);
+        return [...prev, id];
       }
     });
   };
+
+  const popularChips = useMemo(() => {
+    const set = new Set<string>();
+    formulations.forEach((f) => {
+      if (f.use && f.use !== "Traditional therapeutic formulation") {
+        f.use.split(",").forEach((s) => {
+          const trimmed = s.trim();
+          if (trimmed && trimmed.length < 25) set.add(trimmed);
+        });
+      }
+    });
+    const arr = Array.from(set).slice(0, 4);
+    return arr.length > 0 ? arr : ["Vata", "Pitta", "Kapha"];
+  }, [formulations]);
 
   if (status === "loading" || isLoading) {
     return (
@@ -538,7 +601,7 @@ export default function Dashboard() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   autoComplete="off"
-                  placeholder='Try “fever”, “Triphala” or “Vata”'
+                  placeholder='Try “Ashwagandha”, “General Weakness” or “Vata”'
                   aria-label="Search formulations"
                 />
                 <kbd>/</kbd>
@@ -586,7 +649,7 @@ export default function Dashboard() {
             {/* Popular Search Chips */}
             <div className="chips">
               Popular:{" "}
-              {["Digestive", "Memory", "Joint pain", "Vitality"].map((chip) => (
+              {popularChips.map((chip) => (
                 <button
                   key={chip}
                   onClick={() => setSearchQuery(chip)}
@@ -686,7 +749,7 @@ export default function Dashboard() {
             filteredFormulations.map((f, i) => {
               const srcMeta = SOURCES[f.src] || SOURCES["plant"];
               const color = srcMeta[2];
-              const isSaved = savedIndices.includes(i);
+              const isSaved = savedIds.includes(f.id);
 
               return (
                 <div
@@ -699,7 +762,7 @@ export default function Dashboard() {
                     className="save"
                     aria-pressed={isSaved}
                     aria-label={`Save ${f.n}`}
-                    onClick={(e) => toggleSave(i, e)}
+                    onClick={(e) => toggleSave(f.id, e)}
                   >
                     <Icon id="heart" size={18} />
                   </button>
@@ -730,8 +793,10 @@ export default function Dashboard() {
             })
           ) : (
             <div className="empty" style={{ gridColumn: "1/-1" }}>
-              <b>No formulations match</b>
-              Try a different dosha or source, or clear the filters.
+              <b>{formulations.length === 0 ? "No records cataloged yet" : "No formulations match"}</b>
+              {formulations.length === 0
+                ? "The curator has not added any verified formulations to the archive yet."
+                : "Try a different dosha or source, or clear the filters."}
             </div>
           )}
         </div>
@@ -740,15 +805,15 @@ export default function Dashboard() {
         <div className="cols">
           <div className="card">
             <h3>Pick up where you left off</h3>
-            <div className="empty" style={{ background: savedIndices.length ? "none" : undefined, padding: savedIndices.length ? 0 : undefined }}>
-              {savedIndices.length > 0 ? (
+            <div className="empty" style={{ background: savedIds.length ? "none" : undefined, padding: savedIds.length ? 0 : undefined }}>
+              {savedIds.length > 0 ? (
                 <div>
-                  {savedIndices.map((idx) => {
-                    const item = formulations[idx];
+                  {savedIds.map((id) => {
+                    const item = formulations.find((f) => f.id === id);
                     if (!item) return null;
                     return (
                       <button
-                        key={idx}
+                        key={id}
                         className="ghost"
                         style={{ margin: "0 6px 6px 0", fontSize: 14 }}
                         onClick={() => setActiveDrawerItem(item)}
@@ -771,7 +836,7 @@ export default function Dashboard() {
             <div>
               <h3 style={{ marginBottom: 4 }}>Archive at a glance</h3>
               <span style={{ color: "var(--muted)" }}>
-                {recordCount || formulations.length} verified formulations from 4 source types. A timeline will appear after 30 days of entries.
+                {recordCount || formulations.length} verified formulation{formulations.length === 1 ? "" : "s"} cataloged in the traditional archive.
               </span>
             </div>
           </div>
@@ -823,12 +888,9 @@ export default function Dashboard() {
               <div style={{ display: "flex", gap: 10, marginTop: 24, flexWrap: "wrap" }}>
                 <button
                   className="go"
-                  onClick={() => {
-                    const idx = formulations.findIndex((f) => f.n === activeDrawerItem.n);
-                    if (idx > -1) toggleSave(idx);
-                  }}
+                  onClick={() => toggleSave(activeDrawerItem.id)}
                 >
-                  {savedIndices.some((idx) => formulations[idx]?.n === activeDrawerItem.n)
+                  {savedIds.includes(activeDrawerItem.id)
                     ? "Saved"
                     : "Save formulation"}
                 </button>
