@@ -1,28 +1,8 @@
 "use client";
 
+import React, { useState, useMemo, useEffect } from "react";
 import { useAuth } from "@/components/useAuth";
 import { useSession } from "next-auth/react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
-import { BarChart, Bar, ResponsiveContainer, XAxis, Tooltip } from "recharts";
-import {
-  Clock,
-  Database,
-  FileText,
-  TrendingUp,
-  Search,
-  BrainCircuit,
-  ArrowRight,
-  Leaf,
-  Layers,
-  Sparkles,
-} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { drug } from "@prisma/client";
@@ -34,68 +14,370 @@ type ChartDataPoint = {
   records: number;
 };
 
-let chartData: ChartDataPoint[] = [];
-let TotalRecordsThisWeek: number = 0;
-let mostActiveDayOfTheWeek: string = "";
-let mostActivePercentage: number = 0;
+/* ── Inline SVG Symbols Matching the HTML Wireframe ── */
+function Icon({ id, size = 20, className = "" }: { id: string; size?: number; className?: string }) {
+  const paths: Record<string, React.ReactNode> = {
+    leaf: (
+      <>
+        <path d="M5 19C3 10 9 3 20 4c1 11-6 17-15 15z" />
+        <path d="M5 19c4-6 8-9 12-11" />
+      </>
+    ),
+    mortar: (
+      <>
+        <path d="M3 11h18a8 8 0 0 1-8 8h-2a8 8 0 0 1-8-8z" />
+        <path d="M8 19v2h8v-2M16 3l-4.5 8" />
+      </>
+    ),
+    bottle: (
+      <>
+        <path d="M9 3h6v3l2 3v11a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V9l2-3z" />
+        <path d="M7 13h10M12 15.5c1 1.3 1.4 2 1.4 2.6a1.4 1.4 0 0 1-2.8 0c0-.6.4-1.3 1.4-2.6z" />
+      </>
+    ),
+    jar: (
+      <>
+        <path d="M8 4h8v3H8zM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zM6 12h12" />
+      </>
+    ),
+    pot: (
+      <>
+        <path d="M5 10h14v6a5 5 0 0 1-5 5h-4a5 5 0 0 1-5-5zM3 10h18M9 3c0 2 2 2 2 4M14 3c0 2 2 2 2 4" />
+      </>
+    ),
+    lotus: (
+      <>
+        <path d="M12 20C8 17 7 12 12 5c5 7 4 12 0 15zM12 20C6 20 3 16 3 11c4 0 7 2 9 9zM12 20c6 0 9-4 9-9-4 0-7 2-9 9z" />
+      </>
+    ),
+    flame: (
+      <path d="M12 3c3 4 5 6 5 10a5 5 0 0 1-10 0c0-2 1-3 2-5 1 1 1 2 2 2 0-3 0-5 1-7z" />
+    ),
+    air: (
+      <path d="M3 8h11a3 3 0 1 0-3-3M3 13h16a3 3 0 1 1-3 3M3 18h7" />
+    ),
+    drop: (
+      <path d="M12 3c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11z" />
+    ),
+    gem: (
+      <path d="M12 3l6 6-6 12-6-12zM6 9h12M12 3v18" />
+    ),
+    hex: (
+      <>
+        <path d="M12 3l7 4v10l-7 4-7-4V7z" />
+        <circle cx="12" cy="12" r="3" />
+      </>
+    ),
+    voice: <path d="M4 5h16v10H9l-5 4z" />,
+    home: <path d="M4 11l8-7 8 7v9H4z" />,
+    book: (
+      <path d="M4 5c3-1 6-1 8 1 2-2 5-2 8-1v14c-3-1-6-1-8 1-2-2-5-2-8-1z" />
+    ),
+    plus: <path d="M12 5v14M5 12h14" />,
+    users: (
+      <>
+        <circle cx="9" cy="8" r="3.5" />
+        <path d="M3 20c0-4 3-6 6-6s6 2 6 6M16 5a3.5 3.5 0 0 1 0 7M18 14c2 1 3 3 3 6" />
+      </>
+    ),
+    doc: <path d="M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6" />,
+    check: <path d="M4 12l5 5 11-11" />,
+    heart: (
+      <path d="M12 20S4 15 4 9a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z" />
+    ),
+    search: (
+      <>
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-3.5-3.5" />
+      </>
+    ),
+  };
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+      style={{ flex: "none" }}
+    >
+      {paths[id] || null}
+    </svg>
+  );
+}
+
+/* ── Lotus Mandala Drawing ── */
+function LotusMandala() {
+  const petalLarge = Array.from({ length: 16 }, (_, i) => (
+    <path
+      key={`lp${i}`}
+      d="M0-98C-15-78-15-60 0-46 15-60 15-78 0-98z"
+      transform={`rotate(${i * 22.5})`}
+      fill="var(--accent-soft)"
+      stroke="currentColor"
+      strokeWidth="1.2"
+    />
+  ));
+  const petalSmall = Array.from({ length: 8 }, (_, i) => (
+    <path
+      key={`sp${i}`}
+      d="M0-62C-9-50-9-40 0-30 9-40 9-50 0-62z"
+      transform={`rotate(${i * 45 + 22.5})`}
+      fill="none"
+      stroke="var(--organic)"
+      strokeWidth="1.2"
+    />
+  ));
+  const dots = Array.from({ length: 36 }, (_, i) => (
+    <circle
+      key={`d${i}`}
+      cx="0"
+      cy="-108"
+      r="1.3"
+      fill="currentColor"
+      transform={`rotate(${i * 10})`}
+    />
+  ));
+  const corners: [string, number, number][] = [
+    ["leaf", 0, -118],
+    ["drop", 118, 0],
+    ["flame", 0, 118],
+    ["mortar", -118, 0],
+  ];
+
+  return (
+    <svg
+      viewBox="-130 -130 260 260"
+      role="img"
+      aria-label="Lotus mandala with leaf, water, flame and mortar"
+      style={{ width: "100%", maxWidth: 340, justifySelf: "center", color: "var(--accent)" }}
+    >
+      <circle r="112" fill="none" stroke="currentColor" strokeDasharray="2 5" opacity=".6" />
+      {petalLarge}
+      {petalSmall}
+      {dots}
+      <circle r="24" fill="var(--surface)" stroke="currentColor" />
+      <svg x="-15" y="-15" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 20C8 17 7 12 12 5c5 7 4 12 0 15zM12 20C6 20 3 16 3 11c4 0 7 2 9 9zM12 20c6 0 9-4 9-9-4 0-7 2-9 9z" />
+      </svg>
+      {corners.map(([iconId, cx, cy]) => (
+        <g key={iconId}>
+          <circle cx={cx} cy={cy} r="13" fill="var(--surface)" stroke="currentColor" />
+          <svg x={cx - 8} y={cy - 8} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            {iconId === "leaf" && (
+              <>
+                <path d="M5 19C3 10 9 3 20 4c1 11-6 17-15 15z" />
+                <path d="M5 19c4-6 8-9 12-11" />
+              </>
+            )}
+            {iconId === "drop" && <path d="M12 3c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11z" />}
+            {iconId === "flame" && <path d="M12 3c3 4 5 6 5 10a5 5 0 0 1-10 0c0-2 1-3 2-5 1 1 1 2 2 2 0-3 0-5 1-7z" />}
+            {iconId === "mortar" && (
+              <>
+                <path d="M3 11h18a8 8 0 0 1-8 8h-2a8 8 0 0 1-8-8z" />
+                <path d="M8 19v2h8v-2M16 3l-4.5 8" />
+              </>
+            )}
+          </svg>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+/* ── Diamond Pattern Band ── */
+function DiamondBand() {
+  return (
+    <svg width="100%" height="12" aria-hidden="true" style={{ display: "block", color: "var(--accent)", opacity: 0.55, margin: "14px 0 26px" }}>
+      <defs>
+        <pattern id="pt-user" width="24" height="12" patternUnits="userSpaceOnUse">
+          <path d="M0 6l6-5 6 5-6 5zM12 6l6-5 6 5-6 5z" fill="none" stroke="currentColor" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="12" fill="url(#pt-user)" />
+    </svg>
+  );
+}
+
+/* ── Doshas metadata matching HTML ── */
+const DOSHAS: Record<string, { dev: string; el: string; ic: string; d: string; c: string }> = {
+  Vata: { dev: "वात", el: "Air and space", ic: "air", d: "Movement, breath, nerves", c: "var(--mineral)" },
+  Pitta: { dev: "पित्त", el: "Fire and water", ic: "flame", d: "Digestion, metabolism, heat", c: "var(--organic)" },
+  Kapha: { dev: "कफ", el: "Water and earth", ic: "drop", d: "Structure, stability, moisture", c: "var(--plant)" },
+};
+
+/* ── Source metadata matching HTML ── */
+const SOURCES: Record<string, [string, string, string]> = {
+  plant: ["Plant", "leaf", "var(--plant)"],
+  organic: ["Organic", "hex", "var(--organic)"],
+  mineral: ["Mineral", "gem", "var(--mineral)"],
+  oral: ["Oral tradition", "voice", "var(--oral)"],
+};
+
+/* ── Baseline Classical Formulations from HTML Wireframe ── */
+type Formulation = {
+  id?: string;
+  n: string;
+  s: string;
+  src: "plant" | "organic" | "mineral" | "oral";
+  form: string;
+  d: string[];
+  use: string;
+  ing: string;
+  ref: string;
+  when: string;
+};
+
+const BASE_FORMULATIONS: Formulation[] = [
+  { n: "Triphala Churna", s: "त्रिफला चूर्ण", src: "plant", form: "mortar", d: ["Vata", "Pitta", "Kapha"], use: "Digestive health", ing: "Amalaki, Bibhitaki, Haritaki", ref: "Classical texts, widely cited", when: "2 days ago" },
+  { n: "Brahmi Ghrita", s: "ब्राह्मी घृत", src: "plant", form: "jar", d: ["Vata", "Pitta"], use: "Memory and focus", ing: "Brahmi, cow’s ghee", ref: "Ashtanga Hridaya, Uttarasthana", when: "3 days ago" },
+  { n: "Shilajit Rasayana", s: "शिलाजीत रसायन", src: "mineral", form: "gem", d: ["Kapha"], use: "Vitality", ing: "Purified shilajit", ref: "Charaka Samhita, Chikitsasthana", when: "Saturday" },
+  { n: "Ashwagandha Taila", s: "अश्वगन्धा तैल", src: "oral", form: "bottle", d: ["Vata"], use: "Joint pain", ing: "Ashwagandha, sesame oil", ref: "Oral lineage, healer interviews", when: "Saturday" },
+  { n: "Panchagavya Ghrita", s: "पञ्चगव्य घृत", src: "organic", form: "jar", d: ["Vata", "Pitta"], use: "Nourishment", ing: "Five cow products, ghee", ref: "Charaka Samhita, Chikitsasthana", when: "Friday" },
+];
 
 export default function Dashboard() {
   useAuth(["user"]);
 
   const { data: session, status } = useSession();
 
+  // Active filters and drawer state
+  const [selectedDosha, setSelectedDosha] = useState<string | null>(null);
+  const [selectedSource, setSelectedSource] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [savedIndices, setSavedIndices] = useState<number[]>([]);
+  const [activeDrawerItem, setActiveDrawerItem] = useState<Formulation | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [searchMode, setSearchMode] = useState<"ai" | "filters">("ai");
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 2200);
+  };
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["drugRecords"],
     queryFn: async () => {
       const response = await axios.get("/api/users/records/get");
-
-      chartData = getWeeklyChartData(response.data.recentDrugRecords);
-
-      TotalRecordsThisWeek = chartData.reduce(
-        (sum, day) => sum + day.records,
-        0
-      );
-
-      const mostActiveDayOfTheWeekData = chartData.reduce((max, current) =>
-        current.records > max.records ? current : max
-      );
-
-      mostActiveDayOfTheWeek = mostActiveDayOfTheWeekData.name;
-      mostActivePercentage =
-        TotalRecordsThisWeek > 0
-          ? (mostActiveDayOfTheWeekData.records / TotalRecordsThisWeek) * 100
-          : 0;
-
       return response.data;
     },
     enabled: !!session,
     refetchOnWindowFocus: false,
   });
 
-  const records = data?.recentDrugRecords || [];
+  const dbRecords: drug[] = data?.recentDrugRecords || [];
   const recordCount = data?.recordCount || 0;
+
+  // Merge DB records with the baseline formulations
+  const formulations: Formulation[] = useMemo(() => {
+    const list: Formulation[] = [...BASE_FORMULATIONS];
+    dbRecords.forEach((r) => {
+      // Avoid duplicate names
+      if (!list.some((item) => item.n.toLowerCase() === (r.primary_name || "").toLowerCase())) {
+        const rawSrc = (r.source_type || "plant").toLowerCase();
+        const validSrc: "plant" | "organic" | "mineral" | "oral" =
+          rawSrc.includes("mineral") ? "mineral" : rawSrc.includes("organic") ? "organic" : rawSrc.includes("oral") ? "oral" : "plant";
+        list.push({
+          id: r.id,
+          n: r.primary_name || "Botanical Formulation",
+          s: "आयुर्वेदिक योग",
+          src: validSrc,
+          form: "mortar",
+          d: ["Vata", "Pitta"],
+          use: "Traditional therapeutic formulation",
+          ing: "Herbal compounds, active extracts",
+          ref: "Folklore Archive Cataloged Entry",
+          when: r.created_at ? new Date(r.created_at).toLocaleDateString() : "Recently",
+        });
+      }
+    });
+    return list;
+  }, [dbRecords]);
+
+  // Filtered formulations
+  const filteredFormulations = useMemo(() => {
+    return formulations.filter((f) => {
+      if (selectedDosha && !f.d.includes(selectedDosha)) return false;
+      if (selectedSource && f.src !== selectedSource) return false;
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matches =
+          f.n.toLowerCase().includes(q) ||
+          f.s.toLowerCase().includes(q) ||
+          f.use.toLowerCase().includes(q) ||
+          f.ing.toLowerCase().includes(q) ||
+          f.d.some((d) => d.toLowerCase().includes(q)) ||
+          SOURCES[f.src][0].toLowerCase().includes(q);
+        if (!matches) return false;
+      }
+      return true;
+    });
+  }, [formulations, selectedDosha, selectedSource, searchQuery]);
+
+  // Search suggestion matches
+  const suggestions = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase().trim();
+    return formulations.filter((f) =>
+      f.n.toLowerCase().includes(q) ||
+      f.use.toLowerCase().includes(q) ||
+      f.d.some((d) => d.toLowerCase().includes(q))
+    ).slice(0, 5);
+  }, [formulations, searchQuery]);
+
+  // Handle hotkey "/"
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "/" && document.activeElement?.tagName !== "INPUT") {
+        e.preventDefault();
+        document.getElementById("user-q")?.focus();
+      }
+      if (e.key === "Escape") {
+        setActiveDrawerItem(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const toggleSave = (index: number, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setSavedIndices((prev) => {
+      const exists = prev.includes(index);
+      if (exists) {
+        showToast(`Removed from saved`);
+        return prev.filter((i) => i !== index);
+      } else {
+        showToast(`Saved “${formulations[index].n}”`);
+        return [...prev, index];
+      }
+    });
+  };
 
   if (status === "loading" || isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center w-full min-h-[60vh] text-zinc-400">
-        <div className="w-10 h-10 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mb-4" />
-        <p className="text-xs font-mono tracking-wider uppercase text-zinc-500">
-          Loading Herbarium Dashboard...
-        </p>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", color: "var(--muted)" }}>
+        <div style={{ width: 36, height: 36, border: "2px solid var(--accent-soft)", borderTopColor: "var(--accent)", borderRadius: "50%", animation: "spin 1s linear infinite", marginBottom: 16 }} />
+        <p style={{ fontSize: 13, fontFamily: "var(--sans)", color: "var(--muted)" }}>Loading Researcher Panel…</p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center w-full min-h-[60vh] p-4">
-        <div className="p-8 text-center bg-zinc-950 rounded-xl border border-red-900/50 max-w-md">
-          <h2 className="text-lg font-semibold text-red-400 mb-2">
-            Failed to Load Repository
-          </h2>
-          <p className="text-zinc-400 text-xs leading-relaxed">
-            Could not fetch repository records. Please verify your connection or refresh.
-          </p>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", padding: 24 }}>
+        <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 32, maxWidth: 400, textAlign: "center" }}>
+          <h2 style={{ fontFamily: "var(--serif)", color: "var(--warn)" }}>Failed to load repository</h2>
+          <p style={{ color: "var(--muted)", fontSize: 14, marginTop: 8 }}>Could not fetch records. Please refresh.</p>
         </div>
       </div>
     );
@@ -103,325 +385,486 @@ export default function Dashboard() {
 
   if (!session) {
     return (
-      <div className="flex flex-col items-center justify-center w-full min-h-[60vh] p-4">
-        <div className="p-8 text-center bg-zinc-950 rounded-xl border border-zinc-800 max-w-md">
-          <h2 className="text-lg font-semibold text-zinc-200 mb-2">Access Denied</h2>
-          <p className="text-zinc-400 text-xs">Please sign in to access the archive.</p>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", padding: 24 }}>
+        <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 32, maxWidth: 400, textAlign: "center" }}>
+          <h2 style={{ fontFamily: "var(--serif)", color: "var(--ink)" }}>Access Denied</h2>
+          <p style={{ color: "var(--muted)", fontSize: 14, marginTop: 8 }}>Please sign in to access the archive.</p>
         </div>
       </div>
     );
   }
 
-  const formatDate = (dateString: any) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }).format(date);
-  };
-
-  const username =
-    session.user?.name || session.user?.email?.split("@")[0] || "Researcher";
+  const username = session.user?.name || session.user?.email?.split("@")[0] || "user";
+  const initials = username.slice(0, 1).toUpperCase();
 
   return (
-    <div className="min-h-screen bg-black text-zinc-100 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* Editorial Header Banner */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-6 border-b border-zinc-900">
+    <div
+      style={{
+        background: "var(--bg)",
+        color: "var(--ink)",
+        font: "16px/1.55 var(--sans)",
+        minHeight: "100vh",
+        transition: "background .3s",
+      }}
+    >
+      {/* ── CSS Tokens matching Folklore Diaries – Researcher panel.html exactly ── */}
+      <style>{`
+        :root {
+          color-scheme: light;
+          --bg: #EEF1E6;
+          --surface: #FBFCF7;
+          --sunk: #E3E8D8;
+          --ink: #1B2A1F;
+          --muted: #56655A;
+          --line: #CFD7C3;
+          --accent: #1F5A3D;
+          --accent-ink: #fff;
+          --accent-soft: #D5E6D3;
+          --plant: #3F7A4B;
+          --organic: #B0603A;
+          --mineral: #5A6E8C;
+          --oral: #9A7A1E;
+          --warn: #B4531A;
+          --warn-soft: #F6E2CF;
+          --serif: "Fraunces", Georgia, serif;
+          --sans: "Hind", system-ui, -apple-system, "Segoe UI", sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Hind:wght@400;500;600&display=swap');
+        
+        .pill { display: inline-block; border-radius: 99px; padding: 1px 10px; font-size: 13px; font-weight: 500; background: var(--accent-soft); }
+        .hero { display: grid; grid-template-columns: 1.15fr .85fr; gap: 24px; align-items: center; }
+        .hero h1 { font-size: clamp(30px,4.2vw,46px); max-width: 16ch; font-family: var(--serif); font-weight: 600; margin: 0; line-height: 1.15; }
+        .hello { color: var(--accent); font: 500 18px var(--serif); margin-bottom: 6px; }
+        .sloka { margin: 16px 0 20px; padding: 2px 0 2px 14px; border-left: 3px solid var(--accent); max-width: 52ch; }
+        .sloka q { display: block; font: 600 19px/1.5 var(--serif); quotes: none; }
+        .sloka span { color: var(--muted); font-size: 14.5px; display: block; }
+        .searchwrap { position: relative; }
+        .search { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 7px 7px 7px 14px; }
+        .search:focus-within { border-color: var(--accent); }
+        .search input { flex: 1; min-width: 0; border: 0; background: none; font: inherit; color: var(--ink); padding: 9px 0; outline: 0; }
+        .search input::placeholder { color: var(--muted); }
+        kbd { border: 1px solid var(--line); border-radius: 6px; padding: 0 6px; font: 13px var(--sans); color: var(--muted); }
+        .seg { display: flex; background: var(--sunk); border-radius: 10px; padding: 3px; }
+        .seg button { border: 0; background: none; padding: 6px 11px; border-radius: 8px; font-size: 14px; color: var(--muted); font-weight: 500; cursor: pointer; }
+        .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); }
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; font-size: 14px; color: var(--muted); align-items: center; }
+        .chips button { border: 1px solid var(--line); background: none; border-radius: 99px; padding: 4px 12px; cursor: pointer; color: inherit; }
+        .chips button:hover { border-color: var(--accent); }
+        h2.sec { font-size: 22px; margin: 40px 0 4px; font-family: var(--serif); font-weight: 600; }
+        .sub { color: var(--muted); margin: 0 0 14px; font-size: 15px; }
+        .doshas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .dosha { border: 1px solid var(--line); background: var(--surface); border-radius: 18px; padding: 16px; text-align: left; display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; align-items: center; position: relative; transition: border-color .2s; cursor: pointer; }
+        .dosha:hover, .dosha[aria-pressed="true"] { border-color: var(--c); }
+        .dosha[aria-pressed="true"] { background: color-mix(in srgb, var(--c) 10%, var(--surface)); }
+        .dosha .orb { grid-row: span 3; width: 58px; height: 58px; border-radius: 50%; background: color-mix(in srgb, var(--c) 16%, transparent); color: var(--c); display: grid; place-items: center; }
+        .dosha .dev { font: 600 28px/1.1 var(--serif); color: var(--c); }
+        .dosha b { font-weight: 600; }
+        .dosha span.d { color: var(--muted); font-size: 14px; }
+        .srcs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+        .src { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 7px 16px 7px 12px; color: var(--c); cursor: pointer; }
+        .src span { color: var(--ink); font-weight: 500; }
+        .src small { color: var(--muted); }
+        .src[aria-pressed="true"] { background: var(--c); border-color: var(--c); }
+        .src[aria-pressed="true"] span, .src[aria-pressed="true"] small { color: #fff; }
+        .bar { display: flex; justify-content: space-between; align-items: end; gap: 10px; flex-wrap: wrap; margin-top: 38px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; margin-top: 14px; }
+        .fcard { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; text-align: left; display: flex; flex-direction: column; padding: 0; transition: border-color .2s, transform .2s; position: relative; cursor: pointer; }
+        .fcard:hover { border-color: var(--c); transform: translateY(-2px); }
+        .fcard .pic { height: 96px; background: color-mix(in srgb, var(--c) 14%, var(--surface)); color: var(--c); display: grid; place-items: center; position: relative; }
+        .fcard .pic svg.bgm { position: absolute; right: -20px; top: -20px; opacity: .22; }
+        .fcard .bd { padding: 14px 16px 16px; }
+        .fcard h3 { font-size: 18px; font-family: var(--serif); font-weight: 600; margin: 0; line-height: 1.15; }
+        .fcard .sa { color: var(--muted); font-size: 15px; }
+        .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+        .tag { font-size: 13px; border-radius: 99px; padding: 1px 9px; background: var(--sunk); }
+        .save { position: absolute; right: 10px; top: 10px; width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--surface); display: grid; place-items: center; color: var(--muted); cursor: pointer; z-index: 2; }
+        .save[aria-pressed="true"] { color: var(--organic); }
+        .save[aria-pressed="true"] svg { fill: currentColor; }
+        .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+        .card h3 { font-size: 18px; font-family: var(--serif); font-weight: 600; margin: 0 0 12px; }
+        .empty { background: var(--sunk); border-radius: 12px; padding: 14px; color: var(--muted); font-size: 14.5px; }
+        .empty b { color: var(--ink); display: block; }
+        .cols { display: grid; grid-template-columns: 1.5fr 1fr; gap: 18px; margin-top: 20px; }
+        .quote { display: flex; gap: 14px; align-items: center; }
+        .quote .ic { color: var(--accent); }
+        .go { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 10px; padding: 10px 18px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; font-family: inherit; }
+        .ghost { background: none; border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-block; color: inherit; font-family: inherit; }
+        .ghost:hover { border-color: var(--accent); }
+        #sug { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 10; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 6px; box-shadow: 0 12px 30px rgba(0,0,0,.14); }
+        #sug button { display: flex; gap: 10px; align-items: center; width: 100%; text-align: left; border: 0; background: none; padding: 9px 10px; border-radius: 9px; cursor: pointer; font-family: inherit; }
+        #sug button:hover, #sug button:focus-visible { background: var(--accent-soft); }
+        #sug small { color: var(--muted); }
+        #sug p { margin: 6px 10px; color: var(--muted); font-size: 14.5px; }
+        #scrim { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 99; }
+        #dr { position: fixed; right: 0; top: 0; bottom: 0; width: min(420px,100%); background: var(--surface); z-index: 100; overflow: auto; border-left: 1px solid var(--line); }
+        #dr .pic { height: 150px; display: grid; place-items: center; position: relative; overflow: hidden; color: var(--c); background: color-mix(in srgb,var(--c) 14%,var(--surface)); }
+        #dr .bd { padding: 20px 22px 30px; }
+        #dr h2 { font-size: 26px; font-family: var(--serif); font-weight: 600; margin: 0; }
+        #dr dl { margin: 16px 0; display: grid; grid-template-columns: 110px 1fr; gap: 8px 12px; }
+        #dr dt { color: var(--muted); }
+        #dr dd { margin: 0; }
+        #dr .x { position: absolute; right: 12px; top: 12px; width: 36px; height: 36px; border-radius: 50%; border: 0; background: var(--surface); font-size: 20px; cursor: pointer; display: grid; place-items: center; }
+        #toast { position: fixed; left: 50%; bottom: 20px; transform: translate(-50%, 30px); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 12px; opacity: 0; transition: .25s; z-index: 120; pointer-events: none; }
+        #toast.on { opacity: 1; transform: translate(-50%, 0); }
+        
+        @media (max-width: 900px) {
+          .hero, .cols, .doshas { grid-template-columns: 1fr; }
+          .search { flex-wrap: wrap; }
+          .search input { flex-basis: 100%; order: -1; }
+          kbd { display: none; }
+        }
+      `}</style>
+
+      {/* ── Main Container ── */}
+      <main style={{ padding: "22px clamp(18px,4vw,48px) 56px", maxWidth: 1180, width: "100%", margin: "0 auto" }}>
+        
+        {/* Top bar */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+          <span className="pill">Researcher panel</span>
+          <div style={{ display: "flex", gap: 10, alignItems: "center", color: "var(--muted)", fontSize: 14 }}>
+            <span>{username}</span>
+            <div style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--accent-soft)", display: "grid", placeItems: "center", fontWeight: 600, fontFamily: "var(--serif)" }}>
+              {initials}
+            </div>
+          </div>
+        </div>
+
+        {/* Decorative Diamond Band */}
+        <DiamondBand />
+
+        {/* ── HERO ── */}
+        <section className="hero">
           <div>
-            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 text-[11px] font-mono tracking-wider mb-3">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span>FOLKLORE ARCHIVE • RESEARCH PORTAL</span>
+            <div className="hello">नमस्ते, {username}</div>
+            <h1>What are you looking for today?</h1>
+            <div className="sloka">
+              <q lang="sa">स्वस्थस्य स्वास्थ्यरक्षणम् आतुरस्य विकारप्रशमनं च</q>
+              <span>To protect the health of the healthy, and to ease the illness of the sick. Charaka Samhita, Sutrasthana 30.26</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">
-              Welcome back, {username}
-            </h1>
-            <p className="text-zinc-400 text-xs sm:text-sm mt-1 max-w-xl">
-              Explore documented folk materia medica, search verified medicinal formulations, and review scientific publications.
-            </p>
-          </div>
 
-          {/* Quick Actions */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            <Link
-              href="/dashboard/data"
-              className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white shadow-sm transition-all"
-            >
-              <Database className="w-3.5 h-3.5" />
-              <span>View Repository</span>
-            </Link>
-            <Link
-              href="/dashboard/ai-search"
-              className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg bg-zinc-900 hover:bg-zinc-800 text-emerald-400 border border-zinc-800 transition-all"
-            >
-              <BrainCircuit className="w-3.5 h-3.5 text-emerald-400" />
-              <span>AI Search</span>
-            </Link>
-            <Link
-              href="/dashboard/manual-search"
-              className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 transition-all"
-            >
-              <Search className="w-3.5 h-3.5" />
-              <span>Manual Filters</span>
-            </Link>
-          </div>
-        </div>
-
-        {/* Metric Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="bg-zinc-950/70 border-zinc-800/80 hover:border-zinc-700 transition-all">
-            <CardHeader className="pb-2 pt-5 px-5">
-              <div className="flex items-center justify-between text-zinc-400">
-                <CardDescription className="text-xs uppercase tracking-wider font-mono">
-                  Total Cataloged
-                </CardDescription>
-                <Database className="w-4 h-4 text-emerald-400" />
-              </div>
-              <CardTitle className="text-3xl font-bold text-white mt-1">
-                {recordCount}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-5 pb-5">
-              <div className="text-[11px] text-zinc-400 flex items-center gap-1 font-mono">
-                <span className="text-emerald-400">Verified</span> formulations in repository
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-zinc-950/70 border-zinc-800/80 hover:border-zinc-700 transition-all">
-            <CardHeader className="pb-2 pt-5 px-5">
-              <div className="flex items-center justify-between text-zinc-400">
-                <CardDescription className="text-xs uppercase tracking-wider font-mono">
-                  Weekly Additions
-                </CardDescription>
-                <TrendingUp className="w-4 h-4 text-teal-400" />
-              </div>
-              <CardTitle className="text-3xl font-bold text-white mt-1">
-                {TotalRecordsThisWeek || 0}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-5 pb-5">
-              <div className="text-[11px] text-zinc-400 flex items-center gap-1 font-mono">
-                <span className="text-teal-400">Active</span> documentation pace
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-zinc-950/70 border-zinc-800/80 hover:border-zinc-700 transition-all">
-            <CardHeader className="pb-2 pt-5 px-5">
-              <div className="flex items-center justify-between text-zinc-400">
-                <CardDescription className="text-xs uppercase tracking-wider font-mono">
-                  Recent Entries
-                </CardDescription>
-                <Leaf className="w-4 h-4 text-emerald-400" />
-              </div>
-              <CardTitle className="text-3xl font-bold text-white mt-1">
-                {records.length}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-5 pb-5">
-              <div className="text-[11px] text-zinc-400 flex items-center gap-1 font-mono">
-                Viewing newest archive additions
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-zinc-950/70 border-zinc-800/80 hover:border-zinc-700 transition-all">
-            <CardHeader className="pb-2 pt-5 px-5">
-              <div className="flex items-center justify-between text-zinc-400">
-                <CardDescription className="text-xs uppercase tracking-wider font-mono">
-                  Source Origins
-                </CardDescription>
-                <Layers className="w-4 h-4 text-amber-400" />
-              </div>
-              <CardTitle className="text-3xl font-bold text-white mt-1">
-                4 Taxa
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-5 pb-5">
-              <div className="text-[11px] text-zinc-400 font-mono">
-                Plant · Organic · Mineral · Oral
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Activity Chart & Repository Distribution */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Weekly Activity Bar Chart */}
-          <Card className="bg-zinc-950/60 border-zinc-800/80 lg:col-span-2">
-            <CardHeader className="pb-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-base font-semibold text-white">
-                    Documentation Timeline
-                  </CardTitle>
-                  <CardDescription className="text-xs text-zinc-400 mt-0.5">
-                    Records indexed across the past seven days
-                  </CardDescription>
-                </div>
-                <Badge variant="outline" className="border-zinc-800 text-zinc-400 text-[10px] font-mono">
-                  WEEKLY CADENCE
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[220px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData}>
-                    <XAxis
-                      dataKey="name"
-                      stroke="#52525b"
-                      fontSize={11}
-                      tickLine={false}
-                      axisLine={{ stroke: "#27272a" }}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#09090b",
-                        border: "1px solid #27272a",
-                        borderRadius: "8px",
-                        fontSize: "12px",
-                      }}
-                      labelStyle={{ color: "#e4e4e7" }}
-                      itemStyle={{ color: "#34d399" }}
-                    />
-                    <Bar
-                      dataKey="records"
-                      fill="#059669"
-                      radius={[4, 4, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Metrics & Discovery Pill */}
-          <div className="space-y-4 flex flex-col justify-between">
-            <Card className="bg-zinc-950/60 border-zinc-800/80 p-5 flex-1 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-mono uppercase text-zinc-400">
-                    Repository Insight
-                  </span>
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                </div>
-                <h3 className="text-sm font-medium text-white mb-1">
-                  Peak Contribution Day
-                </h3>
-                <p className="text-xs text-zinc-400 mb-4">
-                  {mostActiveDayOfTheWeek
-                    ? `${mostActiveDayOfTheWeek} saw the highest documentation activity.`
-                    : "Consistent documentation across all active periods."}
-                </p>
-                <div className="w-full bg-zinc-900 rounded-full h-1.5 mb-2 overflow-hidden">
-                  <div
-                    className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min(100, Math.max(15, mostActivePercentage))}%` }}
-                  />
-                </div>
-                <div className="flex justify-between text-[11px] font-mono text-zinc-400">
-                  <span>Frequency ratio</span>
-                  <span className="text-emerald-400">{Math.round(mostActivePercentage)}%</span>
-                </div>
-              </div>
-
-              {/* Direct Portal Link */}
-              <div className="pt-4 border-t border-zinc-900 mt-4">
-                <Link
-                  href="/dashboard/ai-search"
-                  className="flex items-center justify-between text-xs text-zinc-300 hover:text-emerald-400 transition-colors group"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <BrainCircuit className="w-3.5 h-3.5 text-emerald-400" />
-                    Query repository with AI
-                  </span>
-                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </div>
-            </Card>
-          </div>
-        </div>
-
-        {/* Recent Formulations List */}
-        <Card className="bg-zinc-950/60 border-zinc-800/80 overflow-hidden">
-          <CardHeader className="border-b border-zinc-900 pb-4 pt-5 px-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-base font-semibold text-white">
-                  Recently Cataloged Formulations
-                </CardTitle>
-                <CardDescription className="text-xs text-zinc-400 mt-0.5">
-                  Latest entries indexed into the folk medicine archive
-                </CardDescription>
-              </div>
-              <Link
-                href="/dashboard/data"
-                className="inline-flex items-center gap-1.5 text-xs font-mono text-emerald-400 hover:text-emerald-300 transition-colors"
-              >
-                <span>View Full Index</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          </CardHeader>
-
-          <CardContent className="p-0">
-            <div className="divide-y divide-zinc-900">
-              {records.length > 0 ? (
-                records.map((record: drug) => (
-                  <Link
-                    key={record.id}
-                    href="/dashboard/data"
-                    className="p-4 sm:px-6 hover:bg-zinc-900/40 transition-colors flex items-center justify-between group block"
+            {/* Search Box */}
+            <div className="searchwrap">
+              <div className="search" role="search">
+                <Icon id="search" size={20} />
+                <input
+                  id="user-q"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoComplete="off"
+                  placeholder='Try “fever”, “Triphala” or “Vata”'
+                  aria-label="Search formulations"
+                />
+                <kbd>/</kbd>
+                <div className="seg" role="group" aria-label="Search mode">
+                  <button
+                    aria-pressed={searchMode === "ai"}
+                    onClick={() => setSearchMode("ai")}
                   >
-                    <div className="flex items-center space-x-3.5 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-950/60 border border-emerald-900/50 flex items-center justify-center text-emerald-400 shrink-0">
-                        <Leaf className="w-4 h-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <h4 className="text-sm font-medium text-zinc-200 group-hover:text-emerald-400 transition-colors truncate">
-                          {record.primary_name || "Untitled Botanical Record"}
-                        </h4>
-                        <div className="flex items-center gap-2 text-[11px] text-zinc-400 font-mono mt-0.5">
-                          <span>Cataloged: {formatDate(record.created_at)}</span>
-                          {record.source_type && (
-                            <>
-                              <span>•</span>
-                              <span className="text-zinc-400 uppercase">
-                                {record.source_type}
-                              </span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-xs font-mono text-zinc-400 group-hover:text-zinc-300 hidden sm:inline">
-                        View Folio
-                      </span>
-                      <ArrowRight className="w-3.5 h-3.5 text-zinc-600 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" />
-                    </div>
-                  </Link>
-                ))
-              ) : (
-                <div className="p-12 text-center text-zinc-500 space-y-3">
-                  <p className="text-sm">No formulations cataloged yet.</p>
-                  <Link
-                    href="/dashboard/manual-search"
-                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white transition-all"
+                    Ask AI
+                  </button>
+                  <button
+                    aria-pressed={searchMode === "filters"}
+                    onClick={() => setSearchMode("filters")}
                   >
-                    <Search className="w-3.5 h-3.5" />
-                    Explore Repository Search
-                  </Link>
+                    Filters
+                  </button>
+                </div>
+              </div>
+
+              {/* Suggestions Dropdown */}
+              {searchQuery.trim().length > 0 && (
+                <div id="sug">
+                  {suggestions.length > 0 ? (
+                    suggestions.map((item, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          setActiveDrawerItem(item);
+                          setSearchQuery("");
+                        }}
+                      >
+                        <Icon id={item.form} size={22} />
+                        <span>
+                          <b>{item.n}</b> <small>{item.use} · {item.d.join(", ")}</small>
+                        </span>
+                      </button>
+                    ))
+                  ) : (
+                    <p>No match for “{searchQuery}”. Try an ingredient, a use or a dosha.</p>
+                  )}
                 </div>
               )}
             </div>
-          </CardContent>
-        </Card>
+
+            {/* Popular Search Chips */}
+            <div className="chips">
+              Popular:{" "}
+              {["Digestive", "Memory", "Joint pain", "Vitality"].map((chip) => (
+                <button
+                  key={chip}
+                  onClick={() => setSearchQuery(chip)}
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Lotus Mandala */}
+          <LotusMandala />
+        </section>
+
+        {/* ── Browse by Dosha ── */}
+        <h2 className="sec">Browse by dosha</h2>
+        <p className="sub">The three humours of Ayurveda. Pick one to see formulations that balance it.</p>
+        <div className="doshas">
+          {Object.keys(DOSHAS).map((key) => {
+            const d = DOSHAS[key];
+            const count = formulations.filter((f) => f.d.includes(key)).length;
+            const isSelected = selectedDosha === key;
+            return (
+              <button
+                key={key}
+                className="dosha"
+                style={{ "--c": d.c } as any}
+                aria-pressed={isSelected}
+                onClick={() => setSelectedDosha(isSelected ? null : key)}
+              >
+                <span className="orb">
+                  <Icon id={d.ic} size={28} />
+                </span>
+                <span className="dev" lang="sa">{d.dev}</span>
+                <b>
+                  {key} <small style={{ fontWeight: 400, color: "var(--muted)" }}>· {count}</small>
+                </b>
+                <span className="d">{d.el}. {d.d}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ── Filter by Source ── */}
+        <div className="srcs" role="group" aria-label="Filter by source">
+          <span style={{ alignSelf: "center", color: "var(--muted)", fontSize: "14.5px" }}>Source:</span>
+          {Object.keys(SOURCES).map((key) => {
+            const [label, icon, color] = SOURCES[key];
+            const count = formulations.filter((f) => f.src === key).length;
+            const isSelected = selectedSource === key;
+            return (
+              <button
+                key={key}
+                className="src"
+                style={{ "--c": color } as any}
+                aria-pressed={isSelected}
+                onClick={() => setSelectedSource(isSelected ? null : key)}
+              >
+                <Icon id={icon} size={18} />
+                <span>{label}</span>
+                <small>{count}</small>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ── Formulations Catalog ── */}
+        <div className="bar">
+          <div>
+            <h2 id="catalog" style={{ fontSize: 22, fontFamily: "var(--serif)", fontWeight: 600, margin: 0 }}>
+              Formulations
+            </h2>
+            <p className="sub" style={{ margin: "2px 0 0" }}>
+              Showing {filteredFormulations.length} of {formulations.length}
+              {(selectedDosha || selectedSource) && (
+                <> · {[selectedDosha, selectedSource && SOURCES[selectedSource][0]].filter(Boolean).join(", ")}</>
+              )}
+            </p>
+          </div>
+          {(selectedDosha || selectedSource || searchQuery) && (
+            <button
+              className="ghost"
+              onClick={() => {
+                setSelectedDosha(null);
+                setSelectedSource(null);
+                setSearchQuery("");
+              }}
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
+
+        {/* Formulation Grid */}
+        <div className="grid">
+          {filteredFormulations.length > 0 ? (
+            filteredFormulations.map((f, i) => {
+              const srcMeta = SOURCES[f.src] || SOURCES["plant"];
+              const color = srcMeta[2];
+              const isSaved = savedIndices.includes(i);
+
+              return (
+                <div
+                  key={f.id || i}
+                  className="fcard"
+                  style={{ "--c": color } as any}
+                  onClick={() => setActiveDrawerItem(f)}
+                >
+                  <button
+                    className="save"
+                    aria-pressed={isSaved}
+                    aria-label={`Save ${f.n}`}
+                    onClick={(e) => toggleSave(i, e)}
+                  >
+                    <Icon id="heart" size={18} />
+                  </button>
+
+                  <div className="pic">
+                    <Icon id={f.form} size={44} />
+                    <svg className="ic bgm" width="130" height="130" viewBox="0 0 24 24">
+                      {srcMeta[1] === "leaf" && <path d="M5 19C3 10 9 3 20 4c1 11-6 17-15 15zM5 19c4-6 8-9 12-11" fill="none" stroke="currentColor" strokeWidth="1.6" />}
+                      {srcMeta[1] === "hex" && <path d="M12 3l7 4v10l-7 4-7-4V7z" fill="none" stroke="currentColor" strokeWidth="1.6" />}
+                      {srcMeta[1] === "gem" && <path d="M12 3l6 6-6 12-6-12zM6 9h12M12 3v18" fill="none" stroke="currentColor" strokeWidth="1.6" />}
+                      {srcMeta[1] === "voice" && <path d="M4 5h16v10H9l-5 4z" fill="none" stroke="currentColor" strokeWidth="1.6" />}
+                    </svg>
+                  </div>
+
+                  <div className="bd">
+                    <h3>{f.n}</h3>
+                    <div className="sa" lang="sa">{f.s}</div>
+                    <div className="tags">
+                      <span className="tag">{srcMeta[0]}</span>
+                      <span className="tag">{f.use}</span>
+                      {f.d.map((dosha) => (
+                        <span key={dosha} className="tag">{dosha}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="empty" style={{ gridColumn: "1/-1" }}>
+              <b>No formulations match</b>
+              Try a different dosha or source, or clear the filters.
+            </div>
+          )}
+        </div>
+
+        {/* ── Bottom Two Columns ── */}
+        <div className="cols">
+          <div className="card">
+            <h3>Pick up where you left off</h3>
+            <div className="empty" style={{ background: savedIndices.length ? "none" : undefined, padding: savedIndices.length ? 0 : undefined }}>
+              {savedIndices.length > 0 ? (
+                <div>
+                  {savedIndices.map((idx) => {
+                    const item = formulations[idx];
+                    if (!item) return null;
+                    return (
+                      <button
+                        key={idx}
+                        className="ghost"
+                        style={{ margin: "0 6px 6px 0", fontSize: 14 }}
+                        onClick={() => setActiveDrawerItem(item)}
+                      >
+                        {item.n}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <>
+                  <b>Nothing saved yet</b>Tap the heart on any formulation to keep it here.
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="card quote">
+            <Icon id="book" size={44} className="ic" />
+            <div>
+              <h3 style={{ marginBottom: 4 }}>Archive at a glance</h3>
+              <span style={{ color: "var(--muted)" }}>
+                {recordCount || formulations.length} verified formulations from 4 source types. A timeline will appear after 30 days of entries.
+              </span>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* ── Detail Drawer Modal ── */}
+      {activeDrawerItem && (
+        <>
+          <div id="scrim" onClick={() => setActiveDrawerItem(null)} />
+          <aside
+            id="dr"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Formulation details"
+            style={{ "--c": SOURCES[activeDrawerItem.src][2] } as any}
+          >
+            <div className="pic">
+              <Icon id={activeDrawerItem.form} size={64} />
+              <button
+                className="x"
+                aria-label="Close"
+                onClick={() => setActiveDrawerItem(null)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="bd">
+              <h2>{activeDrawerItem.n}</h2>
+              <div lang="sa" style={{ color: "var(--muted)", fontSize: 18 }}>
+                {activeDrawerItem.s}
+              </div>
+
+              <dl>
+                <dt>Source type</dt>
+                <dd>{SOURCES[activeDrawerItem.src][0]}</dd>
+                <dt>Used for</dt>
+                <dd>{activeDrawerItem.use}</dd>
+                <dt>Balances</dt>
+                <dd>{activeDrawerItem.d.join(", ")}</dd>
+                <dt>Ingredients</dt>
+                <dd>{activeDrawerItem.ing}</dd>
+                <dt>Reference</dt>
+                <dd>{activeDrawerItem.ref}</dd>
+                <dt>Added</dt>
+                <dd>{activeDrawerItem.when}</dd>
+              </dl>
+
+              <div style={{ display: "flex", gap: 10, marginTop: 24, flexWrap: "wrap" }}>
+                <button
+                  className="go"
+                  onClick={() => {
+                    const idx = formulations.findIndex((f) => f.n === activeDrawerItem.n);
+                    if (idx > -1) toggleSave(idx);
+                  }}
+                >
+                  {savedIndices.some((idx) => formulations[idx]?.n === activeDrawerItem.n)
+                    ? "Saved"
+                    : "Save formulation"}
+                </button>
+                <button
+                  className="ghost"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(
+                      `${activeDrawerItem.n} (${activeDrawerItem.s}). ${activeDrawerItem.ref}. Folklore Diaries Archive.`
+                    );
+                    showToast("Citation copied");
+                  }}
+                >
+                  Copy citation
+                </button>
+              </div>
+            </div>
+          </aside>
+        </>
+      )}
+
+      {/* ── Toast Element ── */}
+      <div id="toast" className={toastMessage ? "on" : ""} role="status">
+        {toastMessage}
       </div>
     </div>
   );
