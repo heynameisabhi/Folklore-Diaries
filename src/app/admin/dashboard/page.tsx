@@ -220,14 +220,6 @@ function DiamondBand() {
   );
 }
 
-type QueueItem = {
-  id: number;
-  k: "draft" | "source";
-  t: string;
-  s: string;
-  ic: string;
-};
-
 type FeedItem = {
   id: string;
   av: string;
@@ -240,13 +232,6 @@ export default function AdminDashboard() {
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  const [queue, setQueue] = useState<QueueItem[]>([
-    { id: 1, k: "draft", t: "Arjuna Kshirapaka", s: "अर्जुन क्षीरपाक", ic: "pot" },
-    { id: 2, k: "draft", t: "Guduchi Satva", s: "गुडूची सत्त्व", ic: "leaf" },
-    { id: 3, k: "source", t: "Brahmi Ghrita", s: "Add a citation", ic: "book" },
-  ]);
-
-  const [approvedCount, setApprovedCount] = useState(0);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const [feed, setFeed] = useState<FeedItem[]>([
@@ -260,34 +245,6 @@ export default function AdminDashboard() {
     setTimeout(() => {
       setToastMessage(null);
     }, 2200);
-  };
-
-  const handleQueueAction = (item: QueueItem) => {
-    setQueue((prev) => prev.filter((q) => q.id !== item.id));
-    if (item.k === "draft") {
-      setApprovedCount((c) => c + 1);
-      showToast(`Approved “${item.t}”`);
-      setFeed((prev) => [
-        {
-          id: Date.now().toString(),
-          av: "A",
-          text: <>You approved <b>{item.t}</b></>,
-          time: "Just now",
-        },
-        ...prev,
-      ]);
-    } else {
-      showToast(`Source added to “${item.t}”`);
-      setFeed((prev) => [
-        {
-          id: Date.now().toString(),
-          av: "A",
-          text: <>You updated <b>{item.t}</b></>,
-          time: "Just now",
-        },
-        ...prev,
-      ]);
-    }
   };
 
   const { data, isLoading, error } = useQuery({
@@ -308,9 +265,6 @@ export default function AdminDashboard() {
   const totalUsers = dashboardData.users.length || 4;
   const activeUsers = dashboardData.users.filter((user) => user.status === "ACTIVE").length || 4;
   const blockedUsers = dashboardData.users.filter((user) => user.status === "BLOCKED").length;
-
-  const draftsCount = queue.filter((q) => q.k === "draft").length;
-  const missingSourceCount = queue.filter((q) => q.k === "source").length;
 
   if (status === "loading" || isLoading) {
     return (
@@ -389,17 +343,7 @@ export default function AdminDashboard() {
         .ghost:hover { border-color: var(--accent); }
         h2.sec { font-size: 22px; margin: 40px 0 4px; font-family: var(--serif); font-weight: 600; }
         .sub { color: var(--muted); margin: 0 0 14px; font-size: 15px; }
-        .queue { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .task { background: var(--surface); border: 1px solid var(--line); border-left: 5px solid var(--warn); border-radius: 14px; padding: 14px 16px; text-align: left; }
-        .task.ok { border-left-color: var(--plant); }
-        .task strong { font: 600 28px/1 var(--serif); display: block; }
-        .task span { color: var(--muted); font-size: 14px; }
         .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
-        .ql { margin-top: 12px; }
-        .qrow { display: grid; grid-template-columns: 44px 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
-        .qrow:first-child { border-top: 0; }
-        .qrow .ib { width: 44px; height: 44px; border-radius: 12px; background: var(--warn-soft); color: var(--warn); display: grid; place-items: center; }
-        .qrow small { display: block; color: var(--muted); }
         .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
         .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; text-decoration: none; color: inherit; display: block; transition: border-color .2s; }
         .kpi:hover { border-color: var(--accent); }
@@ -422,7 +366,7 @@ export default function AdminDashboard() {
         #toast.on { opacity: 1; transform: translate(-50%, 0); }
         
         @media (max-width: 900px) {
-          .hero, .two, .queue { grid-template-columns: 1fr; }
+          .hero, .two { grid-template-columns: 1fr; }
           .kpis, .cats { grid-template-columns: repeat(2, 1fr); }
         }
       `}</style>
@@ -438,7 +382,7 @@ export default function AdminDashboard() {
             <div className="hello">Curator console</div>
             <h1 lang="sa">द्रव्यगुण व रसशास्त्र</h1>
             <p style={{ color: "var(--muted)", maxWidth: "50ch", margin: "10px 0 0" }}>
-              Review what needs attention, then add new formulations to the archive.
+              Explore, curate, and maintain verified traditional formulations and repository lineage.
             </p>
             <div className="cta">
               <Link href="/admin/dashboard/data/insert" className="go">
@@ -457,70 +401,13 @@ export default function AdminDashboard() {
           <LotusMandalaAdmin />
         </section>
 
-        {/* ── Needs your attention ── */}
-        <h2 className="sec">Needs your attention</h2>
-        <p className="sub">Clear these before the next archive review.</p>
-
-        <div className="queue">
-          <div className={`task ${draftsCount ? "" : "ok"}`}>
-            <strong>{draftsCount}</strong>
-            <b>Drafts to review</b>
-            <br />
-            <span>{draftsCount ? "Waiting for approval" : "All clear"}</span>
-          </div>
-
-          <div className={`task ${missingSourceCount ? "" : "ok"}`}>
-            <strong>{missingSourceCount}</strong>
-            <b>Missing a source</b>
-            <br />
-            <span>{missingSourceCount ? "Entries without a citation" : "All clear"}</span>
-          </div>
-
-          <div className={`task ${blockedUsers ? "" : "ok"}`}>
-            <strong>{blockedUsers}</strong>
-            <b>Blocked accounts</b>
-            <br />
-            <span>{blockedUsers ? `${blockedUsers} accounts blocked` : `All ${totalUsers} accounts are active`}</span>
-          </div>
-        </div>
-
-        {/* Review Queue List */}
-        <div className="card ql">
-          {queue.length > 0 ? (
-            queue.map((q) => (
-              <div key={q.id} className="qrow">
-                <div className="ib">
-                  <Icon id={q.ic} size={22} />
-                </div>
-                <div>
-                  <b>{q.t}</b>
-                  <small>
-                    {q.k === "draft" ? `${q.s} · Draft by contributor` : q.s}
-                  </small>
-                </div>
-                <button
-                  className="go"
-                  style={{ padding: "8px 14px", fontSize: 14 }}
-                  onClick={() => handleQueueAction(q)}
-                >
-                  {q.k === "draft" ? "Approve" : "Add source"}
-                </button>
-              </div>
-            ))
-          ) : (
-            <div className="empty">
-              <b>All clear</b>Nothing is waiting for review. New drafts will show up here.
-            </div>
-          )}
-        </div>
-
         {/* ── Archive health ── */}
         <h2 className="sec">Archive health</h2>
         <div className="kpis" style={{ marginTop: 12 }}>
           <Link href="/admin/dashboard/data" className="kpi">
-            <b>{(dashboardData.totalDrugs ?? 5) + approvedCount}</b>
+            <b>{dashboardData.totalDrugs ?? 5}</b>
             <span>Formulations</span>
-            <em>{approvedCount ? `+${approvedCount} just now` : "+2 this week"}</em>
+            <em>+2 this week</em>
           </Link>
 
           <Link href="/admin/dashboard/data" className="kpi">
