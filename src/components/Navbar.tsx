@@ -36,6 +36,9 @@ export function Navbar() {
 
   const isAdmin = pathname.startsWith("/admin");
   const isDashboard = pathname.startsWith("/dashboard");
+  const isAuthPage = pathname === "/sign-in" || pathname === "/forgot-password";
+
+  if (isAuthPage) return null;
 
   const themeMode = isAdmin ? "admin" : isDashboard ? "user" : "default";
 
