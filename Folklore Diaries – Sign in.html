@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Folklore Diaries – Sign in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Hind:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light;--bg:#EEF1E6;--surface:#FBFCF7;--sunk:#E3E8D8;--ink:#1B2A1F;--muted:#56655A;--line:#C3CCB6;--accent:#1F5A3D;--accent-ink:#fff;--accent-soft:#D5E6D3;--err:#B3261E;--err-soft:#F8DEDA;--serif:"Fraunces",Georgia,serif;--sans:"Hind",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#121A15;--surface:#1A241D;--sunk:#0F1612;--ink:#E7EDE0;--muted:#A3B1A5;--line:#34443A;--accent:#7CC79A;--accent-ink:#0F1A13;--accent-soft:#234331;--err:#F2928A;--err-soft:#3C1E1B}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#121A15;--surface:#1A241D;--sunk:#0F1612;--ink:#E7EDE0;--muted:#A3B1A5;--line:#34443A;--accent:#7CC79A;--accent-ink:#0F1A13;--accent-soft:#234331;--err:#F2928A;--err-soft:#3C1E1B}
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 var(--sans)}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2{font-family:var(--serif);font-weight:600;margin:0;line-height:1.15}
+.ic{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.wrap{display:grid;grid-template-columns:1.05fr 1fr;min-height:100%}
+.left{--surface:#16382A;--accent-soft:rgba(255,255,255,.07);--organic:#E8B84A;background:radial-gradient(120% 90% at 20% 10%,#2A6B4A 0%,#173D2B 55%,#0F2A1E 100%);color:#E7F1E4;padding:36px clamp(24px,5vw,64px);display:flex;flex-direction:column;justify-content:space-between;gap:20px}
+.brand{display:flex;gap:10px;align-items:center;font:600 21px var(--serif)}
+.brand .ic{color:#A9DDB9}
+.art{width:min(420px,78%);align-self:center;color:#BFE3C9}
+.sloka q{display:block;font:600 22px/1.45 var(--serif);quotes:none;max-width:24ch}
+.sloka span{display:block;margin-top:8px;color:#B7CDBB;font-size:14.5px;max-width:46ch}
+.right{display:grid;place-items:center;padding:32px 20px;position:relative}
+.card{width:100%;max-width:420px}
+.card h1{font-size:34px}
+.card .lead{color:var(--muted);margin:8px 0 26px}
+.field{margin-bottom:16px}
+.field label{display:block;font-weight:600;margin-bottom:6px;font-size:15px}
+.box{display:flex;align-items:center;gap:10px;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:0 12px;transition:border-color .15s,box-shadow .15s}
+.box:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.box .ic{color:var(--muted)}
+.box input{flex:1;min-width:0;border:0;background:none;padding:13px 0;outline:0}
+.box input::placeholder{color:var(--muted);opacity:.8}
+.field.bad .box{border-color:var(--err);box-shadow:0 0 0 3px var(--err-soft)}
+.msg{color:var(--err);font-size:14px;margin:6px 2px 0;min-height:0}
+.eye{border:0;background:none;padding:6px;border-radius:8px;color:var(--muted);display:grid;cursor:pointer}
+.eye:hover{color:var(--ink)}
+.rowx{display:flex;justify-content:space-between;align-items:center;margin:2px 0 20px;font-size:15px;gap:10px;flex-wrap:wrap}
+.rowx label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.rowx input{accent-color:var(--accent);width:17px;height:17px}
+a{color:var(--accent);font-weight:500}
+.go{width:100%;border:0;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-weight:600;padding:14px;cursor:pointer;display:flex;justify-content:center;align-items:center;gap:10px;transition:filter .15s}
+.go:hover{filter:brightness(1.08)}
+.go[disabled]{opacity:.75;cursor:progress}
+.spin{width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:r .7s linear infinite}
+@keyframes r{to{transform:rotate(360deg)}}
+.note{margin-top:22px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:14px;text-align:center}
+.ok{display:none;text-align:center}
+.ok .ic{color:var(--accent)}
+.ok h2{font-size:28px;margin:10px 0 6px}
+.ok p{color:var(--muted);margin:0 0 18px}
+.done form{display:none}.done .ok{display:block}.done .hd{display:none}
+.mini{position:absolute;top:18px;right:20px;color:var(--muted);font-size:14px}
+@media (max-width:860px){
+.wrap{grid-template-columns:1fr}
+.left{padding:20px 24px;flex-direction:row;align-items:center}
+.art,.sloka{display:none}
+.right{align-items:start;padding-top:28px}
+.mini{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation-duration:2s!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="lotus" viewBox="0 0 24 24"><path d="M12 20C8 17 7 12 12 5c5 7 4 12 0 15zM12 20C6 20 3 16 3 11c4 0 7 2 9 9zM12 20c6 0 9-4 9-9-4 0-7 2-9 9z"/></symbol>
+<symbol id="leaf" viewBox="0 0 24 24"><path d="M5 19C3 10 9 3 20 4c1 11-6 17-15 15z"/><path d="M5 19c4-6 8-9 12-11"/></symbol>
+<symbol id="drop" viewBox="0 0 24 24"><path d="M12 3c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11z"/></symbol>
+<symbol id="flame" viewBox="0 0 24 24"><path d="M12 3c3 4 5 6 5 10a5 5 0 0 1-10 0c0-2 1-3 2-5 1 1 1 2 2 2 0-3 0-5 1-7z"/></symbol>
+<symbol id="mortar" viewBox="0 0 24 24"><path d="M3 11h18a8 8 0 0 1-8 8h-2a8 8 0 0 1-8-8z"/><path d="M8 19v2h8v-2M16 3l-4.5 8"/></symbol>
+<symbol id="user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.500 3.500-7 8-7s8 2.500 8 7"/></symbol>
+<symbol id="mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+<symbol id="lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+<symbol id="eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="eyeoff" viewBox="0 0 24 24"><path d="M3 3l18 18M10.500 6.200A9 9 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3.200 3.800M6.300 6.800A17 17 0 0 0 2 12s4 7 10 7c1.600 0 3-.4 4.200-1M9.900 9.900a3 3 0 0 0 4.200 4.200"/></symbol>
+<symbol id="check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+</defs></svg>
+
+<div class="wrap">
+  <section class="left" aria-label="About Folklore Diaries">
+    <div class="brand"><svg class="ic" width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><use href="#lotus"/></svg>Folklore Diaries</div>
+    <svg class="art" id="art" viewBox="-130 -130 260 260" role="img" aria-label="Lotus mandala with leaf, water, flame and mortar"></svg>
+    <div class="sloka"><q lang="sa">स्वस्थस्य स्वास्थ्यरक्षणम् आतुरस्य विकारप्रशमनं च</q><span>A living archive of Ayurvedic formulations and the lineages that carried them. Charaka Samhita, Sutrasthana 30.26</span></div>
+  </section>
+
+  <section class="right" id="right">
+    <span class="mini">Need help? <a href="#">Contact the curator</a></span>
+    <div class="card">
+      <div class="hd">
+        <h1>Welcome back</h1>
+        <p class="lead">Sign in to continue to the Folklore Diaries archive.</p>
+      </div>
+      <form id="f" novalidate>
+        <div class="field" id="fu"><label for="u">Username</label>
+          <div class="box"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#user"/></svg><input id="u" name="username" autocomplete="username" placeholder="Your username" aria-describedby="eu"></div>
+          <div class="msg" id="eu" role="alert"></div></div>
+        <div class="field" id="fe"><label for="e">Email</label>
+          <div class="box"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#mail"/></svg><input id="e" type="email" name="email" autocomplete="email" placeholder="name@example.com" aria-describedby="ee"></div>
+          <div class="msg" id="ee" role="alert"></div></div>
+        <div class="field" id="fp"><label for="p">Password</label>
+          <div class="box"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#lock"/></svg><input id="p" type="password" name="password" autocomplete="current-password" placeholder="At least 8 characters" aria-describedby="ep"><button type="button" class="eye" id="t" aria-label="Show password" aria-pressed="false"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#eye" id="te"/></svg></button></div>
+          <div class="msg" id="ep" role="alert"></div></div>
+        <div class="rowx"><label><input type="checkbox" checked> Keep me signed in</label><a href="#">Forgot password?</a></div>
+        <button class="go" id="b" type="submit"><span id="bl">Sign in</span></button>
+      </form>
+      <div class="ok" id="ok" role="status"><svg class="ic" width="54" height="54" viewBox="0 0 24 24" aria-hidden="true"><use href="#check"/></svg><h2>Namaste, <span id="nm">user</span></h2><p>Signed in. Taking you to your panel…</p><button class="go" id="again" type="button" style="background:none;color:var(--ink);border:1px solid var(--line)">Back to sign in (preview)</button></div>
+      <p class="note">By signing in, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+var $=function(s){return document.querySelector(s)};
+(function(){
+  var p="",i,o="",a=[["leaf",0,-118],["drop",118,0],["flame",0,118],["mortar",-118,0]];
+  for(i=0;i<16;i++)p+='<path d="M0-98C-15-78-15-60 0-46 15-60 15-78 0-98z" transform="rotate('+i*22.5+')" fill="var(--accent-soft)" stroke="currentColor" stroke-width="1.2"/>';
+  for(i=0;i<8;i++)p+='<path d="M0-62C-9-50-9-40 0-30 9-40 9-50 0-62z" transform="rotate('+(i*45+22.5)+')" fill="none" stroke="var(--organic)" stroke-width="1.2"/>';
+  for(i=0;i<36;i++)p+='<circle cx="0" cy="-108" r="1.3" fill="currentColor" transform="rotate('+i*10+')"/>';
+  a.forEach(function(x){o+='<circle cx="'+x[1]+'" cy="'+x[2]+'" r="13" fill="var(--surface)" stroke="currentColor"/><svg class="ic" x="'+(x[1]-8)+'" y="'+(x[2]-8)+'" width="16" height="16" viewBox="0 0 24 24"><use href="#'+x[0]+'"/></svg>'});
+  $("#art").innerHTML='<circle r="112" fill="none" stroke="currentColor" stroke-dasharray="2 5" opacity=".6"/>'+p+'<circle r="24" fill="var(--surface)" stroke="currentColor"/><svg class="ic" x="-15" y="-15" width="30" height="30" viewBox="0 0 24 24"><use href="#lotus"/></svg>'+o;
+})();
+var rules={
+  u:[function(v){return v.length>=3},"Enter your username (at least 3 characters)."],
+  e:[function(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)},"Enter a valid email, like name@example.com."],
+  p:[function(v){return v.length>=8},"Your password needs at least 8 characters."]
+};
+function check(k){var v=$("#"+k).value.trim(),r=rules[k],bad=!r[0](k==="p"?$("#p").value:v);
+  $("#f"+(k==="u"?"u":k==="e"?"e":"p")).classList.toggle("bad",bad);
+  $("#e"+k).textContent=bad?r[1]:"";$("#"+k).setAttribute("aria-invalid",String(bad));return !bad}
+["u","e","p"].forEach(function(k){
+  var el=$("#"+k);el.addEventListener("blur",function(){if(el.value)check(k)});
+  el.addEventListener("input",function(){if($("#f"+k).classList.contains("bad"))check(k)});
+});
+$("#t").onclick=function(){var s=$("#p").type==="password";$("#p").type=s?"text":"password";
+  $("#t").setAttribute("aria-pressed",String(s));$("#t").setAttribute("aria-label",s?"Hide password":"Show password");
+  $("#te").setAttribute("href",s?"#eyeoff":"#eye")};
+$("#f").addEventListener("submit",function(ev){
+  ev.preventDefault();
+  var okAll=["u","e","p"].map(check).every(Boolean);
+  if(!okAll){var first=["u","e","p"].filter(function(k){return $("#f"+k).classList.contains("bad")})[0];$("#"+first).focus();return}
+  var b=$("#b");b.disabled=true;$("#bl").textContent="Signing in…";b.insertAdjacentHTML("afterbegin",'<i class="spin"></i>');
+  setTimeout(function(){$("#nm").textContent=$("#u").value.trim();$("#right").classList.add("done");},1100);
+});
+$("#again").onclick=function(){var b=$("#b");b.disabled=false;$("#bl").textContent="Sign in";var s=b.querySelector(".spin");if(s)s.remove();$("#f").reset();$("#right").classList.remove("done");$("#u").focus()};
+</script>
+</body>
+</html>
