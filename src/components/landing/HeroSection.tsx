@@ -138,13 +138,13 @@ export default function HeroSection() {
                   {/* Bottom Image Plaque */}
                   <div className="absolute bottom-4 left-4 right-4">
                     <p className="text-xs font-mono uppercase tracking-widest text-emerald-400">
-                      Classical Herbal Preparation
+                      Classical Herbal Medicine
                     </p>
                     <h3 className="text-sm font-medium text-white mt-0.5">
-                      Stone Kharal & Fresh Leaf Grinding (कल्क / Kalka)
+                      Traditional Brass Kharal & Herbal Processing
                     </h3>
                     <p className="text-[11px] text-zinc-400 mt-1 line-clamp-1">
-                      Traditional crushing, extraction, and fresh leaf decoctions of healing plants.
+                      Authentic compounding of therapeutic seeds, churnas, and fresh healing botanicals.
                     </p>
                   </div>
                 </div>
