@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/components/useAuth";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -24,6 +25,8 @@ import {
   FileSpreadsheet,
   Activity,
   HeartPulse,
+  Leaf,
+  Sparkles,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
@@ -89,7 +92,7 @@ export default function AdminDashboard() {
       <div className="flex flex-col items-center justify-center w-full min-h-[60vh] text-zinc-400">
         <div className="w-10 h-10 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mb-4" />
         <p className="text-xs font-mono tracking-wider uppercase text-zinc-500">
-          Loading Admin Curator Console...
+          Loading Curator Dashboard...
         </p>
       </div>
     );
@@ -121,57 +124,62 @@ export default function AdminDashboard() {
     );
   }
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }).format(date);
-  };
-
   return (
     <div className="min-h-screen bg-black text-zinc-100 p-4 sm:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto space-y-8">
-        {/* Editorial Header Banner */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-6 border-b border-zinc-900">
-          <div>
-            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 text-[11px] font-mono tracking-wider mb-3">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>CURATOR ARCHIVE CONSOLE • ELEVATED PRIVILEGES</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">
-              Archive Curator Dashboard
-            </h1>
-            <p className="text-zinc-400 text-xs sm:text-sm mt-1 max-w-xl">
-              System governance, drug ingestion pipelines, oral tradition lineages, and user access oversight.
-            </p>
+        {/* Editorial Curator Banner with Authentic Parchment Painting Backdrop */}
+        <div className="relative rounded-2xl border border-zinc-800 bg-zinc-950 overflow-hidden shadow-2xl">
+          {/* Background Heritage Painting Banner */}
+          <div className="absolute inset-0 opacity-20 pointer-events-none">
+            <Image
+              src="/images/ayurvedic-preparation-art.jpg"
+              alt="Classical Ayurvedic herbal preparation painting"
+              fill
+              className="object-cover object-right"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/90 to-black/60" />
           </div>
 
-          {/* Quick Actions */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            <Link
-              href="/admin/dashboard/data/insert"
-              className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white shadow-sm transition-all"
-            >
-              <PlusCircle className="w-3.5 h-3.5" />
-              <span>Ingest Formulations</span>
-            </Link>
-            <Link
-              href="/admin/dashboard/data"
-              className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-800 transition-all"
-            >
-              <Database className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Manage Repository</span>
-            </Link>
-            <Link
-              href="/admin/dashboard/generate-report"
-              className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 transition-all"
-            >
-              <FileText className="w-3.5 h-3.5 text-blue-400" />
-              <span>Export Report</span>
-            </Link>
+          <div className="relative z-10 p-6 sm:p-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full border border-emerald-900/60 bg-emerald-950/40 text-emerald-400 text-[11px] font-mono tracking-wider mb-3">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <span>CURATOR ARCHIVE CONSOLE • ELEVATED PRIVILEGES</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight text-white">
+                द्रव्यगुण व रसशास्त्र • Curator Console
+              </h1>
+              <p className="text-zinc-400 text-xs sm:text-sm mt-2 leading-relaxed">
+                Overseeing traditional Ayurvedic materia medica, multi-source drug ingestions,
+                classical formulation pipelines, and lineage practitioner records.
+              </p>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+              <Link
+                href="/admin/dashboard/data/insert"
+                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white shadow-sm transition-all"
+              >
+                <PlusCircle className="w-3.5 h-3.5" />
+                <span>Ingest Formulation</span>
+              </Link>
+              <Link
+                href="/admin/dashboard/data"
+                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-800 transition-all"
+              >
+                <Database className="w-3.5 h-3.5 text-emerald-400" />
+                <span>View Database</span>
+              </Link>
+              <Link
+                href="/admin/dashboard/generate-report"
+                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 transition-all"
+              >
+                <FileText className="w-3.5 h-3.5 text-blue-400" />
+                <span>Export Report</span>
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -268,6 +276,165 @@ export default function AdminDashboard() {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Visual Reference Gallery: Authentic Ayurvedic Formulations & Materia Medica */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-semibold text-white">
+                Materia Medica Visual Catalog
+              </h2>
+              <p className="text-xs text-zinc-400">
+                Authentic photographic references of Ayurvedic preparations, plant organs, and therapeutic formulations
+              </p>
+            </div>
+            <Link
+              href="/admin/dashboard/data"
+              className="text-xs font-mono text-emerald-400 hover:text-emerald-300 transition-colors inline-flex items-center gap-1"
+            >
+              <span>Manage Entire Index</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Card 1: Fresh Grinding & Kalka */}
+            <div
+              onClick={() => router.push("/admin/dashboard/data")}
+              className="group rounded-xl border border-zinc-850 hover:border-zinc-700 bg-zinc-950 overflow-hidden cursor-pointer transition-all flex flex-col"
+            >
+              <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-900">
+                <Image
+                  src="/images/ayurvedic-stone-mortar.jpg"
+                  alt="Stone Kharal with fresh green herbal leaves and churnas"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 25vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+                <span className="absolute top-2.5 right-2.5 text-[10px] font-mono px-2 py-0.5 rounded bg-black/70 backdrop-blur-md text-emerald-400 border border-white/10">
+                  KALKA / कल्क
+                </span>
+              </div>
+              <div className="p-4 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-white group-hover:text-emerald-400 transition-colors">
+                    Stone Kharal & Fresh Herbs
+                  </h3>
+                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                    Freshly crushed neem, holy basil, whole cumin, and mineral churnas for topical pastes and extracts.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2.5 border-t border-zinc-900 text-[11px] font-mono text-zinc-400 flex items-center justify-between">
+                  <span>Plant origin taxonomy</span>
+                  <ArrowRight className="w-3 h-3 text-zinc-600 group-hover:text-emerald-400" />
+                </div>
+              </div>
+            </div>
+
+            {/* Card 2: Compounding & Classical Churna */}
+            <div
+              onClick={() => router.push("/admin/dashboard/data/insert")}
+              className="group rounded-xl border border-zinc-850 hover:border-zinc-700 bg-zinc-950 overflow-hidden cursor-pointer transition-all flex flex-col"
+            >
+              <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-900">
+                <Image
+                  src="/images/turmeric-medicine.jpg"
+                  alt="Raw turmeric rhizome and pure Haridra powder"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 25vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+                <span className="absolute top-2.5 right-2.5 text-[10px] font-mono px-2 py-0.5 rounded bg-black/70 backdrop-blur-md text-amber-400 border border-white/10">
+                  CHURNA / चूर्ण
+                </span>
+              </div>
+              <div className="p-4 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-white group-hover:text-amber-400 transition-colors">
+                    Rhizomes & Sun-Dried Churnas
+                  </h3>
+                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                    Therapeutic golden Haridra powder, raw rhizomes, and pulverized roots compounded for systemic formulas.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2.5 border-t border-zinc-900 text-[11px] font-mono text-zinc-400 flex items-center justify-between">
+                  <span>Ingest new churna</span>
+                  <ArrowRight className="w-3 h-3 text-zinc-600 group-hover:text-amber-400" />
+                </div>
+              </div>
+            </div>
+
+            {/* Card 3: Medicated Taila & Kashayam */}
+            <div
+              onClick={() => router.push("/admin/dashboard/data")}
+              className="group rounded-xl border border-zinc-850 hover:border-zinc-700 bg-zinc-950 overflow-hidden cursor-pointer transition-all flex flex-col"
+            >
+              <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-900">
+                <Image
+                  src="/images/herbal-oil-taila.jpg"
+                  alt="Amber bottle with medicated herbal oil and dried herbs"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 25vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+                <span className="absolute top-2.5 right-2.5 text-[10px] font-mono px-2 py-0.5 rounded bg-black/70 backdrop-blur-md text-teal-400 border border-white/10">
+                  TAILA / तैल
+                </span>
+              </div>
+              <div className="p-4 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-white group-hover:text-teal-400 transition-colors">
+                    Medicated Tailas & Decoctions
+                  </h3>
+                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                    Infused herbal oils and water decoctions prepared through classical paka heat extraction cycles.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2.5 border-t border-zinc-900 text-[11px] font-mono text-zinc-400 flex items-center justify-between">
+                  <span>Browse preparations</span>
+                  <ArrowRight className="w-3 h-3 text-zinc-600 group-hover:text-teal-400" />
+                </div>
+              </div>
+            </div>
+
+            {/* Card 4: Oral Healer Parampara & Lineages */}
+            <div
+              onClick={() => router.push("/admin/dashboard/data")}
+              className="group rounded-xl border border-zinc-850 hover:border-zinc-700 bg-zinc-950 overflow-hidden cursor-pointer transition-all flex flex-col"
+            >
+              <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-900">
+                <Image
+                  src="/images/ayurvedic-tree-lineage.jpg"
+                  alt="Tree of classical Ayurvedic and yogic disciplines"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 25vw"
+                  className="object-contain p-2 bg-white/95 group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+                <span className="absolute top-2.5 right-2.5 text-[10px] font-mono px-2 py-0.5 rounded bg-black/70 backdrop-blur-md text-amber-300 border border-white/10">
+                  PARAMPARA / परम्परा
+                </span>
+              </div>
+              <div className="p-4 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-white group-hover:text-amber-400 transition-colors">
+                    Healing Tree & Guru Lineages
+                  </h3>
+                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                    Oral guru-shishya paramparas, regional folk healer lineages, and traditional practice duration audits.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2.5 border-t border-zinc-900 text-[11px] font-mono text-zinc-400 flex items-center justify-between">
+                  <span>Contributor lineages</span>
+                  <ArrowRight className="w-3 h-3 text-zinc-600 group-hover:text-amber-400" />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Activity Chart & Curator Action Center */}
@@ -389,7 +556,7 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        {/* Recent Registered Users Feed */}
+        {/* Registered Users Feed */}
         <Card className="bg-zinc-950/60 border-zinc-800/80 overflow-hidden">
           <CardHeader className="border-b border-zinc-900 pb-4 pt-5 px-6">
             <div className="flex items-center justify-between">
