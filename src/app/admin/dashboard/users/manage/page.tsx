@@ -126,23 +126,100 @@ export default function ManageUsersPage() {
   });
 
   return (
-    <div className="flex flex-col gap-4 pt-20 text-zinc-400 px-4">
-      <h1 className="text-2xl font-bold">Manage Users</h1>
+    <div
+      style={{
+        ["--mup-bg" as any]: "#F3EEE0",
+        ["--mup-surface" as any]: "#FDFBF4",
+        ["--mup-sunk" as any]: "#EAE2CC",
+        ["--mup-line" as any]: "#D9CFB3",
+        ["--mup-accent" as any]: "#8A5A00",
+        ["--mup-accent-soft" as any]: "#F3E3B8",
+        ["--mup-ink" as any]: "#1B2A1F",
+        ["--mup-muted" as any]: "#56655A",
+        color: "var(--mup-ink)",
+      }}
+      className="mup-scope flex flex-col gap-5 pt-4 sm:pt-8 px-4 sm:px-6 pb-20 max-w-6xl mx-auto h-full overflow-y-auto"
+    >
+      <style>{`
+        .mup-scope {
+          color: var(--mup-ink) !important;
+        }
+        .mup-scope [data-slot="card"],
+        .mup-scope .bg-card,
+        .mup-scope [class*="bg-zinc-9"] {
+          background-color: var(--mup-surface) !important;
+          border-color: var(--mup-line) !important;
+          color: var(--mup-ink) !important;
+        }
+        .mup-scope [class*="bg-zinc-8"],
+        .mup-scope [class*="bg-zinc-7"] {
+          background-color: var(--mup-sunk) !important;
+          border-color: var(--mup-line) !important;
+          color: var(--mup-ink) !important;
+        }
+        .mup-scope [class*="border-zinc-"] {
+          border-color: var(--mup-line) !important;
+        }
+        .mup-scope .text-white,
+        .mup-scope [class*="text-zinc-1"],
+        .mup-scope [class*="text-zinc-2"],
+        .mup-scope [class*="text-zinc-3"] {
+          color: var(--mup-ink) !important;
+        }
+        .mup-scope [class*="text-zinc-4"],
+        .mup-scope [class*="text-zinc-5"] {
+          color: var(--mup-muted) !important;
+        }
+        .mup-scope input {
+          background-color: #FFFFFF !important;
+          border-color: var(--mup-line) !important;
+          color: var(--mup-ink) !important;
+        }
+        .mup-scope table,
+        .mup-scope th,
+        .mup-scope td {
+          border-color: var(--mup-line) !important;
+          color: var(--mup-ink) !important;
+        }
+        .mup-scope thead,
+        .mup-scope thead tr,
+        .mup-scope .bg-zinc-800 {
+          background-color: var(--mup-sunk) !important;
+        }
+        .mup-scope tr:hover {
+          background-color: var(--mup-bg) !important;
+        }
+        .mup-scope .fixed.inset-0.z-50 {
+          background-color: rgba(27, 42, 31, 0.45) !important;
+        }
+      `}</style>
 
-      <Card className="bg-zinc-900 border-zinc-800 text-white">
-        <CardHeader>
-          <CardTitle>Users List</CardTitle>
-          <CardDescription className="text-zinc-400">
+      <div>
+        <h1
+          style={{ fontFamily: '"Fraunces", Georgia, serif', color: "var(--mup-ink)" }}
+          className="text-2xl sm:text-3xl font-semibold tracking-tight"
+        >
+          User Access Governance
+        </h1>
+        <p style={{ color: "var(--mup-muted)" }} className="text-xs sm:text-sm mt-0.5">
+          Review, activate, block, or delete system accounts in the Folklore Diaries repository.
+        </p>
+      </div>
+
+      <Card className="bg-[#FDFBF4] border border-[#D9CFB3] text-[#1B2A1F] shadow-xs rounded-2xl">
+        <CardHeader className="border-b border-[#D9CFB3] pb-4">
+          <CardTitle className="font-serif font-bold text-xl text-[#1B2A1F]">Users List</CardTitle>
+          <CardDescription className="text-[#56655A]">
             Manage existing users in the system.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-6">
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-zinc-500" />
+              <Search className="absolute left-3 top-3 h-4 w-4 text-[#56655A]" />
               <Input
                 placeholder="Search by name or ID..."
-                className="bg-zinc-800 border-zinc-700 pl-9"
+                className="bg-white border-[#D9CFB3] text-[#1B2A1F] placeholder:text-[#56655A] pl-9 rounded-xl"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -152,7 +229,7 @@ export default function ManageUsersPage() {
               <Button
                 onClick={() => syncUsers()}
                 disabled={isSyncing}
-                className="flex items-center gap-2 bg-zinc-800 border border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white cursor-pointer"
+                className="flex items-center gap-2 bg-white border border-[#D9CFB3] text-[#1B2A1F] hover:bg-[#EAE2CC] rounded-xl cursor-pointer shadow-xs"
                 title="Sync users from Supabase Auth to DB"
               >
                 <RefreshCw
@@ -170,13 +247,13 @@ export default function ManageUsersPage() {
             </div>
           ) : (
             <Table>
-              <TableHeader className="bg-zinc-800">
-                <TableRow className="border-zinc-700 hover:bg-zinc-800">
-                  <TableHead className="text-zinc-400">Name</TableHead>
-                  <TableHead className="text-zinc-400">Email</TableHead>
-                  <TableHead className="text-zinc-400">Role</TableHead>
-                  <TableHead className="text-zinc-400">Status</TableHead>
-                  <TableHead className="text-zinc-400 text-right">
+              <TableHeader className="bg-[#EAE2CC]">
+                <TableRow className="border-[#D9CFB3] hover:bg-[#EAE2CC]">
+                  <TableHead className="text-[#1B2A1F] font-semibold">Name</TableHead>
+                  <TableHead className="text-[#1B2A1F] font-semibold">Email</TableHead>
+                  <TableHead className="text-[#1B2A1F] font-semibold">Role</TableHead>
+                  <TableHead className="text-[#1B2A1F] font-semibold">Status</TableHead>
+                  <TableHead className="text-[#1B2A1F] font-semibold text-right">
                     Actions
                   </TableHead>
                 </TableRow>
@@ -184,7 +261,7 @@ export default function ManageUsersPage() {
               <TableBody>
                 {filteredUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-zinc-500">
+                    <TableCell colSpan={5} className="text-center py-8 text-[#56655A]">
                       No users found.
                     </TableCell>
                   </TableRow>
@@ -192,17 +269,17 @@ export default function ManageUsersPage() {
                   filteredUsers.map((user) => (
                     <TableRow
                       key={user.id}
-                      className="border-zinc-700 hover:bg-zinc-800"
+                      className="border-[#D9CFB3] hover:bg-[#F3EEE0]/60"
                     >
-                      <TableCell>{user.name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>{user.role}</TableCell>
+                      <TableCell className="font-medium text-[#1B2A1F]">{user.name}</TableCell>
+                      <TableCell className="text-[#56655A]">{user.email}</TableCell>
+                      <TableCell className="text-[#1B2A1F] font-medium">{user.role}</TableCell>
                       <TableCell>
                         <span
-                          className={`px-2 py-1 rounded-full text-xs ${
+                          className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                             user.status === "ACTIVE"
-                              ? "bg-emerald-900/30 text-emerald-400"
-                              : "bg-red-900/30 text-red-400"
+                              ? "bg-[#D5E6D3] text-[#3F7A4B] border border-[#3F7A4B]/30"
+                              : "bg-[#F6E2CF] text-[#B4531A] border border-[#B4531A]/30"
                           }`}
                         >
                           {user.status}
@@ -212,10 +289,10 @@ export default function ManageUsersPage() {
                         <Button
                           variant="ghost"
                           className={cn(
-                            "cursor-pointer",
+                            "cursor-pointer rounded-lg text-xs font-semibold",
                             user.status === "ACTIVE"
-                              ? "bg-red-900/30 text-red-400"
-                              : "bg-emerald-900/30 text-emerald-400"
+                              ? "bg-[#F6E2CF] text-[#B4531A] hover:bg-[#B4531A] hover:text-white"
+                              : "bg-[#D5E6D3] text-[#3F7A4B] hover:bg-[#3F7A4B] hover:text-white"
                           )}
                           onClick={() => {
                             setSelectedUser(user);
@@ -227,7 +304,7 @@ export default function ManageUsersPage() {
                         </Button>
                         <Button
                           variant="ghost"
-                          className="bg-red-950 text-red-500 hover:bg-red-900 hover:text-red-400 cursor-pointer p-2"
+                          className="bg-[#F6E2CF] text-[#B4531A] hover:bg-[#B4531A] hover:text-white cursor-pointer p-2 rounded-lg"
                           onClick={() => {
                             setSelectedUser(user);
                             setPopupType("DELETE");
@@ -248,23 +325,24 @@ export default function ManageUsersPage() {
       </Card>
 
       {isPopupOpen && selectedUser && popupType && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-50">
-          <div className="bg-zinc-900 p-10 rounded-lg text-white w-100">
-            <h2 className="text-xl font-bold mb-4">
+        <div className="fixed inset-0 flex items-center justify-center bg-[rgba(27,42,31,0.5)] backdrop-blur-xs p-4 z-50 animate-in fade-in duration-150">
+          <div className="bg-[#FDFBF4] border border-[#D9CFB3] p-6 rounded-2xl text-[#1B2A1F] max-w-md w-full shadow-2xl">
+            <h2 className="text-xl font-serif font-bold mb-3 text-[#1B2A1F]">
               {popupType === "STATUS" ? "Confirm Status Change" : "Confirm Delete User"}
             </h2>
-            <p>
+            <p className="text-sm text-[#56655A]">
               Are you sure you want to {popupType === "STATUS" ? "change status of" : "permanently delete"}{" "}
-              <b>{selectedUser.name}</b>?
+              <b className="text-[#1B2A1F]">{selectedUser.name}</b>?
             </p>
             {popupType === "DELETE" && (
-              <p className="text-sm text-red-400 mt-2">
+              <p className="text-xs text-[#B4531A] bg-[#F6E2CF]/60 p-3 rounded-xl border border-[#F6E2CF] mt-3">
                 This will completely remove them from the database and they will no longer be able to log in.
               </p>
             )}
-            <div className="mt-4 flex justify-end gap-2">
+            <div className="mt-5 flex justify-end gap-2">
               <Button
-                className="bg-red-900/30 text-red-400 hover:bg-red-700 cursor-pointer"
+                variant="outline"
+                className="border-[#D9CFB3] bg-white text-[#1B2A1F] hover:bg-[#EAE2CC] rounded-xl cursor-pointer"
                 onClick={() => {
                   setIsPopupOpen(false);
                   setPopupType(null);
@@ -273,7 +351,7 @@ export default function ManageUsersPage() {
                 Cancel
               </Button>
               <Button
-                className="bg-emerald-900/30 text-emerald-400 hover:bg-emerald-700 cursor-pointer"
+                className="bg-[#B4531A] text-white hover:opacity-90 rounded-xl cursor-pointer shadow-xs"
                 onClick={() => {
                   if (popupType === "STATUS") {
                     toggleUserStatus.mutate(selectedUser);

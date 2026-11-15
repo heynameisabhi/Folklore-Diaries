@@ -195,7 +195,7 @@ export default function GenerateReport() {
                     <h2 className="text-2xl font-bold text-red-500 mb-2">
                         Access Denied
                     </h2>
-                    <p className="text-zinc-400">Please log in to access this page.</p>
+                    <p className="text-[#56655A]">Please log in to access this page.</p>
                 </div>
             </div>
         );
@@ -214,38 +214,99 @@ export default function GenerateReport() {
         checked: boolean;
         onChange: (checked: boolean) => void;
     }) => (
-        <div className="flex items-start space-x-3">
+        <div className="flex items-start space-x-3 p-1.5 rounded-lg hover:bg-[#EAE2CC]/30 transition-colors">
             <Checkbox
                 id={id}
                 checked={checked}
                 onCheckedChange={onChange}
-                className="mt-0.5"
+                className="mt-0.5 border-[#D9CFB3] data-[state=checked]:bg-[#8A5A00] data-[state=checked]:border-[#8A5A00]"
             />
             <div className="flex-1">
-                <label htmlFor={id} className="text-sm font-medium text-zinc-200 cursor-pointer">
+                <label htmlFor={id} className="text-sm font-semibold text-[#1B2A1F] cursor-pointer block">
                     {label}
                 </label>
-                <p className="text-xs text-zinc-400 mt-0.5">{description}</p>
+                <p className="text-xs text-[#56655A] mt-0.5">{description}</p>
             </div>
         </div>
     );
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-black to-zinc-900 text-zinc-100 p-6">
+        <div
+            style={{
+                ["--grp-bg" as any]: "#F3EEE0",
+                ["--grp-surface" as any]: "#FDFBF4",
+                ["--grp-sunk" as any]: "#EAE2CC",
+                ["--grp-line" as any]: "#D9CFB3",
+                ["--grp-accent" as any]: "#8A5A00",
+                ["--grp-accent-soft" as any]: "#F3E3B8",
+                ["--grp-ink" as any]: "#1B2A1F",
+                ["--grp-muted" as any]: "#56655A",
+                color: "var(--grp-ink)",
+            }}
+            className="grp-scope min-h-screen p-4 sm:p-6 pb-24 overflow-y-auto"
+        >
+            <style>{`
+                .grp-scope {
+                    background-color: var(--grp-bg);
+                    color: var(--grp-ink) !important;
+                }
+                .grp-scope [data-slot="card"],
+                .grp-scope .bg-card,
+                .grp-scope [class*="bg-zinc-9"],
+                .grp-scope .bg-zinc-950 {
+                    background-color: var(--grp-surface) !important;
+                    border-color: var(--grp-line) !important;
+                    color: var(--grp-ink) !important;
+                }
+                .grp-scope [class*="bg-zinc-8"] {
+                    background-color: var(--grp-sunk) !important;
+                    border-color: var(--grp-line) !important;
+                    color: var(--grp-ink) !important;
+                }
+                .grp-scope [class*="border-zinc-"] {
+                    border-color: var(--grp-line) !important;
+                }
+                .grp-scope .text-white,
+                .grp-scope [class*="text-zinc-1"],
+                .grp-scope [class*="text-zinc-2"],
+                .grp-scope .text-gray-200 {
+                    color: var(--grp-ink) !important;
+                }
+                .grp-scope [class*="text-zinc-4"],
+                .grp-scope [class*="text-zinc-5"] {
+                    color: var(--grp-muted) !important;
+                }
+                .grp-scope button.bg-emerald-600,
+                .grp-scope button.bg-emerald-700 {
+                    background-color: var(--grp-accent) !important;
+                    color: #ffffff !important;
+                }
+                .grp-scope select,
+                .grp-scope button[role="combobox"] {
+                    background-color: #FFFFFF !important;
+                    border-color: var(--grp-line) !important;
+                    color: var(--grp-ink) !important;
+                }
+            `}</style>
             <div className="max-w-6xl mx-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between mb-8 pb-4 border-b border-[var(--grp-line)]">
                     <div className="flex items-center gap-4">
                         <Button
                             variant="ghost"
                             onClick={() => router.back()}
-                            className="text-zinc-400 bg-zinc-800 hover:text-white hover:bg-zinc-700 transition-colors cursor-pointer"
+                            className="transition-colors cursor-pointer"
+                            style={{
+                                background: "var(--grp-surface)",
+                                border: "1px solid var(--grp-line)",
+                                color: "var(--grp-ink)",
+                            }}
                         >
                             <ArrowLeft className="w-5 h-5" />
                         </Button>
                         <div>
-                            <h1 className="text-2xl font-semibold text-gray-200">Generate Custom Report</h1>
-                            <p className="text-zinc-400 mt-1">Export detailed PDF reports from the Folklore Diaries repository</p>
+                            <h1 style={{ fontFamily: '"Fraunces", Georgia, serif', color: "var(--grp-ink)" }} className="text-2xl font-semibold">Generate Custom Report</h1>
+                            <p style={{ color: "var(--grp-muted)" }} className="text-sm mt-1">Export detailed PDF reports from the Folklore Diaries repository</p>
                         </div>
                     </div>
 
@@ -254,7 +315,7 @@ export default function GenerateReport() {
                             variant="outline"
                             size="sm"
                             onClick={selectAllOptions}
-                            className="border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800 cursor-pointer text-xs"
+                            className="border border-[#D9CFB3] bg-white text-[#1B2A1F] hover:bg-[#EAE2CC] cursor-pointer text-xs rounded-xl shadow-xs font-medium"
                         >
                             Select All
                         </Button>
@@ -262,7 +323,7 @@ export default function GenerateReport() {
                             variant="outline"
                             size="sm"
                             onClick={resetToDefaults}
-                            className="border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800 cursor-pointer text-xs"
+                            className="border border-[#D9CFB3] bg-white text-[#1B2A1F] hover:bg-[#EAE2CC] cursor-pointer text-xs rounded-xl shadow-xs font-medium"
                         >
                             <RotateCcw className="w-3.5 h-3.5 mr-1" />
                             Defaults
@@ -274,13 +335,13 @@ export default function GenerateReport() {
                     {/* Report Options */}
                     <div className="lg:col-span-2 space-y-6">
                         {/* Time Range Selection */}
-                        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm text-white">
+                        <Card className="bg-[#FDFBF4] border border-[#D9CFB3] text-[#1B2A1F] rounded-2xl shadow-xs">
                             <CardHeader>
-                                <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
-                                    <Calendar className="w-5 h-5 text-emerald-400" />
+                                <CardTitle className="text-xl font-serif font-bold text-[#1B2A1F] flex items-center gap-2">
+                                    <Calendar className="w-5 h-5 text-[#8A5A00]" />
                                     Time Range Filter
                                 </CardTitle>
-                                <CardDescription className="text-zinc-400">
+                                <CardDescription className="text-[#56655A]">
                                     Filter records by creation or entry timestamp
                                 </CardDescription>
                             </CardHeader>
@@ -289,10 +350,10 @@ export default function GenerateReport() {
                                     value={timeRange}
                                     onValueChange={(value: TimeRange) => setTimeRange(value)}
                                 >
-                                    <SelectTrigger className="w-full bg-zinc-800 border-zinc-700 text-white">
+                                    <SelectTrigger className="w-full bg-white border border-[#D9CFB3] text-[#1B2A1F] rounded-xl">
                                         <SelectValue placeholder="Select time range" />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+                                    <SelectContent className="bg-[#FDFBF4] border border-[#D9CFB3] text-[#1B2A1F]">
                                         <SelectItem value="week">Last 7 Days</SelectItem>
                                         <SelectItem value="month">Last 30 Days</SelectItem>
                                         <SelectItem value="year">Last 1 Year</SelectItem>
@@ -303,18 +364,18 @@ export default function GenerateReport() {
                         </Card>
 
                         {/* Drug Registry Information */}
-                        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
+                        <Card className="bg-[#FDFBF4] border border-[#D9CFB3] text-[#1B2A1F] rounded-2xl shadow-xs">
                             <CardHeader>
                                 <div className="flex items-center justify-between">
-                                    <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
-                                        <Leaf className="w-5 h-5 text-emerald-400" />
+                                    <CardTitle className="text-xl font-serif font-bold text-[#1B2A1F] flex items-center gap-2">
+                                        <Leaf className="w-5 h-5 text-[#8A5A00]" />
                                         Drug & Medicine Data
                                     </CardTitle>
                                     <Button
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => selectAllInCategory('drugs')}
-                                        className="cursor-pointer text-xs bg-gray-300/10 text-emerald-400 hover:bg-gray-300/20 hover:text-white"
+                                        className="cursor-pointer text-xs bg-gray-300/10 text-[#8A5A00] hover:bg-gray-300/20 hover:text-white"
                                     >
                                         Select All
                                     </Button>
@@ -346,18 +407,18 @@ export default function GenerateReport() {
                         </Card>
 
                         {/* Medical & Therapeutic Information */}
-                        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
+                        <Card className="bg-[#FDFBF4] border border-[#D9CFB3] text-[#1B2A1F] rounded-2xl shadow-xs">
                             <CardHeader>
                                 <div className="flex items-center justify-between">
-                                    <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
-                                        <HeartPulse className="w-5 h-5 text-emerald-400" />
+                                    <CardTitle className="text-xl font-serif font-bold text-[#1B2A1F] flex items-center gap-2">
+                                        <HeartPulse className="w-5 h-5 text-[#8A5A00]" />
                                         Therapeutic Indications & Usage
                                     </CardTitle>
                                     <Button
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => selectAllInCategory('medical')}
-                                        className="cursor-pointer text-xs bg-gray-300/10 text-emerald-400 hover:bg-gray-300/20 hover:text-white"
+                                        className="cursor-pointer text-xs bg-gray-300/10 text-[#8A5A00] hover:bg-gray-300/20 hover:text-white"
                                     >
                                         Select All
                                     </Button>
@@ -382,18 +443,18 @@ export default function GenerateReport() {
                         </Card>
 
                         {/* Traditional Knowledge & Contributors */}
-                        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
+                        <Card className="bg-[#FDFBF4] border border-[#D9CFB3] text-[#1B2A1F] rounded-2xl shadow-xs">
                             <CardHeader>
                                 <div className="flex items-center justify-between">
-                                    <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
-                                        <UserCheck className="w-5 h-5 text-emerald-400" />
+                                    <CardTitle className="text-xl font-serif font-bold text-[#1B2A1F] flex items-center gap-2">
+                                        <UserCheck className="w-5 h-5 text-[#8A5A00]" />
                                         Folk Healers & Traditional Contributors
                                     </CardTitle>
                                     <Button
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => selectAllInCategory('contributors')}
-                                        className="cursor-pointer text-xs bg-gray-300/10 text-emerald-400 hover:bg-gray-300/20 hover:text-white"
+                                        className="cursor-pointer text-xs bg-gray-300/10 text-[#8A5A00] hover:bg-gray-300/20 hover:text-white"
                                     >
                                         Select All
                                     </Button>
@@ -418,18 +479,18 @@ export default function GenerateReport() {
                         </Card>
 
                         {/* Research & Scientific Literature */}
-                        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
+                        <Card className="bg-[#FDFBF4] border border-[#D9CFB3] text-[#1B2A1F] rounded-2xl shadow-xs">
                             <CardHeader>
                                 <div className="flex items-center justify-between">
-                                    <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
-                                        <BookOpen className="w-5 h-5 text-emerald-400" />
+                                    <CardTitle className="text-xl font-serif font-bold text-[#1B2A1F] flex items-center gap-2">
+                                        <BookOpen className="w-5 h-5 text-[#8A5A00]" />
                                         Research & Scientific References
                                     </CardTitle>
                                     <Button
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => selectAllInCategory('research')}
-                                        className="cursor-pointer text-xs bg-gray-300/10 text-emerald-400 hover:bg-gray-300/20 hover:text-white"
+                                        className="cursor-pointer text-xs bg-gray-300/10 text-[#8A5A00] hover:bg-gray-300/20 hover:text-white"
                                     >
                                         Select All
                                     </Button>
@@ -454,18 +515,18 @@ export default function GenerateReport() {
                         </Card>
 
                         {/* Media & Documentation */}
-                        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
+                        <Card className="bg-[#FDFBF4] border border-[#D9CFB3] text-[#1B2A1F] rounded-2xl shadow-xs">
                             <CardHeader>
                                 <div className="flex items-center justify-between">
-                                    <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
-                                        <Image className="w-5 h-5 text-emerald-400" />
+                                    <CardTitle className="text-xl font-serif font-bold text-[#1B2A1F] flex items-center gap-2">
+                                        <Image className="w-5 h-5 text-[#8A5A00]" />
                                         Photographs & Media
                                     </CardTitle>
                                     <Button
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => selectAllInCategory('media')}
-                                        className="cursor-pointer text-xs bg-gray-300/10 text-emerald-400 hover:bg-gray-300/20 hover:text-white"
+                                        className="cursor-pointer text-xs bg-gray-300/10 text-[#8A5A00] hover:bg-gray-300/20 hover:text-white"
                                     >
                                         Select All
                                     </Button>
@@ -490,18 +551,18 @@ export default function GenerateReport() {
                         </Card>
 
                         {/* User Administration */}
-                        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
+                        <Card className="bg-[#FDFBF4] border border-[#D9CFB3] text-[#1B2A1F] rounded-2xl shadow-xs">
                             <CardHeader>
                                 <div className="flex items-center justify-between">
-                                    <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
-                                        <User className="w-5 h-5 text-emerald-400" />
+                                    <CardTitle className="text-xl font-serif font-bold text-[#1B2A1F] flex items-center gap-2">
+                                        <User className="w-5 h-5 text-[#8A5A00]" />
                                         User Directory & Roles
                                     </CardTitle>
                                     <Button
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => selectAllInCategory('user')}
-                                        className="cursor-pointer text-xs bg-gray-300/10 text-emerald-400 hover:bg-gray-300/20 hover:text-white"
+                                        className="cursor-pointer text-xs bg-gray-300/10 text-[#8A5A00] hover:bg-gray-300/20 hover:text-white"
                                     >
                                         Select All
                                     </Button>
@@ -526,18 +587,18 @@ export default function GenerateReport() {
                         </Card>
 
                         {/* Additional Options */}
-                        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
+                        <Card className="bg-[#FDFBF4] border border-[#D9CFB3] text-[#1B2A1F] rounded-2xl shadow-xs">
                             <CardHeader>
                                 <div className="flex items-center justify-between">
-                                    <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
-                                        <Database className="w-5 h-5 text-emerald-400" />
+                                    <CardTitle className="text-xl font-serif font-bold text-[#1B2A1F] flex items-center gap-2">
+                                        <Database className="w-5 h-5 text-[#8A5A00]" />
                                         Summary & Metadata
                                     </CardTitle>
                                     <Button
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => selectAllInCategory('additional')}
-                                        className="cursor-pointer text-xs bg-gray-300/10 text-emerald-400 hover:bg-gray-300/20 hover:text-white"
+                                        className="cursor-pointer text-xs bg-gray-300/10 text-[#8A5A00] hover:bg-gray-300/20 hover:text-white"
                                     >
                                         Select All
                                     </Button>
@@ -565,13 +626,13 @@ export default function GenerateReport() {
                     {/* Action Panel */}
                     <div className="space-y-6">
                         {/* Generate Button Card */}
-                        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm sticky top-24">
+                        <Card className="bg-[#FDFBF4] border border-[#D9CFB3] text-[#1B2A1F] rounded-2xl shadow-xs sticky top-24">
                             <CardHeader>
-                                <CardTitle className="text-xl text-zinc-100 flex items-center gap-2">
-                                    <FileText className="w-5 h-5 text-emerald-400" />
+                                <CardTitle className="text-xl font-serif font-bold text-[#1B2A1F] flex items-center gap-2">
+                                    <FileText className="w-5 h-5 text-[#8A5A00]" />
                                     Export Document
                                 </CardTitle>
-                                <CardDescription className="text-zinc-400">
+                                <CardDescription className="text-[#56655A]">
                                     Compiles selected repository data into a formatted PDF
                                 </CardDescription>
                             </CardHeader>
@@ -579,7 +640,7 @@ export default function GenerateReport() {
                                 <Button
                                     onClick={handleGenerateReport}
                                     disabled={isGenerating}
-                                    className="w-full bg-gradient-to-r from-emerald-700 to-green-600 hover:from-emerald-800 hover:to-green-700 cursor-pointer text-white font-medium py-2.5 shadow-lg shadow-emerald-950/40"
+                                    className="w-full bg-[#8A5A00] hover:bg-[#704800] cursor-pointer text-white font-semibold py-2.5 rounded-xl shadow-xs transition-all"
                                 >
                                     {isGenerating ? (
                                         <>
@@ -594,14 +655,14 @@ export default function GenerateReport() {
                                     )}
                                 </Button>
 
-                                <div className="border-t border-zinc-800 pt-4 space-y-2 text-xs text-zinc-400">
+                                <div className="border-t border-zinc-800 pt-4 space-y-2 text-xs text-[#56655A]">
                                     <div className="flex justify-between">
                                         <span>Selected Period:</span>
                                         <span className="text-zinc-200 capitalize font-medium">{timeRange}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span>Selected Fields:</span>
-                                        <span className="text-emerald-400 font-semibold">
+                                        <span className="text-[#8A5A00] font-semibold">
                                             {Object.values(reportOptions).filter(Boolean).length} / {Object.keys(reportOptions).length}
                                         </span>
                                     </div>

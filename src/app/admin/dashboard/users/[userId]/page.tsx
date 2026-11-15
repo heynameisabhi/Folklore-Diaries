@@ -79,26 +79,26 @@ export default function UserDetailPage() {
 
     if (status === "loading" || isLoading) {
         return (
-            <div className="flex flex-col items-center justify-center w-full h-screen bg-black">
-                <div className="w-16 h-16 border-t-4 border-green-500 border-solid rounded-full animate-spin"></div>
-                <p className="mt-4 text-green-500">Loading user details...</p>
+            <div className="flex flex-col items-center justify-center w-full min-h-[60vh] bg-[#F3EEE0]">
+                <div className="w-12 h-12 border-t-4 border-[#8A5A00] border-solid rounded-full animate-spin"></div>
+                <p className="mt-4 text-[#8A5A00] font-medium text-sm">Loading user details...</p>
             </div>
         );
     }
 
     if (error || !user) {
         return (
-            <div className="flex flex-col items-center justify-center w-full h-screen bg-black">
-                <div className="p-8 text-center bg-zinc-900 rounded-xl border border-zinc-800">
-                    <h2 className="text-2xl font-bold text-red-500 mb-2">
+            <div className="flex flex-col items-center justify-center w-full min-h-[60vh] bg-[#F3EEE0] p-6">
+                <div className="p-8 text-center bg-[#FDFBF4] rounded-2xl border border-[#D9CFB3] shadow-sm max-w-md w-full">
+                    <h2 className="text-xl font-serif font-bold text-[#B4531A] mb-2">
                         Error Loading User
                     </h2>
-                    <p className="text-zinc-400">
+                    <p className="text-[#56655A] text-sm">
                         Could not fetch user details. Please try again.
                     </p>
                     <Button
                         variant="outline"
-                        className="mt-4 border-zinc-700 text-zinc-300"
+                        className="mt-5 border-[#D9CFB3] bg-white text-[#1B2A1F] hover:bg-[#EAE2CC] cursor-pointer"
                         onClick={() => router.push("/admin/dashboard/users/manage")}
                     >
                         Return to Users List
@@ -109,24 +109,24 @@ export default function UserDetailPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-black to-zinc-900 text-zinc-100 p-6">
+        <div className="min-h-full bg-[#F3EEE0] text-[#1B2A1F] p-4 sm:p-8">
             <div className="max-w-4xl mx-auto space-y-6">
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between pb-4 border-b border-[#D9CFB3]">
                     <div className="flex items-center space-x-4">
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => router.back()}
-                            className="text-zinc-400 hover:text-white hover:bg-zinc-800 cursor-pointer"
+                            className="text-[#56655A] hover:text-[#1B2A1F] hover:bg-[#EAE2CC] border border-[#D9CFB3] bg-[#FDFBF4] cursor-pointer rounded-xl"
                         >
                             <ArrowLeft className="w-5 h-5" />
                         </Button>
                         <div>
-                            <h1 className="text-2xl font-bold text-zinc-100">
+                            <h1 className="text-2xl font-serif font-bold text-[#1B2A1F]">
                                 {user.name || "User Account"}
                             </h1>
-                            <p className="text-zinc-400 text-sm">Account details and access status</p>
+                            <p className="text-[#56655A] text-sm">Account details and access status</p>
                         </div>
                     </div>
 
@@ -134,10 +134,10 @@ export default function UserDetailPage() {
                         variant="outline"
                         onClick={() => toggleStatusMutation.mutate()}
                         disabled={toggleStatusMutation.isPending}
-                        className={`cursor-pointer border-zinc-700 ${
+                        className={`cursor-pointer rounded-xl font-medium transition-all ${
                             user.status === "ACTIVE"
-                                ? "text-red-400 hover:bg-red-950/40 hover:text-red-300"
-                                : "text-green-400 hover:bg-green-950/40 hover:text-green-300"
+                                ? "bg-[#F6E2CF] border-[#B4531A] text-[#B4531A] hover:bg-[#B4531A] hover:text-white"
+                                : "bg-[#D5E6D3] border-[#3F7A4B] text-[#3F7A4B] hover:bg-[#3F7A4B] hover:text-white"
                         }`}
                     >
                         {toggleStatusMutation.isPending ? (
@@ -152,63 +152,63 @@ export default function UserDetailPage() {
                 </div>
 
                 {/* User Info Card */}
-                <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-sm">
-                    <CardHeader>
-                        <CardTitle className="text-lg text-zinc-100">
+                <Card className="bg-[#FDFBF4] border-[#D9CFB3] text-[#1B2A1F] rounded-2xl shadow-xs">
+                    <CardHeader className="border-b border-[#D9CFB3] pb-4">
+                        <CardTitle className="text-lg font-serif font-bold text-[#1B2A1F]">
                             Profile Information
                         </CardTitle>
-                        <CardDescription className="text-zinc-400">
+                        <CardDescription className="text-[#56655A]">
                             Registered credentials and access role in Folklore Diaries
                         </CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="flex items-center space-x-3 p-3 bg-zinc-800/40 rounded-lg border border-zinc-800">
-                                <div className="p-2.5 rounded-lg bg-blue-500/20 text-blue-400">
+                    <CardContent className="pt-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="flex items-center space-x-3 p-3.5 bg-[#EAE2CC]/40 rounded-xl border border-[#D9CFB3]">
+                                <div className="p-2.5 rounded-xl bg-[#F3E3B8] text-[#8A5A00]">
                                     <User className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-zinc-400">Full Name</p>
-                                    <p className="text-sm font-medium text-zinc-100">{user.name || "N/A"}</p>
+                                    <p className="text-xs text-[#56655A] font-semibold">Full Name</p>
+                                    <p className="text-sm font-semibold text-[#1B2A1F]">{user.name || "N/A"}</p>
                                 </div>
                             </div>
 
-                            <div className="flex items-center space-x-3 p-3 bg-zinc-800/40 rounded-lg border border-zinc-800">
-                                <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-400">
+                            <div className="flex items-center space-x-3 p-3.5 bg-[#EAE2CC]/40 rounded-lg border border-[#D9CFB3]">
+                                <div className="p-2.5 rounded-xl bg-[#D5E6D3] text-[#1F5A3D]">
                                     <Mail className="w-5 h-5" />
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-xs text-zinc-400">Email Address</p>
-                                    <p className="text-sm font-medium text-zinc-100 truncate">{user.email}</p>
+                                    <p className="text-xs text-[#56655A] font-semibold">Email Address</p>
+                                    <p className="text-sm font-semibold text-[#1B2A1F] truncate">{user.email}</p>
                                 </div>
                             </div>
 
-                            <div className="flex items-center space-x-3 p-3 bg-zinc-800/40 rounded-lg border border-zinc-800">
-                                <div className="p-2.5 rounded-lg bg-purple-500/20 text-purple-400">
+                            <div className="flex items-center space-x-3 p-3.5 bg-[#EAE2CC]/40 rounded-lg border border-[#D9CFB3]">
+                                <div className="p-2.5 rounded-xl bg-[#F3E3B8] text-[#8A5A00]">
                                     <Shield className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-zinc-400">Assigned Role</p>
-                                    <p className="text-sm font-medium text-zinc-100">{user.role || "USER"}</p>
+                                    <p className="text-xs text-[#56655A] font-semibold">Assigned Role</p>
+                                    <p className="text-sm font-semibold text-[#1B2A1F]">{user.role || "USER"}</p>
                                 </div>
                             </div>
 
-                            <div className="flex items-center space-x-3 p-3 bg-zinc-800/40 rounded-lg border border-zinc-800">
-                                <div className="p-2.5 rounded-lg bg-zinc-700/30 text-zinc-300">
+                            <div className="flex items-center space-x-3 p-3.5 bg-[#EAE2CC]/40 rounded-lg border border-[#D9CFB3]">
+                                <div className="p-2.5 rounded-xl bg-[#EAE2CC] text-[#1B2A1F]">
                                     {user.status === "ACTIVE" ? (
-                                        <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                                        <CheckCircle2 className="w-5 h-5 text-[#3F7A4B]" />
                                     ) : (
-                                        <XCircle className="w-5 h-5 text-red-400" />
+                                        <XCircle className="w-5 h-5 text-[#B4531A]" />
                                     )}
                                 </div>
                                 <div>
-                                    <p className="text-xs text-zinc-400">Account Status</p>
+                                    <p className="text-xs text-[#56655A] font-semibold">Account Status</p>
                                     <Badge
                                         variant="outline"
                                         className={`mt-0.5 ${
                                             user.status === "ACTIVE"
-                                                ? "bg-green-500/20 text-green-400 border-green-500/30"
-                                                : "bg-red-500/20 text-red-400 border-red-500/30"
+                                                ? "bg-[#D5E6D3] text-[#3F7A4B] border-[#3F7A4B]/40"
+                                                : "bg-[#F6E2CF] text-[#B4531A] border-[#B4531A]/40"
                                         }`}
                                     >
                                         {user.status}
@@ -217,13 +217,13 @@ export default function UserDetailPage() {
                             </div>
                         </div>
 
-                        <div className="mt-6 pt-4 border-t border-zinc-800 flex justify-between items-center text-xs text-zinc-500">
-                            <span>User ID: <code className="text-zinc-400">{user.id}</code></span>
+                        <div className="mt-6 pt-4 border-t border-[#D9CFB3] flex justify-between items-center text-xs text-[#56655A]">
+                            <span>User ID: <code className="text-[#1B2A1F] font-mono">{user.id}</code></span>
                             <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => router.push("/admin/dashboard/users/manage")}
-                                className="text-zinc-400 hover:text-white"
+                                className="text-[#56655A] hover:text-[#1B2A1F] hover:bg-[#EAE2CC] cursor-pointer"
                             >
                                 Back to All Users
                             </Button>

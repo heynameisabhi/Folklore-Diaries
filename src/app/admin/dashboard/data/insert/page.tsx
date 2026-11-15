@@ -338,34 +338,87 @@ export default function AdminInsertDataPage() {
   };
 
   return (
-    <div className="flex flex-col items-center min-h-[calc(100vh-80px)] bg-gradient-to-tl from-zinc-950 via-black/40 to-emerald-950/70 p-4 md:p-8">
+    <div
+      style={{
+        ["--ins-bg" as any]: "#F3EEE0",
+        ["--ins-surface" as any]: "#FDFBF4",
+        ["--ins-sunk" as any]: "#EAE2CC",
+        ["--ins-line" as any]: "#D9CFB3",
+        ["--ins-accent" as any]: "#8A5A00",
+        ["--ins-accent-soft" as any]: "#F3E3B8",
+        ["--ins-ink" as any]: "#1B2A1F",
+        ["--ins-muted" as any]: "#56655A",
+        color: "var(--ins-ink)",
+      }}
+      className="ins-scope flex flex-col items-center min-h-[calc(100vh-80px)] p-4 md:p-8 pb-24 overflow-y-auto"
+    >
+      <style>{`
+        .ins-scope {
+          color: var(--ins-ink) !important;
+        }
+        .ins-scope [data-slot="card"],
+        .ins-scope .bg-card,
+        .ins-scope [class*="bg-zinc-9"] {
+          background-color: var(--ins-surface) !important;
+          border-color: var(--ins-line) !important;
+          color: var(--ins-ink) !important;
+        }
+        .ins-scope [class*="bg-zinc-8"] {
+          background-color: var(--ins-sunk) !important;
+          border-color: var(--ins-line) !important;
+          color: var(--ins-ink) !important;
+        }
+        .ins-scope [class*="border-zinc-"] {
+          border-color: var(--ins-line) !important;
+        }
+        .ins-scope .text-white,
+        .ins-scope [class*="text-zinc-1"],
+        .ins-scope [class*="text-zinc-2"] {
+          color: var(--ins-ink) !important;
+        }
+        .ins-scope [class*="text-zinc-4"],
+        .ins-scope [class*="text-zinc-5"] {
+          color: var(--ins-muted) !important;
+        }
+        .ins-scope input:not([type="checkbox"]):not([type="radio"]),
+        .ins-scope select,
+        .ins-scope textarea {
+          background-color: #FFFFFF !important;
+          border-color: var(--ins-line) !important;
+          color: var(--ins-ink) !important;
+        }
+        .ins-scope button.bg-emerald-600 {
+          background-color: var(--ins-accent) !important;
+          color: #ffffff !important;
+        }
+      `}</style>
       <div className="w-full max-w-5xl space-y-6">
         {/* Navigation Tabs Header */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-zinc-900/80 p-3 rounded-xl border border-zinc-800 backdrop-blur-md">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#FDFBF4] p-4 rounded-2xl border border-[#D9CFB3] shadow-xs">
           <div className="flex items-center gap-3 px-2">
-            <div className="h-10 w-10 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-xl bg-[#F3E3B8] text-[#8A5A00] flex items-center justify-center border border-[#D9CFB3] shadow-xs">
               <Layers className="h-5 w-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-base font-semibold text-white">Drug Ingestion Management</h1>
-                <Badge className="bg-emerald-950/60 text-emerald-400 border border-emerald-800 text-[10px] px-2 py-0.5">
+                <h1 className="text-base font-serif font-bold text-[#1B2A1F]">Drug Ingestion Management</h1>
+                <Badge className="bg-[#F3E3B8] text-[#8A5A00] border border-[#D9CFB3] text-[10px] px-2 py-0.5 font-semibold">
                   <ShieldCheck className="w-3 h-3 mr-1" />
-                  Admin Only
+                  Curator Only
                 </Badge>
               </div>
-              <p className="text-xs text-zinc-400">Single drug detail entry or bulk CSV data import</p>
+              <p className="text-xs text-[#56655A]">Single drug detail entry or bulk CSV data import</p>
             </div>
           </div>
 
-          <div className="flex items-center bg-zinc-950 p-1 rounded-lg border border-zinc-800 w-full sm:w-auto">
+          <div className="flex items-center bg-[#EAE2CC] p-1 rounded-xl border border-[#D9CFB3] w-full sm:w-auto">
             <button
               type="button"
               onClick={() => setActiveTab("single")}
-              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all cursor-pointer ${
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all cursor-pointer ${
                 activeTab === "single"
-                  ? "bg-emerald-600 text-white shadow-md"
-                  : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
+                  ? "bg-[#8A5A00] text-white shadow-xs"
+                  : "text-[#56655A] hover:text-[#1B2A1F]"
               }`}
             >
               <Sparkles className="w-4 h-4" />
@@ -374,10 +427,10 @@ export default function AdminInsertDataPage() {
             <button
               type="button"
               onClick={() => setActiveTab("bulk")}
-              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all cursor-pointer ${
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all cursor-pointer ${
                 activeTab === "bulk"
-                  ? "bg-emerald-600 text-white shadow-md"
-                  : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
+                  ? "bg-[#8A5A00] text-white shadow-xs"
+                  : "text-[#56655A] hover:text-[#1B2A1F]"
               }`}
             >
               <FileSpreadsheet className="w-4 h-4" />
@@ -395,13 +448,13 @@ export default function AdminInsertDataPage() {
 
         {/* Tab 2: Bulk CSV Upload */}
         {activeTab === "bulk" && (
-          <Card className="w-full border-[#1a1a1a] bg-black shadow-xl backdrop-blur-md animate-in fade-in-50 duration-300">
-            <CardHeader className="border-b border-[#1a1a1a] bg-black">
-              <CardTitle className="text-white flex items-center gap-2">
-                <FileSpreadsheet className="h-5 w-5 text-green-400" />
+          <Card className="w-full border border-[#D9CFB3] bg-[#FDFBF4] text-[#1B2A1F] shadow-xs rounded-2xl animate-in fade-in-50 duration-300">
+            <CardHeader className="border-b border-[#D9CFB3] bg-[#FDFBF4]">
+              <CardTitle className="text-[#1B2A1F] font-serif font-bold text-xl flex items-center gap-2">
+                <FileSpreadsheet className="h-5 w-5 text-[#8A5A00]" />
                 Bulk CSV Upload & Preview
               </CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardDescription className="text-[#56655A]">
                 Upload a CSV file to preview, edit, and insert multiple drug records into the
                 database repository. Multi-value fields should be separated by semicolons (;).
               </CardDescription>
@@ -412,38 +465,38 @@ export default function AdminInsertDataPage() {
               {!showTable && (
                 <div
                   {...getRootProps()}
-                  className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-300
+                  className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all duration-300
                     ${
                       isDragActive
-                        ? "border-green-500 bg-green-500/10"
+                        ? "border-[#8A5A00] bg-[#F3E3B8]/30"
                         : csvFile
-                        ? "border-green-400 bg-green-400/5"
-                        : "border-gray-700 hover:border-gray-500 hover:bg-zinc-900/50"
+                        ? "border-[#3F7A4B] bg-[#D5E6D3]/30"
+                        : "border-[#D9CFB3] hover:border-[#8A5A00] hover:bg-[#EAE2CC]/30"
                     }`}
                 >
                   <input {...getInputProps()} />
                   <div className="flex flex-col items-center justify-center gap-3">
                     {csvFile ? (
                       <>
-                        <Check className="h-12 w-12 text-green-400" />
-                        <p className="text-green-400 font-medium text-lg">
+                        <Check className="h-12 w-12 text-[#3F7A4B]" />
+                        <p className="text-[#3F7A4B] font-semibold text-lg">
                           {csvFile.name}
                         </p>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-[#56655A]">
                           {(csvFile.size / 1024).toFixed(2)} KB
                         </p>
                       </>
                     ) : (
                       <>
-                        <div className="h-16 w-16 rounded-full bg-green-900/20 flex items-center justify-center">
-                          <Upload className="h-8 w-8 text-green-500" />
+                        <div className="h-16 w-16 rounded-full bg-[#F3E3B8] flex items-center justify-center border border-[#D9CFB3]">
+                          <Upload className="h-8 w-8 text-[#8A5A00]" />
                         </div>
-                        <p className="text-gray-300 text-lg font-medium">
+                        <p className="text-[#1B2A1F] text-lg font-serif font-bold">
                           {isDragActive
                             ? "Drop the CSV file here"
                             : "Drag & drop a CSV file, or click to browse"}
                         </p>
-                        <div className="text-xs text-gray-500 mt-2 space-y-1">
+                        <div className="text-xs text-[#56655A] mt-2 space-y-1">
                           <p>
                             Expected columns: primary_name, source_type,
                             botanical_description, botanical_names, sanskrit_names,
@@ -464,7 +517,7 @@ export default function AdminInsertDataPage() {
                     id="test-file-input"
                     type="file"
                     accept=".csv"
-                    className="mt-4 p-2 bg-zinc-800 text-white rounded border border-zinc-700 w-full cursor-pointer"
+                    className="mt-4 p-2 bg-white text-[#1B2A1F] rounded-xl border border-[#D9CFB3] w-full cursor-pointer text-xs"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
@@ -479,7 +532,7 @@ export default function AdminInsertDataPage() {
               {error && (
                 <Alert
                   variant="destructive"
-                  className="mt-4 bg-red-950/30 border-red-500/50 text-red-300"
+                  className="mt-4 bg-[#F6E2CF] border-[#B4531A]/40 text-[#B4531A]"
                 >
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Error</AlertTitle>
@@ -491,9 +544,9 @@ export default function AdminInsertDataPage() {
 
               {/* Success */}
               {success && (
-                <Alert className="mt-4 bg-green-950/30 border-green-500/50 text-green-300">
-                  <Check className="h-4 w-4" />
-                  <AlertTitle>Success</AlertTitle>
+                <Alert className="mt-4 bg-[#D5E6D3] border-[#3F7A4B]/40 text-[#1B2A1F]">
+                  <Check className="h-4 w-4 text-[#3F7A4B]" />
+                  <AlertTitle className="font-semibold text-[#1B2A1F]">Success</AlertTitle>
                   <AlertDescription>
                     {stats ? (
                       <span>

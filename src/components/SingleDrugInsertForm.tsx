@@ -172,21 +172,21 @@ export function SingleDrugInsertForm({
   };
 
   return (
-    <Card className="w-full border-zinc-800 bg-zinc-950/80 shadow-2xl backdrop-blur-md">
-      <CardHeader className="border-b border-zinc-800/80 pb-6">
+    <Card className="w-full border border-[#D9CFB3] bg-[#FDFBF4] text-[#1B2A1F] rounded-2xl shadow-xs">
+      <CardHeader className="border-b border-[#D9CFB3] pb-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-emerald-400" />
+            <CardTitle className="text-xl font-serif font-bold text-[#1B2A1F] flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-[#8A5A00]" />
               Single Drug Entry
             </CardTitle>
-            <CardDescription className="text-zinc-400 mt-1">
+            <CardDescription className="text-[#56655A] mt-1">
               Enter individual folklore medicine details. Multi-value fields can be separated with semicolons (;).
             </CardDescription>
           </div>
           <Badge
             variant="outline"
-            className="w-fit bg-emerald-950/40 text-emerald-300 border-emerald-800/60 px-3 py-1 text-xs"
+            className="w-fit bg-[#F3E3B8] text-[#8A5A00] border-[#D9CFB3] px-3 py-1 text-xs font-semibold"
           >
             Direct Database Insertion
           </Badge>
@@ -196,9 +196,9 @@ export function SingleDrugInsertForm({
       <CardContent className="pt-6">
         {/* Success Alert */}
         {successResult && (
-          <Alert className="mb-6 bg-emerald-950/40 border-emerald-500/50 text-emerald-200">
-            <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-            <AlertTitle className="text-base font-semibold text-emerald-300">
+          <Alert className="mb-6 bg-[#D5E6D3] border-[#3F7A4B]/40 text-[#1B2A1F]">
+            <CheckCircle2 className="h-5 w-5 text-[#3F7A4B]" />
+            <AlertTitle className="text-base font-semibold text-[#1B2A1F]">
               Drug Record Successfully Processed!
             </AlertTitle>
             <AlertDescription className="mt-2 space-y-3">
@@ -213,7 +213,7 @@ export function SingleDrugInsertForm({
                 <Button
                   size="sm"
                   onClick={handleReset}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
+                  className="bg-[#8A5A00] hover:bg-[#704800] text-white cursor-pointer rounded-xl font-semibold"
                 >
                   <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
                   Insert Another Drug
@@ -232,7 +232,7 @@ export function SingleDrugInsertForm({
                   size="sm"
                   variant="ghost"
                   asChild
-                  className="text-zinc-400 hover:text-white cursor-pointer"
+                  className="text-[#56655A] hover:text-[#1B2A1F] cursor-pointer"
                 >
                   <Link href={returnHref}>Return to Dashboard</Link>
                 </Button>
@@ -245,7 +245,7 @@ export function SingleDrugInsertForm({
         {error && (
           <Alert
             variant="destructive"
-            className="mb-6 bg-red-950/40 border-red-500/50 text-red-300"
+            className="mb-6 bg-[#F6E2CF] border-[#B4531A]/40 text-[#B4531A]"
           >
             <AlertCircle className="h-5 w-5" />
             <AlertTitle className="font-semibold">Unable to Save Drug Record</AlertTitle>
@@ -257,18 +257,18 @@ export function SingleDrugInsertForm({
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Section 1: Basic Information */}
-          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-zinc-800 pb-3">
-              <Leaf className="w-5 h-5 text-emerald-400" />
-              <h3 className="text-base font-semibold text-zinc-100">
+          <div className="rounded-2xl border border-[#D9CFB3] bg-[#EAE2CC]/30 p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-[#D9CFB3] pb-3">
+              <Leaf className="w-5 h-5 text-[#8A5A00]" />
+              <h3 className="text-base font-serif font-bold text-[#1B2A1F]">
                 1. Basic Drug Information
               </h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-2">
-                <Label htmlFor="primary_name" className="text-zinc-200">
-                  Primary Name <span className="text-emerald-400 font-bold">*</span>
+                <Label htmlFor="primary_name" className="text-[#1B2A1F] font-semibold text-xs uppercase tracking-wider">
+                  Primary Name <span className="text-[#B4531A] font-bold">*</span>
                 </Label>
                 <Input
                   id="primary_name"
@@ -276,15 +276,15 @@ export function SingleDrugInsertForm({
                   onChange={(e) => handleChange("primary_name", e.target.value)}
                   placeholder="e.g. Tulasi, Ashwagandha, Neem"
                   required
-                  className="bg-zinc-800/70 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-emerald-500"
+                  className="bg-white border-[#D9CFB3] text-[#1B2A1F] placeholder:text-[#56655A] focus-visible:ring-[#8A5A00] rounded-xl"
                 />
-                <p className="text-xs text-zinc-400">
+                <p className="text-xs text-[#56655A]">
                   Main identifier used for search and drug profile creation.
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="source_type" className="text-zinc-200">
+                <Label htmlFor="source_type" className="text-[#1B2A1F] font-semibold text-xs uppercase tracking-wider">
                   Source Type
                 </Label>
                 <Select
@@ -293,24 +293,24 @@ export function SingleDrugInsertForm({
                 >
                   <SelectTrigger
                     id="source_type"
-                    className="w-full bg-zinc-800/70 border-zinc-700 text-white"
+                    className="w-full bg-white border-[#D9CFB3] text-[#1B2A1F] rounded-xl"
                   >
                     <SelectValue placeholder="Select Source Type..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-zinc-700 text-white">
+                  <SelectContent className="bg-[#FDFBF4] border-[#D9CFB3] text-[#1B2A1F]">
                     <SelectItem value="PLANT">PLANT</SelectItem>
                     <SelectItem value="ANIMAL">ANIMAL</SelectItem>
                     <SelectItem value="MINERAL">MINERAL</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-zinc-400">
+                <p className="text-xs text-[#56655A]">
                   Origin classification (Plant, Animal, or Mineral).
                 </p>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="botanical_description" className="text-zinc-200">
+              <Label htmlFor="botanical_description" className="text-[#1B2A1F] font-semibold text-xs uppercase tracking-wider">
                 Botanical / Morphological Description
               </Label>
               <Textarea
@@ -321,23 +321,23 @@ export function SingleDrugInsertForm({
                   handleChange("botanical_description", e.target.value)
                 }
                 placeholder="Enter morphology details, plant habitat, physical characteristics, leaves, flowers, seeds, roots..."
-                className="bg-zinc-800/70 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-emerald-500"
+                className="bg-white border-[#D9CFB3] text-[#1B2A1F] placeholder:text-[#56655A] focus-visible:ring-[#8A5A00] rounded-xl"
               />
             </div>
           </div>
 
           {/* Section 2: Taxonomic & Regional Names */}
-          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-zinc-800 pb-3">
-              <BookOpen className="w-5 h-5 text-emerald-400" />
-              <h3 className="text-base font-semibold text-zinc-100">
+          <div className="rounded-2xl border border-[#D9CFB3] bg-[#EAE2CC]/30 p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-[#D9CFB3] pb-3">
+              <BookOpen className="w-5 h-5 text-[#8A5A00]" />
+              <h3 className="text-base font-serif font-bold text-[#1B2A1F]">
                 2. Botanical & Regional Names
               </h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div className="space-y-2">
-                <Label htmlFor="botanical_names" className="text-zinc-200">
+                <Label htmlFor="botanical_names" className="text-[#1B2A1F] font-semibold text-xs uppercase tracking-wider">
                   Botanical Names (Latin)
                 </Label>
                 <Input
@@ -347,15 +347,15 @@ export function SingleDrugInsertForm({
                     handleChange("botanical_names", e.target.value)
                   }
                   placeholder="Ocimum tenuiflorum; Ocimum sanctum"
-                  className="bg-zinc-800/70 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-emerald-500"
+                  className="bg-white border-[#D9CFB3] text-[#1B2A1F] placeholder:text-[#56655A] focus-visible:ring-[#8A5A00] rounded-xl"
                 />
-                <p className="text-[11px] text-zinc-400">
+                <p className="text-[11px] text-[#56655A]">
                   Separate multiple with semicolon (;)
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="sanskrit_names" className="text-zinc-200">
+                <Label htmlFor="sanskrit_names" className="text-[#1B2A1F] font-semibold text-xs uppercase tracking-wider">
                   Sanskrit Names
                 </Label>
                 <Input
@@ -365,15 +365,15 @@ export function SingleDrugInsertForm({
                     handleChange("sanskrit_names", e.target.value)
                   }
                   placeholder="Surasa; Tulasi; Vaishnavi"
-                  className="bg-zinc-800/70 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-emerald-500"
+                  className="bg-white border-[#D9CFB3] text-[#1B2A1F] placeholder:text-[#56655A] focus-visible:ring-[#8A5A00] rounded-xl"
                 />
-                <p className="text-[11px] text-zinc-400">
+                <p className="text-[11px] text-[#56655A]">
                   Separate multiple with semicolon (;)
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="vernacular_names" className="text-zinc-200">
+                <Label htmlFor="vernacular_names" className="text-[#1B2A1F] font-semibold text-xs uppercase tracking-wider">
                   Vernacular / Common Names
                 </Label>
                 <Input
@@ -383,9 +383,9 @@ export function SingleDrugInsertForm({
                     handleChange("vernacular_names", e.target.value)
                   }
                   placeholder="Holy Basil; Tulsi; Thulasi"
-                  className="bg-zinc-800/70 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-emerald-500"
+                  className="bg-white border-[#D9CFB3] text-[#1B2A1F] placeholder:text-[#56655A] focus-visible:ring-[#8A5A00] rounded-xl"
                 />
-                <p className="text-[11px] text-zinc-400">
+                <p className="text-[11px] text-[#56655A]">
                   Separate multiple with semicolon (;)
                 </p>
               </div>
@@ -393,17 +393,17 @@ export function SingleDrugInsertForm({
           </div>
 
           {/* Section 3: Therapeutic Indications & Methods */}
-          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-zinc-800 pb-3">
-              <HeartPulse className="w-5 h-5 text-emerald-400" />
-              <h3 className="text-base font-semibold text-zinc-100">
+          <div className="rounded-2xl border border-[#D9CFB3] bg-[#EAE2CC]/30 p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-[#D9CFB3] pb-3">
+              <HeartPulse className="w-5 h-5 text-[#8A5A00]" />
+              <h3 className="text-base font-serif font-bold text-[#1B2A1F]">
                 3. Therapeutic Uses & Indications
               </h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-2">
-                <Label htmlFor="diseases" className="text-zinc-200">
+                <Label htmlFor="diseases" className="text-[#1B2A1F] font-semibold text-xs uppercase tracking-wider">
                   Target Diseases / Indications
                 </Label>
                 <Textarea
@@ -412,15 +412,15 @@ export function SingleDrugInsertForm({
                   value={formData.diseases}
                   onChange={(e) => handleChange("diseases", e.target.value)}
                   placeholder="e.g. Fever; Kasa (Cough); Svasa (Asthma); Skin Infections"
-                  className="bg-zinc-800/70 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-emerald-500"
+                  className="bg-white border-[#D9CFB3] text-[#1B2A1F] placeholder:text-[#56655A] focus-visible:ring-[#8A5A00] rounded-xl"
                 />
-                <p className="text-[11px] text-zinc-400">
+                <p className="text-[11px] text-[#56655A]">
                   Separate multiple diseases with semicolon (;)
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="usage_methods" className="text-zinc-200">
+                <Label htmlFor="usage_methods" className="text-[#1B2A1F] font-semibold text-xs uppercase tracking-wider">
                   Usage & Preparation Methods
                 </Label>
                 <Textarea
@@ -431,9 +431,9 @@ export function SingleDrugInsertForm({
                     handleChange("usage_methods", e.target.value)
                   }
                   placeholder="e.g. Fresh leaf juice 10ml with honey twice daily; Decoction of root for chronic fever"
-                  className="bg-zinc-800/70 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-emerald-500"
+                  className="bg-white border-[#D9CFB3] text-[#1B2A1F] placeholder:text-[#56655A] focus-visible:ring-[#8A5A00] rounded-xl"
                 />
-                <p className="text-[11px] text-zinc-400">
+                <p className="text-[11px] text-[#56655A]">
                   Separate multiple methods with semicolon (;)
                 </p>
               </div>
@@ -441,17 +441,17 @@ export function SingleDrugInsertForm({
           </div>
 
           {/* Section 4: Traditional Healer / Contributor Details */}
-          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-zinc-800 pb-3">
-              <UserCheck className="w-5 h-5 text-emerald-400" />
-              <h3 className="text-base font-semibold text-zinc-100">
+          <div className="rounded-2xl border border-[#D9CFB3] bg-[#EAE2CC]/30 p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-[#D9CFB3] pb-3">
+              <UserCheck className="w-5 h-5 text-[#8A5A00]" />
+              <h3 className="text-base font-serif font-bold text-[#1B2A1F]">
                 4. Traditional Healer / Contributor Information
               </h3>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
               <div className="space-y-2">
-                <Label htmlFor="contributor_names" className="text-zinc-200">
+                <Label htmlFor="contributor_names" className="text-[#1B2A1F] font-semibold text-xs uppercase tracking-wider">
                   Contributor / Healer Name
                 </Label>
                 <Input
@@ -461,12 +461,12 @@ export function SingleDrugInsertForm({
                     handleChange("contributor_names", e.target.value)
                   }
                   placeholder="e.g. Vaidya Ram Sharma"
-                  className="bg-zinc-800/70 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-emerald-500"
+                  className="bg-white border-[#D9CFB3] text-[#1B2A1F] placeholder:text-[#56655A] focus-visible:ring-[#8A5A00] rounded-xl"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="contributor_ages" className="text-zinc-200">
+                <Label htmlFor="contributor_ages" className="text-[#1B2A1F] font-semibold text-xs uppercase tracking-wider">
                   Age
                 </Label>
                 <Input
@@ -479,14 +479,14 @@ export function SingleDrugInsertForm({
                     handleChange("contributor_ages", e.target.value)
                   }
                   placeholder="e.g. 65"
-                  className="bg-zinc-800/70 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-emerald-500"
+                  className="bg-white border-[#D9CFB3] text-[#1B2A1F] placeholder:text-[#56655A] focus-visible:ring-[#8A5A00] rounded-xl"
                 />
               </div>
 
               <div className="space-y-2">
                 <Label
                   htmlFor="contributor_practice_durations"
-                  className="text-zinc-200"
+                  className="text-[#1B2A1F] font-semibold text-xs uppercase tracking-wider"
                 >
                   Practice Duration / Experience
                 </Label>
@@ -500,12 +500,12 @@ export function SingleDrugInsertForm({
                     )
                   }
                   placeholder="e.g. 35 years"
-                  className="bg-zinc-800/70 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-emerald-500"
+                  className="bg-white border-[#D9CFB3] text-[#1B2A1F] placeholder:text-[#56655A] focus-visible:ring-[#8A5A00] rounded-xl"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="contributor_gurus" className="text-zinc-200">
+                <Label htmlFor="contributor_gurus" className="text-[#1B2A1F] font-semibold text-xs uppercase tracking-wider">
                   Guru / Traditional Lineage
                 </Label>
                 <Input
@@ -515,14 +515,14 @@ export function SingleDrugInsertForm({
                     handleChange("contributor_gurus", e.target.value)
                   }
                   placeholder="e.g. Guru Shankara Bhat"
-                  className="bg-zinc-800/70 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-emerald-500"
+                  className="bg-white border-[#D9CFB3] text-[#1B2A1F] placeholder:text-[#56655A] focus-visible:ring-[#8A5A00] rounded-xl"
                 />
               </div>
 
               <div className="space-y-2 sm:col-span-2">
                 <Label
                   htmlFor="contributor_addresses"
-                  className="text-zinc-200"
+                  className="text-[#1B2A1F] font-semibold text-xs uppercase tracking-wider"
                 >
                   Address / Village / District
                 </Label>
@@ -533,27 +533,27 @@ export function SingleDrugInsertForm({
                     handleChange("contributor_addresses", e.target.value)
                   }
                   placeholder="e.g. Village Bilagi, Siddapur Taluk, Uttara Kannada, Karnataka"
-                  className="bg-zinc-800/70 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-emerald-500"
+                  className="bg-white border-[#D9CFB3] text-[#1B2A1F] placeholder:text-[#56655A] focus-visible:ring-[#8A5A00] rounded-xl"
                 />
               </div>
             </div>
-            <p className="text-[11px] text-zinc-500">
+            <p className="text-[11px] text-[#56655A]">
               Note: If multiple contributors are associated with this record, separate each field with a semicolon (;).
             </p>
           </div>
 
           {/* Section 5: Research & Scientific Documentation */}
-          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-zinc-800 pb-3">
-              <FileText className="w-5 h-5 text-emerald-400" />
-              <h3 className="text-base font-semibold text-zinc-100">
+          <div className="rounded-2xl border border-[#D9CFB3] bg-[#EAE2CC]/30 p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-[#D9CFB3] pb-3">
+              <FileText className="w-5 h-5 text-[#8A5A00]" />
+              <h3 className="text-base font-serif font-bold text-[#1B2A1F]">
                 5. Research & Scientific References
               </h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-2">
-                <Label htmlFor="research_articles" className="text-zinc-200">
+                <Label htmlFor="research_articles" className="text-[#1B2A1F] font-semibold text-xs uppercase tracking-wider">
                   Research Articles & Publications
                 </Label>
                 <Textarea
@@ -564,15 +564,15 @@ export function SingleDrugInsertForm({
                     handleChange("research_articles", e.target.value)
                   }
                   placeholder="e.g. Phytochemical and antibacterial screening of Ocimum sanctum; Antidiabetic action of leaves"
-                  className="bg-zinc-800/70 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-emerald-500"
+                  className="bg-white border-[#D9CFB3] text-[#1B2A1F] placeholder:text-[#56655A] focus-visible:ring-[#8A5A00] rounded-xl"
                 />
-                <p className="text-[11px] text-zinc-400">
+                <p className="text-[11px] text-[#56655A]">
                   Separate multiple articles with semicolon (;)
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="research_thesis" className="text-zinc-200">
+                <Label htmlFor="research_thesis" className="text-[#1B2A1F] font-semibold text-xs uppercase tracking-wider">
                   Theses & Dissertations
                 </Label>
                 <Textarea
@@ -583,9 +583,9 @@ export function SingleDrugInsertForm({
                     handleChange("research_thesis", e.target.value)
                   }
                   placeholder="e.g. Clinical evaluation of Tulasi in Swasa Roga (Ph.D. Thesis)"
-                  className="bg-zinc-800/70 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-emerald-500"
+                  className="bg-white border-[#D9CFB3] text-[#1B2A1F] placeholder:text-[#56655A] focus-visible:ring-[#8A5A00] rounded-xl"
                 />
-                <p className="text-[11px] text-zinc-400">
+                <p className="text-[11px] text-[#56655A]">
                   Separate multiple theses with semicolon (;)
                 </p>
               </div>
@@ -593,16 +593,16 @@ export function SingleDrugInsertForm({
           </div>
 
           {/* Section 6: Photo URLs */}
-          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-zinc-800 pb-3">
-              <ImageIcon className="w-5 h-5 text-emerald-400" />
-              <h3 className="text-base font-semibold text-zinc-100">
+          <div className="rounded-2xl border border-[#D9CFB3] bg-[#EAE2CC]/30 p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-[#D9CFB3] pb-3">
+              <ImageIcon className="w-5 h-5 text-[#8A5A00]" />
+              <h3 className="text-base font-serif font-bold text-[#1B2A1F]">
                 6. Photographs & Documentation Media
               </h3>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="photo_urls" className="text-zinc-200">
+              <Label htmlFor="photo_urls" className="text-[#1B2A1F] font-semibold text-xs uppercase tracking-wider">
                 Photo URLs
               </Label>
               <Textarea
@@ -611,22 +611,22 @@ export function SingleDrugInsertForm({
                 value={formData.photo_urls}
                 onChange={(e) => handleChange("photo_urls", e.target.value)}
                 placeholder="e.g. https://example.com/photos/tulsi_whole_plant.jpg; https://example.com/photos/tulsi_leaves.jpg"
-                className="bg-zinc-800/70 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-emerald-500"
+                className="bg-white border-[#D9CFB3] text-[#1B2A1F] placeholder:text-[#56655A] focus-visible:ring-[#8A5A00] rounded-xl"
               />
-              <p className="text-[11px] text-zinc-400">
+              <p className="text-[11px] text-[#56655A]">
                 Separate multiple image URLs with semicolon (;)
               </p>
             </div>
           </div>
 
           {/* Form Actions Footer */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-zinc-800">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-[#D9CFB3]">
             <Button
               type="button"
               variant="outline"
               onClick={handleReset}
               disabled={isSubmitting}
-              className="w-full sm:w-auto border-zinc-700 bg-zinc-800/60 text-zinc-300 hover:bg-zinc-800 hover:text-white cursor-pointer"
+              className="w-full sm:w-auto border border-[#D9CFB3] bg-white text-[#1B2A1F] hover:bg-[#EAE2CC] rounded-xl cursor-pointer"
             >
               <RotateCcw className="w-4 h-4 mr-2" />
               Reset Form
@@ -635,7 +635,7 @@ export function SingleDrugInsertForm({
             <Button
               type="submit"
               disabled={isSubmitting || !formData.primary_name.trim()}
-              className="w-full sm:w-auto bg-gradient-to-r from-emerald-700 to-green-600 hover:from-emerald-800 hover:to-green-700 text-white font-medium px-8 py-2.5 shadow-lg shadow-emerald-950/40 cursor-pointer disabled:opacity-50"
+              className="w-full sm:w-auto bg-[#8A5A00] hover:bg-[#704800] text-white font-semibold px-8 py-2.5 rounded-xl cursor-pointer shadow-xs disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
@@ -653,9 +653,9 @@ export function SingleDrugInsertForm({
         </form>
       </CardContent>
 
-      <CardFooter className="border-t border-zinc-800/60 bg-zinc-950/90 py-3 px-6 flex justify-between items-center text-xs text-zinc-500">
+      <CardFooter className="border-t border-[#D9CFB3] bg-[#EAE2CC]/30 py-3 px-6 flex justify-between items-center text-xs text-[#56655A]">
         <span className="flex items-center gap-1.5">
-          <Info className="h-3.5 w-3.5 text-zinc-400" />
+          <Info className="h-3.5 w-3.5 text-[#56655A]" />
           Fields with (*) are required. Existing drug names will be safely updated without duplicates.
         </span>
         <span className="hidden sm:inline">Folklore Diaries Drug Registry</span>
