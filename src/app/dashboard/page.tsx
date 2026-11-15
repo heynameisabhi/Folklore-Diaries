@@ -395,7 +395,6 @@ export default function Dashboard() {
   }
 
   const username = session.user?.name || session.user?.email?.split("@")[0] || "user";
-  const initials = username.slice(0, 1).toUpperCase();
 
   return (
     <div
@@ -517,18 +516,6 @@ export default function Dashboard() {
 
       {/* ── Main Container ── */}
       <main style={{ padding: "22px clamp(18px,4vw,48px) 56px", maxWidth: 1180, width: "100%", margin: "0 auto" }}>
-        
-        {/* Top bar */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-          <span className="pill">Researcher panel</span>
-          <div style={{ display: "flex", gap: 10, alignItems: "center", color: "var(--muted)", fontSize: 14 }}>
-            <span>{username}</span>
-            <div style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--accent-soft)", display: "grid", placeItems: "center", fontWeight: 600, fontFamily: "var(--serif)" }}>
-              {initials}
-            </div>
-          </div>
-        </div>
-
         {/* Decorative Diamond Band */}
         <DiamondBand />
 
