@@ -60,6 +60,7 @@ export default function AdminDashboardLayout({
 
   return (
     <div
+      data-panel="curator"
       style={{
         ["--accent" as any]: "#8A5A00",
         ["--accent-soft" as any]: "#F3E3B8",
@@ -69,13 +70,17 @@ export default function AdminDashboardLayout({
         ["--surface" as any]: "#FDFBF4",
         ["--ink" as any]: "#1B2A1F",
         ["--muted" as any]: "#56655A",
+        ["--plant" as any]: "#3F7A4B",
+        ["--warn" as any]: "#B4531A",
+        ["--warn-soft" as any]: "#F6E2CF",
         ["--serif" as any]: '"Fraunces", Georgia, serif',
         ["--sans" as any]: '"Hind", system-ui, -apple-system, "Segoe UI", sans-serif',
       }}
-      className="flex h-[calc(100vh-64px)] mt-[64px] relative bg-[var(--bg)] text-[var(--ink)] font-sans"
+      className="flex h-[calc(100vh-64px)] mt-[64px] relative bg-[var(--bg)] text-[var(--ink)] font-sans curator-scope"
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Hind:wght@400;500;600&display=swap');
+        
         .curator-nav-link {
           display: flex;
           align-items: center;
@@ -118,6 +123,112 @@ export default function AdminDashboardLayout({
           background: var(--surface);
           color: var(--accent);
           font-weight: 600;
+        }
+
+        /* ── Unified Curator Theme Cascading to All Admin Sub-pages ── */
+        [data-panel="curator"] {
+          background-color: var(--bg);
+          color: var(--ink);
+        }
+
+        /* Convert dark background containers to parchment surface */
+        [data-panel="curator"] .bg-black,
+        [data-panel="curator"] .bg-zinc-950,
+        [data-panel="curator"] .bg-zinc-950\/70,
+        [data-panel="curator"] .bg-zinc-950\/80,
+        [data-panel="curator"] .bg-zinc-950\/90,
+        [data-panel="curator"] .bg-zinc-900,
+        [data-panel="curator"] .bg-zinc-900\/40,
+        [data-panel="curator"] .bg-zinc-900\/50,
+        [data-panel="curator"] .bg-zinc-900\/60,
+        [data-panel="curator"] .bg-zinc-900\/70,
+        [data-panel="curator"] .bg-zinc-900\/80 {
+          background-color: var(--surface) !important;
+          color: var(--ink) !important;
+        }
+
+        /* Secondary sunks (input backgrounds, secondary pills) */
+        [data-panel="curator"] .bg-zinc-800,
+        [data-panel="curator"] .bg-zinc-800\/50,
+        [data-panel="curator"] .bg-zinc-850 {
+          background-color: var(--sunk) !important;
+        }
+
+        /* Gradients on sub-pages (e.g. generate report) */
+        [data-panel="curator"] .bg-gradient-to-b.from-black.to-zinc-900,
+        [data-panel="curator"] .bg-gradient-to-r.from-zinc-900.to-zinc-800 {
+          background: var(--bg) !important;
+        }
+
+        /* Borders across tables, cards, dialogs */
+        [data-panel="curator"] .border-zinc-800,
+        [data-panel="curator"] .border-zinc-700,
+        [data-panel="curator"] .border-zinc-850,
+        [data-panel="curator"] .border-zinc-900,
+        [data-panel="curator"] .border-zinc-800\/80,
+        [data-panel="curator"] .border-zinc-800\/50 {
+          border-color: var(--line) !important;
+        }
+
+        /* Typography overrides */
+        [data-panel="curator"] .text-white,
+        [data-panel="curator"] .text-zinc-100,
+        [data-panel="curator"] .text-zinc-200,
+        [data-panel="curator"] .text-gray-200 {
+          color: var(--ink) !important;
+        }
+
+        [data-panel="curator"] .text-zinc-400,
+        [data-panel="curator"] .text-zinc-500,
+        [data-panel="curator"] .text-zinc-600 {
+          color: var(--muted) !important;
+        }
+
+        /* Inputs, selects, and textareas */
+        [data-panel="curator"] input:not([type="checkbox"]):not([type="radio"]),
+        [data-panel="curator"] select,
+        [data-panel="curator"] textarea {
+          background-color: var(--surface) !important;
+          border-color: var(--line) !important;
+          color: var(--ink) !important;
+        }
+
+        [data-panel="curator"] input::placeholder,
+        [data-panel="curator"] textarea::placeholder {
+          color: var(--muted) !important;
+        }
+
+        /* Table header & row styling */
+        [data-panel="curator"] table,
+        [data-panel="curator"] th,
+        [data-panel="curator"] td {
+          border-color: var(--line) !important;
+          color: var(--ink);
+        }
+        [data-panel="curator"] tr:hover {
+          background-color: var(--sunk) !important;
+        }
+
+        /* Action buttons & badges */
+        [data-panel="curator"] .bg-emerald-600,
+        [data-panel="curator"] .bg-emerald-700 {
+          background-color: var(--accent) !important;
+          color: var(--accent-ink) !important;
+        }
+
+        [data-panel="curator"] .text-emerald-400,
+        [data-panel="curator"] .text-emerald-500 {
+          color: var(--accent) !important;
+        }
+
+        [data-panel="curator"] .bg-emerald-950\/40,
+        [data-panel="curator"] .bg-emerald-950\/50,
+        [data-panel="curator"] .bg-emerald-950\/60,
+        [data-panel="curator"] .bg-emerald-950\/80,
+        [data-panel="curator"] .bg-emerald-500\/10 {
+          background-color: var(--accent-soft) !important;
+          color: var(--accent) !important;
+          border-color: var(--line) !important;
         }
       `}</style>
 

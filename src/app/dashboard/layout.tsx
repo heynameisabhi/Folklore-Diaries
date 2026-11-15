@@ -79,6 +79,7 @@ export default function DashboardLayout({
 
   return (
     <div
+      data-panel="researcher"
       style={{
         ["--bg" as any]: "#EEF1E6",
         ["--surface" as any]: "#FBFCF7",
@@ -89,13 +90,17 @@ export default function DashboardLayout({
         ["--accent" as any]: "#1F5A3D",
         ["--accent-ink" as any]: "#fff",
         ["--accent-soft" as any]: "#D5E6D3",
+        ["--plant" as any]: "#3F7A4B",
+        ["--warn" as any]: "#B4531A",
+        ["--warn-soft" as any]: "#F6E2CF",
         ["--serif" as any]: '"Fraunces", Georgia, serif',
         ["--sans" as any]: '"Hind", system-ui, -apple-system, "Segoe UI", sans-serif',
       }}
-      className="flex h-[calc(100vh-64px)] mt-[64px] relative bg-[var(--bg)] text-[var(--ink)] font-sans"
+      className="flex h-[calc(100vh-64px)] mt-[64px] relative bg-[var(--bg)] text-[var(--ink)] font-sans researcher-scope"
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Hind:wght@400;500;600&display=swap');
+        
         .researcher-nav-link {
           display: flex;
           align-items: center;
@@ -117,6 +122,112 @@ export default function DashboardLayout({
           color: var(--ink);
           box-shadow: inset 3px 0 0 var(--accent);
           font-weight: 600;
+        }
+
+        /* ── Unified Researcher Theme Cascading to All User Sub-pages ── */
+        [data-panel="researcher"] {
+          background-color: var(--bg);
+          color: var(--ink);
+        }
+
+        /* Convert dark background containers to herbarium surface */
+        [data-panel="researcher"] .bg-black,
+        [data-panel="researcher"] .bg-zinc-950,
+        [data-panel="researcher"] .bg-zinc-950\/70,
+        [data-panel="researcher"] .bg-zinc-950\/80,
+        [data-panel="researcher"] .bg-zinc-950\/90,
+        [data-panel="researcher"] .bg-zinc-900,
+        [data-panel="researcher"] .bg-zinc-900\/40,
+        [data-panel="researcher"] .bg-zinc-900\/50,
+        [data-panel="researcher"] .bg-zinc-900\/60,
+        [data-panel="researcher"] .bg-zinc-900\/70,
+        [data-panel="researcher"] .bg-zinc-900\/80 {
+          background-color: var(--surface) !important;
+          color: var(--ink) !important;
+        }
+
+        /* Secondary sunks (input backgrounds, secondary pills) */
+        [data-panel="researcher"] .bg-zinc-800,
+        [data-panel="researcher"] .bg-zinc-800\/50,
+        [data-panel="researcher"] .bg-zinc-850 {
+          background-color: var(--sunk) !important;
+        }
+
+        /* Gradients on sub-pages */
+        [data-panel="researcher"] .bg-gradient-to-b.from-black.to-zinc-900,
+        [data-panel="researcher"] .bg-gradient-to-r.from-zinc-900.to-zinc-800 {
+          background: var(--bg) !important;
+        }
+
+        /* Borders across tables, cards, dialogs */
+        [data-panel="researcher"] .border-zinc-800,
+        [data-panel="researcher"] .border-zinc-700,
+        [data-panel="researcher"] .border-zinc-850,
+        [data-panel="researcher"] .border-zinc-900,
+        [data-panel="researcher"] .border-zinc-800\/80,
+        [data-panel="researcher"] .border-zinc-800\/50 {
+          border-color: var(--line) !important;
+        }
+
+        /* Typography overrides */
+        [data-panel="researcher"] .text-white,
+        [data-panel="researcher"] .text-zinc-100,
+        [data-panel="researcher"] .text-zinc-200,
+        [data-panel="researcher"] .text-gray-200 {
+          color: var(--ink) !important;
+        }
+
+        [data-panel="researcher"] .text-zinc-400,
+        [data-panel="researcher"] .text-zinc-500,
+        [data-panel="researcher"] .text-zinc-600 {
+          color: var(--muted) !important;
+        }
+
+        /* Inputs, selects, and textareas */
+        [data-panel="researcher"] input:not([type="checkbox"]):not([type="radio"]),
+        [data-panel="researcher"] select,
+        [data-panel="researcher"] textarea {
+          background-color: var(--surface) !important;
+          border-color: var(--line) !important;
+          color: var(--ink) !important;
+        }
+
+        [data-panel="researcher"] input::placeholder,
+        [data-panel="researcher"] textarea::placeholder {
+          color: var(--muted) !important;
+        }
+
+        /* Table header & row styling */
+        [data-panel="researcher"] table,
+        [data-panel="researcher"] th,
+        [data-panel="researcher"] td {
+          border-color: var(--line) !important;
+          color: var(--ink);
+        }
+        [data-panel="researcher"] tr:hover {
+          background-color: var(--sunk) !important;
+        }
+
+        /* Action buttons & badges */
+        [data-panel="researcher"] .bg-emerald-600,
+        [data-panel="researcher"] .bg-emerald-700 {
+          background-color: var(--accent) !important;
+          color: var(--accent-ink) !important;
+        }
+
+        [data-panel="researcher"] .text-emerald-400,
+        [data-panel="researcher"] .text-emerald-500 {
+          color: var(--accent) !important;
+        }
+
+        [data-panel="researcher"] .bg-emerald-950\/40,
+        [data-panel="researcher"] .bg-emerald-950\/50,
+        [data-panel="researcher"] .bg-emerald-950\/60,
+        [data-panel="researcher"] .bg-emerald-950\/80,
+        [data-panel="researcher"] .bg-emerald-500\/10 {
+          background-color: var(--accent-soft) !important;
+          color: var(--accent) !important;
+          border-color: var(--line) !important;
         }
       `}</style>
 
