@@ -3,17 +3,39 @@
 import type React from "react";
 import { useState } from "react";
 import {
-  Database,
   ChevronRight,
-  LayoutDashboard,
-  BrainCircuit,
-  Search,
   Menu,
   X,
+  Home,
+  BookOpen,
+  Search,
+  Sparkles,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+
+/* ── Lotus icon symbol matching the HTML wireframe ── */
+function LotusIcon({ size = 26, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      style={{ flex: "none" }}
+      aria-hidden="true"
+    >
+      <path d="M12 20C8 17 7 12 12 5c5 7 4 12 0 15z" />
+      <path d="M12 20C6 20 3 16 3 11c4 0 7 2 9 9z" />
+      <path d="M12 20c6 0 9-4 9-9-4 0-7 2-9 9z" />
+    </svg>
+  );
+}
 
 export default function DashboardLayout({
   children,
@@ -28,148 +50,197 @@ export default function DashboardLayout({
     setMobileOpen(false);
   };
 
+  const navItems = [
+    {
+      label: "Home",
+      href: "/dashboard",
+      icon: Home,
+      exact: true,
+    },
+    {
+      label: "Formulations",
+      href: "/dashboard/data",
+      icon: BookOpen,
+      exact: false,
+    },
+    {
+      label: "Manual search",
+      href: "/dashboard/manual-search",
+      icon: Search,
+      exact: false,
+    },
+    {
+      label: "Ask AI",
+      href: "/dashboard/ai-search",
+      icon: Sparkles,
+      exact: false,
+    },
+  ];
+
   return (
-    <div className="flex h-[calc(100vh-64px)] bg-black/50 mt-[64px] relative">
+    <div
+      style={{
+        ["--bg" as any]: "#EEF1E6",
+        ["--surface" as any]: "#FBFCF7",
+        ["--sunk" as any]: "#E3E8D8",
+        ["--ink" as any]: "#1B2A1F",
+        ["--muted" as any]: "#56655A",
+        ["--line" as any]: "#CFD7C3",
+        ["--accent" as any]: "#1F5A3D",
+        ["--accent-ink" as any]: "#fff",
+        ["--accent-soft" as any]: "#D5E6D3",
+        ["--serif" as any]: '"Fraunces", Georgia, serif',
+        ["--sans" as any]: '"Hind", system-ui, -apple-system, "Segoe UI", sans-serif',
+      }}
+      className="flex h-[calc(100vh-64px)] mt-[64px] relative bg-[var(--bg)] text-[var(--ink)] font-sans"
+    >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Hind:wght@400;500;600&display=swap');
+        .researcher-nav-link {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 10px 12px;
+          border-radius: 10px;
+          color: var(--muted);
+          text-decoration: none;
+          font-weight: 500;
+          font-size: 15px;
+          transition: background .15s, color .15s;
+        }
+        .researcher-nav-link:hover {
+          background: var(--surface);
+          color: var(--ink);
+        }
+        .researcher-nav-link.active {
+          background: var(--surface);
+          color: var(--ink);
+          box-shadow: inset 3px 0 0 var(--accent);
+          font-weight: 600;
+        }
+      `}</style>
+
       {/* Mobile Drawer Backdrop */}
       {mobileOpen && (
         <div
           onClick={() => setMobileOpen(false)}
-          className="fixed inset-0 top-[64px] bg-black/70 backdrop-blur-sm z-40 md:hidden transition-opacity"
+          className="fixed inset-0 top-[64px] bg-black/40 backdrop-blur-sm z-40 md:hidden transition-opacity"
         />
       )}
 
-      {/* Sidebar */}
-      <div
-        className={cn(
-          "h-[calc(100vh-64px)] top-[64px] bg-black flex flex-col border-r border-zinc-800 transition-all duration-300 fixed z-50",
-          // Mobile state
-          mobileOpen ? "left-0 w-[280px]" : "-left-full md:left-0",
-          // Desktop state
-          collapsed ? "md:w-[80px]" : "md:w-[300px]"
-        )}
+      {/* Sidebar matching aside.side in the wireframe */}
+      <aside
+        style={{
+          background: "var(--sunk)",
+          borderColor: "var(--line)",
+        }}
+        className={`h-[calc(100vh-64px)] top-[64px] flex flex-col border-r transition-all duration-300 fixed z-50 p-4 ${
+          mobileOpen ? "left-0 w-[260px]" : "-left-full md:left-0"
+        } ${collapsed ? "md:w-[80px]" : "md:w-[250px]"}`}
       >
-        {/* Logo area */}
-        <div className="flex items-center justify-between p-4 border-b border-zinc-800">
-          <div className="flex items-center">
-            <div className="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-md shrink-0">
-              <LayoutDashboard className="w-6 h-6 text-white" />
+        {/* Brand identity area */}
+        <div className="flex items-center justify-between pb-4 border-b border-[var(--line)]">
+          <div className="flex items-center gap-2.5 px-1 min-w-0">
+            <div className="text-[var(--accent)] flex items-center justify-center shrink-0">
+              <LotusIcon size={32} />
             </div>
             {(!collapsed || mobileOpen) && (
-              <div className="ml-3">
-                <h2 className="text-white font-semibold text-sm sm:text-base">User Panel</h2>
-                <p className="text-xs text-zinc-400">Dashboard</p>
+              <div className="min-w-0">
+                <b
+                  style={{ fontFamily: "var(--serif)" }}
+                  className="font-semibold text-[17px] leading-tight block text-[var(--ink)] truncate"
+                >
+                  Folklore Diaries
+                </b>
+                <small className="block text-[var(--muted)] text-[12.5px] -mt-0.5">
+                  Researcher panel
+                </small>
               </div>
             )}
           </div>
+
           {/* Mobile close button */}
           <button
             onClick={() => setMobileOpen(false)}
-            className="p-1 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 md:hidden cursor-pointer"
+            className="p-1 rounded-md text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface)] md:hidden cursor-pointer"
+            aria-label="Close menu"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 py-4 px-2 space-y-2 overflow-y-auto">
-          {/* Dashboard Link */}
-          <Link
-            href="/dashboard"
-            onClick={handleLinkClick}
-            className={cn(
-              "flex items-center px-4 py-2 text-sm rounded-md transition-colors",
-              pathname === "/dashboard"
-                ? "bg-gradient-to-r from-emerald-900/50 to-green-900/30 text-white font-medium"
-                : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
-            )}
-          >
-            <LayoutDashboard className="w-5 h-5 text-emerald-500 mr-3 shrink-0" />
-            {(!collapsed || mobileOpen) && <span>Dashboard</span>}
-          </Link>
+        {/* Navigation list */}
+        <nav className="flex-1 py-4 space-y-1 overflow-y-auto">
+          {navItems.map((item) => {
+            const isActive = item.exact
+              ? pathname === item.href
+              : pathname.startsWith(item.href);
+            const ItemIcon = item.icon;
 
-          {/* View Drug Data */}
-          <Link
-            href="/dashboard/data"
-            onClick={handleLinkClick}
-            className={cn(
-              "flex items-center px-4 py-2 text-sm rounded-md transition-colors",
-              pathname === "/dashboard/data" || pathname === "/dashboard/data/view"
-                ? "bg-gradient-to-r from-emerald-900/50 to-green-900/30 text-white font-medium"
-                : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
-            )}
-          >
-            <Database className="w-5 h-5 text-emerald-500 mr-3 shrink-0" />
-            {(!collapsed || mobileOpen) && <span>View Drug Data</span>}
-          </Link>
-
-          {/* Manual Search Link */}
-          <Link
-            href="/dashboard/manual-search"
-            onClick={handleLinkClick}
-            className={cn(
-              "flex items-center px-4 py-2 text-sm rounded-md transition-colors",
-              pathname === "/dashboard/manual-search"
-                ? "bg-gradient-to-r from-emerald-900/50 to-green-900/30 text-white font-medium"
-                : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
-            )}
-          >
-            <Search className="w-5 h-5 text-emerald-500 mr-3 shrink-0" />
-            {(!collapsed || mobileOpen) && <span>Manual Search</span>}
-          </Link>
-
-          {/* AI Search Link */}
-          <Link
-            href="/dashboard/ai-search"
-            onClick={handleLinkClick}
-            className={cn(
-              "flex items-center px-4 py-2 text-sm rounded-md transition-colors",
-              pathname === "/dashboard/ai-search"
-                ? "bg-gradient-to-r from-emerald-900/50 to-green-900/30 text-white font-medium"
-                : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
-            )}
-          >
-            <BrainCircuit className="w-5 h-5 text-emerald-500 mr-3 shrink-0" />
-            {(!collapsed || mobileOpen) && <span>AI Search</span>}
-          </Link>
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={handleLinkClick}
+                className={`researcher-nav-link ${isActive ? "active" : ""}`}
+                title={collapsed ? item.label : undefined}
+              >
+                <ItemIcon
+                  className="w-5 h-5 shrink-0"
+                  style={{ color: isActive ? "var(--accent)" : "currentColor" }}
+                />
+                {(!collapsed || mobileOpen) && <span>{item.label}</span>}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Collapse button (Desktop only) */}
-        <div className="p-4 border-t border-zinc-800 hidden md:block">
+        <div className="pt-3 border-t border-[var(--line)] hidden md:block">
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="flex items-center justify-center w-full p-2 text-sm text-zinc-400 rounded-md hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
+            className="flex items-center justify-center w-full p-2 text-xs font-medium text-[var(--muted)] rounded-lg hover:bg-[var(--surface)] hover:text-[var(--ink)] transition-colors cursor-pointer"
           >
             {collapsed ? (
               <ChevronRight className="w-5 h-5" />
             ) : (
-              <div className="flex items-center">
-                <ChevronRight className="w-5 h-5 rotate-180 mr-2" />
-                <span>Collapse</span>
+              <div className="flex items-center gap-2">
+                <ChevronRight className="w-4 h-4 rotate-180" />
+                <span>Collapse sidebar</span>
               </div>
             )}
           </button>
         </div>
-      </div>
+      </aside>
 
-      {/* Main content */}
+      {/* Main content wrapper */}
       <main
-        className={cn(
-          "flex-1 min-w-0 overflow-auto transition-[margin-left] duration-300 h-full flex flex-col",
-          collapsed ? "md:ml-[80px]" : "md:ml-[300px]",
-          "ml-0"
-        )}
+        className={`flex-1 min-w-0 overflow-auto transition-[margin-left] duration-300 h-full flex flex-col ${
+          collapsed ? "md:ml-[80px]" : "md:ml-[250px]"
+        } ml-0`}
       >
         {/* Mobile Subheader Bar */}
-        <div className="md:hidden flex items-center justify-between px-4 py-2.5 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800 sticky top-0 z-30 shrink-0">
+        <div
+          style={{
+            background: "var(--sunk)",
+            borderColor: "var(--line)",
+          }}
+          className="md:hidden flex items-center justify-between px-4 py-2.5 border-b sticky top-0 z-30 shrink-0"
+        >
           <button
             onClick={() => setMobileOpen(true)}
-            className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white text-xs cursor-pointer"
+            style={{
+              background: "var(--surface)",
+              borderColor: "var(--line)",
+              color: "var(--ink)",
+            }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium cursor-pointer shadow-sm"
           >
-            <Menu className="w-4 h-4 text-emerald-400" />
+            <Menu className="w-4 h-4 text-[var(--accent)]" />
             <span>Navigation Menu</span>
           </button>
-          <span className="text-xs text-zinc-400 font-medium">
-            Folklore Repository
+          <span className="text-xs font-medium text-[var(--muted)]">
+            Researcher Panel
           </span>
         </div>
 
