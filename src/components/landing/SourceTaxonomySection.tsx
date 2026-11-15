@@ -16,44 +16,44 @@ interface Category {
 
 const CATEGORIES: Category[] = [
   {
-    title: "Plant Origin",
-    sanskrit: "वनस्पति (Vanaspati)",
-    tag: "BOTANICAL FLORA",
+    title: "Fresh Medicinal Herbs",
+    sanskrit: "पत्र व वनस्पति (Patra & Vanaspati)",
+    tag: "FRESH BOTANICALS",
     description:
-      "Medicinal leaves, barks, rhizomes, and wild-harvested herbs used for single-drug and compound decoctions.",
-    examples: "Tulsi · Ashwagandha · Neem · Brahmi",
-    image: "/images/vanaspati-plant.jpg",
-    count: "350+ Taxa",
+      "Fresh leaves, whole wild-harvested herbs, and aerial plant parts used for single-herb extracts, fresh juices (Swarasa), and poultices.",
+    examples: "Tulsi (Holy Basil) · Neem · Brahmi · Vasa",
+    image: "/images/medicinal-tulsi.jpg",
+    count: "350+ Herbs",
   },
   {
-    title: "Organic Origin",
-    sanskrit: "जाङ्गम (Jangama)",
-    tag: "ORGANIC DERIVATIVES",
+    title: "Rhizomes, Roots & Churnas",
+    sanskrit: "मूल व चूर्ण (Moola & Churna)",
+    tag: "HERBAL POWDERS & ROOTS",
     description:
-      "Natural therapeutic byproducts including raw wild honey, purified resins, and traditional carriers.",
-    examples: "Madhu (Raw Honey) · Ghruta · Natural Resins",
-    image: "/images/jangama-organic.jpg",
-    count: "40+ Sources",
+      "Fine therapeutic powders and active rhizomes harvested, sun-dried, and compounded according to classical Ayurvedic samhitās.",
+    examples: "Haridra (Turmeric) · Ashwagandha · Triphala · Shatavari",
+    image: "/images/turmeric-medicine.jpg",
+    count: "180+ Formulations",
   },
   {
-    title: "Mineral Origin",
-    sanskrit: "पार्थिव (Parthiva)",
-    tag: "MINERAL & EARTH",
+    title: "Medicated Oils & Decoctions",
+    sanskrit: "तैल व कषाय (Taila & Kashayam)",
+    tag: "HERBAL OILS & EXTRACTS",
     description:
-      "Purified natural ores, elemental minerals, and geo-deposits prepared through classical purification protocols.",
-    examples: "Shilajit · Swarna Makshika · Gairika",
-    image: "/images/parthiva-mineral.jpg",
-    count: "30+ Minerals",
+      "Slow-infused therapeutic herbal oils (Taila) and concentrated water decoctions (Kashayam) prepared through classical heat processing.",
+    examples: "Kshirabala Taila · Mahanarayan · Dashamoola Kashaya",
+    image: "/images/herbal-oil-taila.jpg",
+    count: "90+ Preparations",
   },
   {
-    title: "Lineage & Texts",
-    sanskrit: "ग्रन्थ व परम्परा (Grantha)",
-    tag: "MANUSCRIPTS & LINEAGE",
+    title: "Therapeutic Spices & Compounds",
+    sanskrit: "दीपन व पाचन द्रव्य (Deepana Dravya)",
+    tag: "MEDICINAL SPICES & SEEDS",
     description:
-      "Uncataloged palm-leaf folios, regional healer lineages, and preserved oral guru-shishya traditions.",
-    examples: "Talapatra Folios · Folk Vaidya Lineages",
-    image: "/images/grantha-manuscript.jpg",
-    count: "120+ Healers",
+      "Classical medicinal spices, seeds, and aromatic botanical catalysts used to stimulate digestive fire (Agni) and compound multi-herb formulas.",
+    examples: "Trikatu (Pippali, Maricha, Shunti) · Elaichi · Lavanga · Twak",
+    image: "/images/ayurvedic-spices.jpg",
+    count: "75+ Compounds",
   },
 ];
 
@@ -64,15 +64,16 @@ export default function SourceTaxonomySection() {
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900/60 text-zinc-400 text-xs font-mono tracking-wider mb-4">
-              <span>●</span> TAXONOMIC CLASSIFICATION
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-800 bg-zinc-950/60 text-zinc-400 text-xs font-mono tracking-wider mb-4">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span>AYURVEDIC MATERIA MEDICA</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-semibold text-white tracking-tight">
-              Classified by Natural Origin
+              Ayurvedic Herbs & Formulations
             </h2>
             <p className="text-zinc-400 text-sm md:text-base mt-2 max-w-xl">
-              Following traditional classical principles, formulations in the
-              archive are structured across four fundamental source disciplines.
+              From fresh sacred leaves and sun-dried roots to medicated churnas and infused oils,
+              explore traditional botanical medicines cataloged across four primary preparation disciplines.
             </p>
           </div>
 
@@ -80,7 +81,7 @@ export default function SourceTaxonomySection() {
             href="/sign-in"
             className="inline-flex items-center gap-2 text-xs font-medium text-zinc-300 hover:text-white transition-colors group self-start md:self-end"
           >
-            <span>Browse Full Classification</span>
+            <span>Explore Herb Repository</span>
             <ArrowUpRight className="w-4 h-4 text-emerald-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </Link>
         </div>
@@ -126,7 +127,7 @@ export default function SourceTaxonomySection() {
 
                 {/* Example pill */}
                 <div className="mt-4 pt-3 border-t border-zinc-900/90 text-[11px] text-zinc-400 font-mono truncate">
-                  <span className="text-zinc-400">Ex: </span>
+                  <span className="text-zinc-500">Ex: </span>
                   {cat.examples}
                 </div>
               </div>
@@ -137,4 +138,3 @@ export default function SourceTaxonomySection() {
     </section>
   );
 }
-

@@ -118,8 +118,8 @@ export default function HeroSection() {
                 {/* Image Container */}
                 <div className="relative aspect-[4/5] w-full rounded-xl overflow-hidden bg-zinc-900">
                   <Image
-                    src="/images/hero-apothecary.jpg"
-                    alt="Authentic traditional herbal apothecary with mortar and fresh botanicals"
+                    src="/images/ayurvedic-mortar.jpg"
+                    alt="Authentic traditional Ayurvedic herb preparation with stone mortar and fresh botanicals"
                     fill
                     priority
                     sizes="(max-width: 768px) 100vw, 420px"
@@ -131,20 +131,20 @@ export default function HeroSection() {
                   <div className="absolute top-3.5 left-3.5">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-black/60 backdrop-blur-md border border-white/10 text-[11px] font-mono text-zinc-300">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                      SPECIMEN NO. 01 • BOTANICA
+                      AYURVEDIC HERBARIUM • SPECIMEN 01
                     </span>
                   </div>
 
                   {/* Bottom Image Plaque */}
                   <div className="absolute bottom-4 left-4 right-4">
                     <p className="text-xs font-mono uppercase tracking-widest text-emerald-400">
-                      Materia Medica & Lineage
+                      Classical Herbal Preparation
                     </p>
                     <h3 className="text-sm font-medium text-white mt-0.5">
-                      Traditional Mortar & Pestle (Kharal) Preparation
+                      Stone Kharal & Fresh Leaf Grinding (कल्क / Kalka)
                     </h3>
                     <p className="text-[11px] text-zinc-400 mt-1 line-clamp-1">
-                      Preserving traditional grinding, extraction, and fresh leaf decoction methods.
+                      Traditional crushing, extraction, and fresh leaf decoctions of healing plants.
                     </p>
                   </div>
                 </div>
