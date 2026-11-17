@@ -8,6 +8,7 @@ import axios from "axios";
 import { drug } from "@prisma/client";
 import Link from "next/link";
 import { getWeeklyChartData } from "@/helpers/getWeeklyChartData";
+import { formatUrl, parseResearchItem, renderClickableText } from "@/helpers/linkUtils";
 
 type ChartDataPoint = {
   name: string;
@@ -231,6 +232,9 @@ type Formulation = {
   use: string;
   ing: string;
   ref: string;
+  refLink?: string | null;
+  research?: { title: string; link: string | null; type: string | null }[];
+  photos?: { image_url: string | null }[];
   when: string;
 };
 
@@ -315,8 +319,11 @@ export default function Dashboard() {
       const descParts = [botanical, r.botanical_description].filter(Boolean);
       const ingredientsText = descParts.length > 0 ? descParts.join(" · ") : "Medicinal herbal botanical";
 
-      const refText =
-        r.research?.[0]?.title || "Folklore Repository Cataloged Entry";
+      const parsedResearch = (r.research || []).map((res: any) => parseResearchItem(res));
+      const firstRes = parsedResearch[0];
+      const refText = firstRes?.title || "Folklore Repository Cataloged Entry";
+      const refLink = firstRes?.link || null;
+      const validPhotos = (r.drug_photos || []).filter((p: any) => Boolean(p.image_url));
 
       const whenText = r.created_at
         ? new Date(r.created_at).toLocaleDateString("en-IN", {
@@ -345,6 +352,9 @@ export default function Dashboard() {
         use: useText,
         ing: ingredientsText,
         ref: refText,
+        refLink,
+        research: parsedResearch,
+        photos: validPhotos,
         when: whenText,
       };
     });
@@ -786,6 +796,27 @@ export default function Dashboard() {
                       {f.d.map((dosha) => (
                         <span key={dosha} className="tag">{dosha}</span>
                       ))}
+                      {f.refLink && (
+                        <a
+                          href={f.refLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="tag"
+                          style={{
+                            color: "var(--accent)",
+                            background: "var(--accent-soft)",
+                            textDecoration: "none",
+                            fontWeight: 600,
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 3,
+                          }}
+                          title={`Scientific Publication: ${f.ref}`}
+                        >
+                          Study Link ↗
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -874,13 +905,97 @@ export default function Dashboard() {
                 <dt>Source type</dt>
                 <dd>{SOURCES[activeDrawerItem.src][0]}</dd>
                 <dt>Used for</dt>
-                <dd>{activeDrawerItem.use}</dd>
+                <dd>{renderClickableText(activeDrawerItem.use)}</dd>
                 <dt>Balances</dt>
                 <dd>{activeDrawerItem.d.join(", ")}</dd>
                 <dt>Ingredients</dt>
-                <dd>{activeDrawerItem.ing}</dd>
+                <dd>{renderClickableText(activeDrawerItem.ing)}</dd>
                 <dt>Reference</dt>
-                <dd>{activeDrawerItem.ref}</dd>
+                <dd>
+                  {activeDrawerItem.refLink ? (
+                    <a
+                      href={activeDrawerItem.refLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        color: "var(--accent)",
+                        fontWeight: 600,
+                        textDecoration: "underline",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 4,
+                      }}
+                    >
+                      {activeDrawerItem.ref} ↗
+                    </a>
+                  ) : (
+                    renderClickableText(activeDrawerItem.ref)
+                  )}
+                </dd>
+                {activeDrawerItem.research && activeDrawerItem.research.length > 1 && (
+                  <>
+                    <dt>Publications</dt>
+                    <dd>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                        {activeDrawerItem.research.slice(1).map((res, ri) => (
+                          res.link ? (
+                            <a
+                              key={ri}
+                              href={res.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                color: "var(--accent)",
+                                textDecoration: "none",
+                                fontWeight: 500,
+                                fontSize: 13,
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 3,
+                              }}
+                            >
+                              {res.title} ↗
+                            </a>
+                          ) : (
+                            <span key={ri} style={{ fontSize: 13, color: "var(--muted)" }}>
+                              {res.title}
+                            </span>
+                          )
+                        ))}
+                      </div>
+                    </dd>
+                  </>
+                )}
+                {activeDrawerItem.photos && activeDrawerItem.photos.length > 0 && (
+                  <>
+                    <dt>Photos</dt>
+                    <dd>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {activeDrawerItem.photos.map((p, pi) =>
+                          p.image_url ? (
+                            <a
+                              key={pi}
+                              href={formatUrl(p.image_url)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="ghost"
+                              style={{
+                                padding: "4px 10px",
+                                fontSize: 13,
+                                textDecoration: "none",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 4,
+                              }}
+                            >
+                              Photo #{pi + 1} ↗
+                            </a>
+                          ) : null
+                        )}
+                      </div>
+                    </dd>
+                  </>
+                )}
                 <dt>Added</dt>
                 <dd>{activeDrawerItem.when}</dd>
               </dl>

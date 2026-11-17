@@ -31,7 +31,9 @@ import {
   AlertTriangle,
   Loader2,
   CheckCircle2,
+  Image as ImageIcon,
 } from "lucide-react";
+import { formatUrl, parseResearchItem, renderClickableText } from "@/helpers/linkUtils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -712,10 +714,68 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
                     </div>
                   )}
 
+                  {/* Research Links Preview */}
+                  {drug.research && drug.research.length > 0 && (
+                    <div className="flex items-center gap-1.5 flex-wrap text-xs">
+                      <span className="font-semibold text-[var(--vdp-ink)]">Research:</span>
+                      {drug.research.slice(0, 3).map((r, i) => {
+                        const parsed = parseResearchItem(r);
+                        return parsed.link ? (
+                          <a
+                            key={i}
+                            href={parsed.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-[var(--vdp-accent-soft)]/60 hover:bg-[var(--vdp-accent)] text-[var(--vdp-accent)] hover:text-white border border-[var(--vdp-accent)]/30 font-medium transition-all text-xs"
+                            title={parsed.title}
+                          >
+                            <BookOpen className="w-3 h-3" />
+                            <span className="max-w-[170px] truncate">{parsed.title}</span>
+                            <ExternalLink className="w-2.5 h-2.5" />
+                          </a>
+                        ) : (
+                          <span key={i} className="px-2 py-0.5 rounded-md bg-[var(--vdp-sunk)] text-[var(--vdp-muted)] border border-[var(--vdp-line)] text-xs">
+                            {parsed.title}
+                          </span>
+                        );
+                      })}
+                      {drug.research.length > 3 && (
+                        <span className="text-[var(--vdp-muted)] text-xs">+{drug.research.length - 3} more</span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Photos Media Preview */}
+                  {drug.photos && drug.photos.length > 0 && (
+                    <div className="flex items-center gap-1.5 flex-wrap text-xs">
+                      <span className="font-semibold text-[var(--vdp-ink)]">Photos:</span>
+                      {drug.photos.slice(0, 3).map((p, i) =>
+                        p.image_url ? (
+                          <a
+                            key={i}
+                            href={formatUrl(p.image_url)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--vdp-sunk)] hover:bg-white text-[var(--vdp-ink)] hover:text-[var(--vdp-accent)] border border-[var(--vdp-line)] font-medium text-xs transition-all"
+                          >
+                            <ImageIcon className="w-3 h-3 text-[var(--vdp-accent)]" />
+                            Photo {i + 1}
+                            <ExternalLink className="w-2.5 h-2.5 text-[var(--vdp-muted)]" />
+                          </a>
+                        ) : null
+                      )}
+                      {drug.photos.length > 3 && (
+                        <span className="text-[var(--vdp-muted)] text-xs">+{drug.photos.length - 3} more</span>
+                      )}
+                    </div>
+                  )}
+
                   {/* Description preview */}
                   {drug.botanical_description && (
                     <p className="text-xs text-[var(--vdp-muted)] line-clamp-2 leading-relaxed">
-                      {drug.botanical_description}
+                      {renderClickableText(drug.botanical_description)}
                     </p>
                   )}
                 </div>
@@ -817,7 +877,7 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
                     Botanical Description
                   </h4>
                   <p className="text-[var(--vdp-ink)] text-sm leading-relaxed bg-[var(--vdp-sunk)]/40 p-3.5 rounded-xl border border-[var(--vdp-line)]">
-                    {selectedRecord.botanical_description}
+                    {renderClickableText(selectedRecord.botanical_description)}
                   </p>
                 </div>
               )}
@@ -878,7 +938,7 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
                             For: {um.disease.name}
                           </span>
                         )}
-                        {um.method_description}
+                        {renderClickableText(um.method_description)}
                       </div>
                     ))}
                   </div>
@@ -892,27 +952,83 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
                     Scientific Research & References
                   </h4>
                   <div className="space-y-2">
-                    {selectedRecord.research.map((r, i) => (
-                      <div
-                        key={i}
-                        className="bg-[var(--vdp-sunk)]/40 border border-[var(--vdp-line)] p-3 rounded-xl flex items-center justify-between gap-3 text-xs"
-                      >
-                        <div>
-                          <div className="text-[var(--vdp-ink)] font-semibold">{r.title}</div>
-                          {r.type && <span className="text-[var(--vdp-muted)] uppercase text-[10px]">{r.type}</span>}
+                    {selectedRecord.research.map((r, i) => {
+                      const parsed = parseResearchItem(r);
+                      return (
+                        <div
+                          key={i}
+                          className="bg-[var(--vdp-sunk)]/40 border border-[var(--vdp-line)] p-3.5 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                        >
+                          <div className="space-y-1">
+                            <div className="text-[var(--vdp-ink)] font-semibold text-sm">
+                              {parsed.link ? (
+                                <a
+                                  href={parsed.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[var(--vdp-ink)] hover:text-[var(--vdp-accent)] hover:underline inline-flex items-center gap-1.5"
+                                >
+                                  {parsed.title}
+                                  <ExternalLink className="w-3.5 h-3.5 text-[var(--vdp-accent)] shrink-0" />
+                                </a>
+                              ) : (
+                                parsed.title
+                              )}
+                            </div>
+                            {parsed.type && (
+                              <span className="inline-block px-2 py-0.5 rounded bg-[var(--vdp-sunk)] text-[var(--vdp-muted)] uppercase text-[10px] font-bold border border-[var(--vdp-line)]">
+                                {parsed.type}
+                              </span>
+                            )}
+                          </div>
+                          {parsed.link && (
+                            <a
+                              href={parsed.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--vdp-accent)] text-white hover:opacity-90 transition-all font-medium text-xs shrink-0 shadow-xs"
+                            >
+                              Open Publication <ExternalLink className="w-3 h-3" />
+                            </a>
+                          )}
                         </div>
-                        {r.link && (
-                          <a
-                            href={r.link}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-[var(--vdp-accent)] hover:underline inline-flex items-center gap-1 shrink-0 font-medium"
-                          >
-                            Read Link <ExternalLink className="w-3 h-3" />
-                          </a>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Photographs & Media Links */}
+              {selectedRecord.photos && selectedRecord.photos.length > 0 && (
+                <div>
+                  <h4 className="text-xs uppercase text-[var(--vdp-muted)] font-semibold tracking-wider mb-2">
+                    Photographs & Documentation Media
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {selectedRecord.photos.map((p, i) => {
+                      if (!p.image_url) return null;
+                      const href = formatUrl(p.image_url);
+                      return (
+                        <a
+                          key={i}
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-3 bg-[var(--vdp-sunk)]/50 hover:bg-white border border-[var(--vdp-line)] hover:border-[var(--vdp-accent)] rounded-xl transition-all block group"
+                        >
+                          <div className="flex items-center justify-between text-xs font-semibold text-[var(--vdp-ink)] group-hover:text-[var(--vdp-accent)]">
+                            <span className="flex items-center gap-1.5">
+                              <ImageIcon className="w-3.5 h-3.5 text-[var(--vdp-accent)]" />
+                              Photo Documentation #{i + 1}
+                            </span>
+                            <ExternalLink className="w-3 h-3 text-[var(--vdp-muted)] group-hover:text-[var(--vdp-accent)]" />
+                          </div>
+                          <span className="text-[11px] text-[var(--vdp-muted)] break-all line-clamp-1 mt-1 block group-hover:underline">
+                            {p.image_url}
+                          </span>
+                        </a>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -941,7 +1057,7 @@ export default function ViewDataPage({ role }: ViewDataPageProps) {
                       {c.address && (
                         <div>
                           <span className="text-[var(--vdp-muted)] block">Address:</span>
-                          <span>{c.address}</span>
+                          <span>{renderClickableText(c.address)}</span>
                         </div>
                       )}
                       {c.guru_name && (

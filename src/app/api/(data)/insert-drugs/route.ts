@@ -237,12 +237,27 @@ export async function POST(request: NextRequest) {
           ];
 
           for (const item of rawResearch) {
+            let title = item.title.trim();
+            let link: string | null = null;
+            if (title.includes("|")) {
+              const parts = title.split("|").map((p) => p.trim());
+              title = parts[0];
+              link = parts[1] || null;
+            } else {
+              const urlMatch = title.match(/(https?:\/\/[^\s]+|www\.[^\s]+|doi\.org\/[^\s]+|10\.\d{4,9}\/[^\s]+)/i);
+              if (urlMatch) {
+                link = urlMatch[0].replace(/[),.;:!?\]\}]+$/, "");
+                const cleanTitle = title.replace(urlMatch[0], "").trim().replace(/^[-–—:()\[\]{}]+|[-–—:()\[\]{}]+$/g, "").trim();
+                title = cleanTitle || link;
+              }
+            }
+
             // Check if this research title and type already exists for this drug
             const existingResearch = await tx.research.findFirst({
               where: {
                 drug_id: drugId,
                 type: item.type,
-                title: { equals: item.title, mode: "insensitive" },
+                title: { equals: title, mode: "insensitive" },
               },
             });
 
@@ -250,8 +265,8 @@ export async function POST(request: NextRequest) {
               await tx.research.create({
                 data: {
                   type: item.type,
-                  title: item.title,
-                  link: null,
+                  title,
+                  link,
                   drug_id: drugId,
                 },
               });

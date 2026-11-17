@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { Search, Loader2, Eye, X, BrainCircuit, Sparkles, Info } from "lucide-react";
+import { Search, Loader2, Eye, X, BrainCircuit, Sparkles, Info, ExternalLink } from "lucide-react";
+import { formatUrl, parseResearchItem, renderClickableText } from "@/helpers/linkUtils";
 import {
   Card,
   CardContent,
@@ -285,7 +286,9 @@ export default function AISearchView({ role = "user" }: { role?: "admin" | "user
                 {selectedItem.botanical_description && (
                   <div className="md:col-span-2">
                     <h4 className="text-xs uppercase text-[var(--ais-muted)] font-semibold mb-1">Botanical Description</h4>
-                    <p className="text-[var(--ais-ink)] text-sm leading-relaxed bg-[var(--ais-sunk)]/40 p-3.5 rounded-xl border border-[var(--ais-line)]">{selectedItem.botanical_description}</p>
+                    <p className="text-[var(--ais-ink)] text-sm leading-relaxed bg-[var(--ais-sunk)]/40 p-3.5 rounded-xl border border-[var(--ais-line)]">
+                      {renderClickableText(selectedItem.botanical_description)}
+                    </p>
                   </div>
                 )}
               </div>
@@ -321,7 +324,7 @@ export default function AISearchView({ role = "user" }: { role?: "admin" | "user
                       <h4 className="text-xs uppercase text-[var(--ais-muted)] font-semibold">Usage Methods</h4>
                       {selectedItem.usage_methods.map((um, i) => (
                         <div key={i} className="bg-[var(--ais-sunk)]/40 p-3 rounded-xl border border-[var(--ais-line)] text-sm text-[var(--ais-ink)]">
-                          {um.method_description}
+                          {renderClickableText(um.method_description)}
                         </div>
                       ))}
                     </div>
@@ -332,19 +335,43 @@ export default function AISearchView({ role = "user" }: { role?: "admin" | "user
               {/* Research */}
               {selectedItem.research.length > 0 && (
                 <div>
-                  <h4 className="text-xs uppercase text-[var(--ais-muted)] font-semibold mb-2">Research</h4>
+                  <h4 className="text-xs uppercase text-[var(--ais-muted)] font-semibold mb-2">Research & Publications</h4>
                   <div className="space-y-2">
-                    {selectedItem.research.map((r, i) => (
-                      <div key={i} className="bg-[var(--ais-sunk)]/40 border border-[var(--ais-line)] p-3 rounded-xl">
-                        <div className="text-[var(--ais-accent)] font-medium">{r.title}</div>
-                        <div className="text-[var(--ais-muted)] text-xs mt-1 uppercase">{r.type}</div>
-                        {r.link && (
-                          <a href={r.link} target="_blank" rel="noreferrer" className="text-[var(--ais-accent)] text-sm mt-2 inline-block hover:underline">
-                            View Link
-                          </a>
-                        )}
-                      </div>
-                    ))}
+                    {selectedItem.research.map((r, i) => {
+                      const parsed = parseResearchItem(r);
+                      return (
+                        <div key={i} className="bg-[var(--ais-sunk)]/40 border border-[var(--ais-line)] p-3.5 rounded-xl flex items-center justify-between gap-3 text-xs">
+                          <div>
+                            <div className="text-[var(--ais-ink)] font-semibold text-sm">
+                              {parsed.link ? (
+                                <a
+                                  href={parsed.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[var(--ais-accent)] hover:underline inline-flex items-center gap-1.5"
+                                >
+                                  {parsed.title}
+                                  <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                                </a>
+                              ) : (
+                                parsed.title
+                              )}
+                            </div>
+                            {parsed.type && <div className="text-[var(--ais-muted)] text-[10px] mt-1 uppercase font-bold">{parsed.type}</div>}
+                          </div>
+                          {parsed.link && (
+                            <a
+                              href={parsed.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3 py-1.5 rounded-lg bg-[var(--ais-accent)] text-white hover:opacity-90 transition-all font-medium text-xs shrink-0 inline-flex items-center gap-1.5"
+                            >
+                              Open Link <ExternalLink className="w-3 h-3" />
+                            </a>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
