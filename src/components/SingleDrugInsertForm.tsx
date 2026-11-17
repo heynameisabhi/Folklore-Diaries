@@ -15,7 +15,10 @@ import {
   Image as ImageIcon,
   HeartPulse,
   Leaf,
+  Upload,
+  X,
 } from "lucide-react";
+import { useDropzone } from "react-dropzone";
 import {
   Card,
   CardContent,
@@ -105,6 +108,76 @@ export function SingleDrugInsertForm({
     setError(null);
     setSuccessResult(null);
   };
+
+  const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
+
+  const handlePhotoUpload = async (acceptedFiles: File[]) => {
+    if (acceptedFiles.length === 0) return;
+    setIsUploadingPhotos(true);
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append("folder", "herbs");
+      acceptedFiles.forEach((file) => {
+        uploadFormData.append("files", file);
+      });
+
+      const res = await axios.post("/api/upload", uploadFormData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (res.data?.success && Array.isArray(res.data.files)) {
+        const newUrls = res.data.files.map((f: any) => f.url).filter(Boolean);
+        if (newUrls.length > 0) {
+          setFormData((prev) => {
+            const existing = prev.photo_urls
+              ? prev.photo_urls.split(";").map((s) => s.trim()).filter(Boolean)
+              : [];
+            const combined = [...existing, ...newUrls];
+            return { ...prev, photo_urls: combined.join("; ") };
+          });
+          toast.success(
+            `Successfully uploaded ${newUrls.length} photograph${
+              newUrls.length > 1 ? "s" : ""
+            }!`
+          );
+        }
+      } else {
+        toast.error(res.data?.error || "Failed to upload photographs");
+      }
+    } catch (err: any) {
+      console.error("Photo upload error:", err);
+      toast.error(err.response?.data?.error || "Failed to upload photographs");
+    } finally {
+      setIsUploadingPhotos(false);
+    }
+  };
+
+  const handleRemovePhoto = (urlToRemove: string) => {
+    setFormData((prev) => {
+      const urls = prev.photo_urls
+        .split(";")
+        .map((s) => s.trim())
+        .filter((u) => u && u !== urlToRemove);
+      return { ...prev, photo_urls: urls.join("; ") };
+    });
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop: handlePhotoUpload,
+    accept: {
+      "image/*": [
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".webp",
+        ".avif",
+        ".tif",
+        ".tiff",
+        ".bmp",
+      ],
+    },
+    disabled: isUploadingPhotos || isSubmitting,
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -593,31 +666,137 @@ export function SingleDrugInsertForm({
           </div>
 
           {/* Section 6: Photo URLs */}
-          <div className="rounded-2xl border border-[#D9CFB3] bg-[#EAE2CC]/30 p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-[#D9CFB3] pb-3">
-              <ImageIcon className="w-5 h-5 text-[#8A5A00]" />
-              <h3 className="text-base font-serif font-bold text-[#1B2A1F]">
-                6. Photographs & Documentation Media
-              </h3>
-            </div>
+          {(() => {
+            const photoList = formData.photo_urls
+              ? formData.photo_urls
+                  .split(";")
+                  .map((s) => s.trim())
+                  .filter(Boolean)
+              : [];
 
-            <div className="space-y-2">
-              <Label htmlFor="photo_urls" className="text-[#1B2A1F] font-semibold text-xs uppercase tracking-wider">
-                Photo URLs
-              </Label>
-              <Textarea
-                id="photo_urls"
-                rows={2}
-                value={formData.photo_urls}
-                onChange={(e) => handleChange("photo_urls", e.target.value)}
-                placeholder="e.g. https://example.com/photos/tulsi_whole_plant.jpg; https://example.com/photos/tulsi_leaves.jpg"
-                className="bg-white border-[#D9CFB3] text-[#1B2A1F] placeholder:text-[#56655A] focus-visible:ring-[#8A5A00] rounded-xl"
-              />
-              <p className="text-[11px] text-[#56655A]">
-                Separate multiple image URLs with semicolon (;)
-              </p>
-            </div>
-          </div>
+            return (
+              <div className="rounded-2xl border border-[#D9CFB3] bg-[#EAE2CC]/30 p-5 space-y-4">
+                <div className="flex items-center justify-between border-b border-[#D9CFB3] pb-3 flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <ImageIcon className="w-5 h-5 text-[#8A5A00]" />
+                    <h3 className="text-base font-serif font-bold text-[#1B2A1F]">
+                      6. Photographs & Documentation Media
+                    </h3>
+                  </div>
+                  {photoList.length > 0 && (
+                    <Badge className="bg-[#8A5A00]/15 text-[#8A5A00] border border-[#8A5A00]/30 text-xs px-2.5 py-0.5 font-medium">
+                      {photoList.length} photo{photoList.length > 1 ? "s" : ""} attached
+                    </Badge>
+                  )}
+                </div>
+
+                {/* Dropzone area */}
+                <div
+                  {...getRootProps()}
+                  className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-200 ${
+                    isDragActive
+                      ? "border-[#8A5A00] bg-[#8A5A00]/10 scale-[0.99]"
+                      : "border-[#D9CFB3] hover:border-[#8A5A00] bg-white/70 hover:bg-white"
+                  } ${isUploadingPhotos ? "opacity-60 cursor-not-allowed" : ""}`}
+                >
+                  <input {...getInputProps()} />
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <div className="w-12 h-12 rounded-full bg-[#EAE2CC] flex items-center justify-center text-[#8A5A00] shadow-xs">
+                      {isUploadingPhotos ? (
+                        <Loader2 className="w-6 h-6 animate-spin text-[#8A5A00]" />
+                      ) : (
+                        <Upload className="w-6 h-6 text-[#8A5A00]" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-[#1B2A1F]">
+                        {isUploadingPhotos
+                          ? "Uploading photographs to Supabase CDN..."
+                          : isDragActive
+                          ? "Drop the photographs here..."
+                          : "Click to select or drag & drop photographs"}
+                      </p>
+                      <p className="text-xs text-[#56655A] mt-0.5">
+                        PNG, JPG, JPEG, WEBP, TIFF up to 25 MB each. Photos will be stored securely on cloud CDN.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Thumbnails preview grid if photos are present */}
+                {photoList.length > 0 && (
+                  <div className="space-y-2 pt-2">
+                    <p className="text-xs font-semibold text-[#1B2A1F] uppercase tracking-wider">
+                      Attached Photographs ({photoList.length})
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                      {photoList.map((url, idx) => {
+                        const filename =
+                          url.split("/").pop() || `Photo ${idx + 1}`;
+                        return (
+                          <div
+                            key={idx}
+                            className="group relative rounded-xl border border-[#D9CFB3] bg-white overflow-hidden shadow-xs hover:shadow-md transition-shadow"
+                          >
+                            <div className="aspect-square w-full bg-[#EAE2CC]/40 flex items-center justify-center overflow-hidden">
+                              <img
+                                src={url}
+                                alt={`Photo ${idx + 1}`}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                onError={(e) => {
+                                  (e.target as HTMLElement).style.display =
+                                    "none";
+                                }}
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRemovePhoto(url)}
+                              title="Remove photograph"
+                              className="absolute top-1.5 right-1.5 p-1 rounded-full bg-red-600/90 hover:bg-red-700 text-white shadow-xs transition-opacity cursor-pointer"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                            <div className="p-1.5 bg-white border-t border-[#D9CFB3]/50">
+                              <p
+                                className="text-[10px] text-[#56655A] truncate font-mono"
+                                title={filename}
+                              >
+                                {filename}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Textarea for direct URL inputs / fallback */}
+                <div className="space-y-1.5 pt-2">
+                  <Label
+                    htmlFor="photo_urls"
+                    className="text-[#1B2A1F] font-semibold text-xs uppercase tracking-wider"
+                  >
+                    Photo URLs (Auto-populated from upload or manually edited)
+                  </Label>
+                  <Textarea
+                    id="photo_urls"
+                    rows={2}
+                    value={formData.photo_urls}
+                    onChange={(e) =>
+                      handleChange("photo_urls", e.target.value)
+                    }
+                    placeholder="e.g. https://example.com/photos/tulsi_whole_plant.jpg; https://example.com/photos/tulsi_leaves.jpg"
+                    className="bg-white border-[#D9CFB3] text-[#1B2A1F] placeholder:text-[#56655A] focus-visible:ring-[#8A5A00] rounded-xl text-xs font-mono"
+                  />
+                  <p className="text-[11px] text-[#56655A]">
+                    Uploaded image URLs are automatically appended here, separated by semicolons (;). You can also paste external image URLs directly.
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Form Actions Footer */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-[#D9CFB3]">

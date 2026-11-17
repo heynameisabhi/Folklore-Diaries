@@ -18,6 +18,8 @@ import {
   Sparkles,
   Layers,
   ShieldCheck,
+  Image as ImageIcon,
+  FolderUp,
 } from "lucide-react";
 import {
   Card,
@@ -220,35 +222,269 @@ export default function AdminInsertDataPage() {
   const [scrollContainerRef, setScrollContainerRef] =
     useState<HTMLDivElement | null>(null);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
-      const file = acceptedFiles[0];
-      if (file.type === "text/csv" || file.name.endsWith(".csv")) {
-        setCsvFile(file);
-        setError("");
-        setSuccess(false);
+  // Batch media upload & auto-matching state
+  const [uploadedMediaFiles, setUploadedMediaFiles] = useState<
+    { originalName: string; url: string }[]
+  >([]);
+  const [isUploadingBatchPhotos, setIsUploadingBatchPhotos] = useState(false);
+  const [matchedCount, setMatchedCount] = useState<number | null>(null);
+  const [rowPhotoUploadingIndex, setRowPhotoUploadingIndex] = useState<number | null>(null);
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const text = e.target?.result as string;
-          const parsed = parseCSV(text);
+  // Helper function to auto-match photos to drug rows
+  const matchPhotosToRows = useCallback(
+    (
+      rows: DrugRow[],
+      photos: { originalName: string; url: string }[]
+    ) => {
+      if (photos.length === 0) return { updatedRows: rows, matches: 0 };
+      let matches = 0;
 
-          if (parsed.length === 0) {
-            setError(
-              "CSV file is empty or has no data rows. Ensure it has a header row and at least one data row."
+      const updatedRows = rows.map((row) => {
+        let rowUrls = row.photo_urls
+          ? row.photo_urls
+              .split(";")
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : [];
+        let rowMatched = false;
+
+        photos.forEach(({ originalName, url }) => {
+          const baseNameWithoutExt = originalName
+            .replace(/\.[^/.]+$/, "")
+            .toLowerCase();
+          const fullOriginalLower = originalName.toLowerCase();
+          const primaryLower = (row.primary_name || "").toLowerCase().trim();
+
+          // Check 1: Does row's photo_urls contain the filename?
+          const hasFilenameInPhotos = rowUrls.some((u) => {
+            const uLower = u.toLowerCase();
+            return (
+              uLower === fullOriginalLower ||
+              uLower === baseNameWithoutExt ||
+              uLower.endsWith(`/${fullOriginalLower}`)
             );
-            return;
-          }
+          });
 
-          setTableData(parsed);
-          setShowTable(true);
+          if (hasFilenameInPhotos) {
+            rowUrls = rowUrls.map((u) => {
+              const uLower = u.toLowerCase();
+              if (
+                uLower === fullOriginalLower ||
+                uLower === baseNameWithoutExt ||
+                uLower.endsWith(`/${fullOriginalLower}`)
+              ) {
+                rowMatched = true;
+                return url;
+              }
+              return u;
+            });
+          } else if (
+            primaryLower &&
+            (primaryLower === baseNameWithoutExt ||
+              baseNameWithoutExt.startsWith(primaryLower) ||
+              baseNameWithoutExt.includes(primaryLower))
+          ) {
+            // Check 2: Does image name start with or equal the primary name? (e.g. tulsi.jpg matches Tulsi)
+            if (!rowUrls.includes(url)) {
+              rowUrls.push(url);
+              rowMatched = true;
+            }
+          }
+        });
+
+        if (rowMatched) matches++;
+        return {
+          ...row,
+          photo_urls: Array.from(new Set(rowUrls)).join("; "),
         };
-        reader.readAsText(file);
-      } else {
-        setError("Please upload a valid CSV file.");
+      });
+
+      return { updatedRows, matches };
+    },
+    []
+  );
+
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      if (acceptedFiles.length > 0) {
+        const file = acceptedFiles[0];
+        if (file.type === "text/csv" || file.name.endsWith(".csv")) {
+          setCsvFile(file);
+          setError("");
+          setSuccess(false);
+
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const text = e.target?.result as string;
+            const parsed = parseCSV(text);
+
+            if (parsed.length === 0) {
+              setError(
+                "CSV file is empty or has no data rows. Ensure it has a header row and at least one data row."
+              );
+              return;
+            }
+
+            let rowsToSet = parsed;
+            if (uploadedMediaFiles.length > 0) {
+              const { updatedRows, matches } = matchPhotosToRows(
+                parsed,
+                uploadedMediaFiles
+              );
+              rowsToSet = updatedRows;
+              setMatchedCount(matches);
+              if (matches > 0) {
+                toast.success(
+                  `Auto-matched previously uploaded images to ${matches} drug row(s)!`
+                );
+              }
+            }
+
+            setTableData(rowsToSet);
+            setShowTable(true);
+          };
+          reader.readAsText(file);
+        } else {
+          setError("Please upload a valid CSV file.");
+        }
       }
+    },
+    [uploadedMediaFiles, matchPhotosToRows]
+  );
+
+  const onBatchPhotoDrop = async (acceptedFiles: File[]) => {
+    if (acceptedFiles.length === 0) return;
+    setIsUploadingBatchPhotos(true);
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append("folder", "herbs");
+      acceptedFiles.forEach((file) => {
+        uploadFormData.append("files", file);
+      });
+
+      const res = await axios.post("/api/upload", uploadFormData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (res.data?.success && Array.isArray(res.data.files)) {
+        const newUploaded = res.data.files.map((f: any) => ({
+          originalName: f.originalName,
+          url: f.url,
+        }));
+
+        const allPhotos = [...uploadedMediaFiles, ...newUploaded];
+        setUploadedMediaFiles(allPhotos);
+
+        if (tableData.length > 0) {
+          const { updatedRows, matches } = matchPhotosToRows(
+            tableData,
+            allPhotos
+          );
+          setTableData(updatedRows);
+          setMatchedCount(matches);
+          toast.success(
+            `Uploaded ${newUploaded.length} photograph${
+              newUploaded.length > 1 ? "s" : ""
+            }! Auto-matched ${matches} drug row(s) in preview table.`
+          );
+        } else {
+          toast.success(
+            `Uploaded ${newUploaded.length} photograph${
+              newUploaded.length > 1 ? "s" : ""
+            }! They will auto-match when you drop your CSV.`
+          );
+        }
+      } else {
+        toast.error(res.data?.error || "Failed to upload photographs");
+      }
+    } catch (err: any) {
+      console.error("Batch photo upload error:", err);
+      toast.error(
+        err.response?.data?.error || "Failed to upload photographs"
+      );
+    } finally {
+      setIsUploadingBatchPhotos(false);
     }
-  }, []);
+  };
+
+  const {
+    getRootProps: getBatchPhotoRootProps,
+    getInputProps: getBatchPhotoInputProps,
+    isDragActive: isBatchPhotoDragActive,
+  } = useDropzone({
+    onDrop: onBatchPhotoDrop,
+    accept: {
+      "image/*": [
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".webp",
+        ".avif",
+        ".tif",
+        ".tiff",
+        ".bmp",
+      ],
+    },
+    disabled: isUploadingBatchPhotos,
+  });
+
+  const handleRowPhotoUpload = async (rowIndex: number, file: File) => {
+    setRowPhotoUploadingIndex(rowIndex);
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append("folder", "herbs");
+      uploadFormData.append("file", file);
+
+      const res = await axios.post("/api/upload", uploadFormData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (res.data?.success && res.data.files?.[0]?.url) {
+        const publicUrl = res.data.files[0].url;
+        setTableData((prev) =>
+          prev.map((row, i) => {
+            if (i !== rowIndex) return row;
+            const currentUrls = row.photo_urls
+              ? row.photo_urls
+                  .split(";")
+                  .map((s) => s.trim())
+                  .filter(Boolean)
+              : [];
+            return {
+              ...row,
+              photo_urls: [...currentUrls, publicUrl].join("; "),
+            };
+          })
+        );
+        toast.success(`Photo attached to Row #${rowIndex + 1}!`);
+      } else {
+        toast.error(res.data?.error || "Photo upload failed");
+      }
+    } catch (err: any) {
+      console.error("Row photo upload error:", err);
+      toast.error(err.response?.data?.error || "Failed to upload photo");
+    } finally {
+      setRowPhotoUploadingIndex(null);
+    }
+  };
+
+  const removeRowPhoto = (rowIndex: number, urlToRemove: string) => {
+    setTableData((prev) =>
+      prev.map((row, i) => {
+        if (i !== rowIndex) return row;
+        const currentUrls = row.photo_urls
+          ? row.photo_urls
+              .split(";")
+              .map((s) => s.trim())
+              .filter((u) => u && u !== urlToRemove)
+          : [];
+        return {
+          ...row,
+          photo_urls: currentUrls.join("; "),
+        };
+      })
+    );
+  };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -325,6 +561,8 @@ export default function AdminInsertDataPage() {
     setError("");
     setSuccess(false);
     setStats(null);
+    setUploadedMediaFiles([]);
+    setMatchedCount(null);
   };
 
   const scrollTable = (direction: "left" | "right") => {
@@ -461,70 +699,140 @@ export default function AdminInsertDataPage() {
             </CardHeader>
 
             <CardContent className="pt-6">
-              {/* Upload Zone */}
+              {/* Upload Zones: Dual Card (CSV Dataset + Batch Photographs) */}
               {!showTable && (
-                <div
-                  {...getRootProps()}
-                  className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all duration-300
-                    ${
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {/* Card 1: CSV Metadata Dropzone */}
+                  <div
+                    {...getRootProps()}
+                    className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all duration-300 flex flex-col justify-between ${
                       isDragActive
-                        ? "border-[#8A5A00] bg-[#F3E3B8]/30"
+                        ? "border-[#8A5A00] bg-[#F3E3B8]/30 scale-[0.99]"
                         : csvFile
                         ? "border-[#3F7A4B] bg-[#D5E6D3]/30"
-                        : "border-[#D9CFB3] hover:border-[#8A5A00] hover:bg-[#EAE2CC]/30"
+                        : "border-[#D9CFB3] hover:border-[#8A5A00] hover:bg-[#EAE2CC]/30 bg-white/60"
                     }`}
-                >
-                  <input {...getInputProps()} />
-                  <div className="flex flex-col items-center justify-center gap-3">
-                    {csvFile ? (
-                      <>
-                        <Check className="h-12 w-12 text-[#3F7A4B]" />
-                        <p className="text-[#3F7A4B] font-semibold text-lg">
-                          {csvFile.name}
+                  >
+                    <input {...getInputProps()} />
+                    <div className="flex flex-col items-center justify-center gap-3 my-auto py-2">
+                      {csvFile ? (
+                        <>
+                          <div className="h-14 w-14 rounded-full bg-[#D5E6D3] flex items-center justify-center border border-[#3F7A4B]/40">
+                            <Check className="h-7 w-7 text-[#3F7A4B]" />
+                          </div>
+                          <div>
+                            <p className="text-[#3F7A4B] font-semibold text-base">
+                              {csvFile.name}
+                            </p>
+                            <p className="text-xs text-[#56655A]">
+                              {(csvFile.size / 1024).toFixed(2)} KB · Ready to preview
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="h-14 w-14 rounded-full bg-[#F3E3B8] flex items-center justify-center border border-[#D9CFB3] text-[#8A5A00]">
+                            <FileSpreadsheet className="h-7 w-7" />
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-[#1B2A1F] text-base font-serif font-bold">
+                              1. Upload CSV Dataset
+                            </p>
+                            <p className="text-xs text-[#56655A]">
+                              Drag & drop a <code className="bg-[#EAE2CC] px-1 rounded text-[#8A5A00]">.csv</code> file, or click to browse
+                            </p>
+                          </div>
+                          <div className="text-[11px] text-[#56655A] mt-2 bg-[#EAE2CC]/40 p-2.5 rounded-xl border border-[#D9CFB3] text-left w-full space-y-1">
+                            <p className="font-semibold text-[#1B2A1F]">
+                              Key Columns Recognized:
+                            </p>
+                            <p className="line-clamp-2">
+                              primary_name, source_type, botanical_names, sanskrit_names, vernacular_names, diseases, usage_methods, photo_urls...
+                            </p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <input
+                      id="test-file-input"
+                      type="file"
+                      accept=".csv"
+                      className="mt-3 p-1.5 bg-white text-[#1B2A1F] rounded-xl border border-[#D9CFB3] w-full cursor-pointer text-xs"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          onDrop([file]);
+                        }
+                      }}
+                    />
+                  </div>
+
+                  {/* Card 2: Batch Photographs Dropzone */}
+                  <div
+                    {...getBatchPhotoRootProps()}
+                    className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all duration-300 flex flex-col justify-between ${
+                      isBatchPhotoDragActive
+                        ? "border-[#8A5A00] bg-[#F3E3B8]/30 scale-[0.99]"
+                        : uploadedMediaFiles.length > 0
+                        ? "border-[#3F7A4B] bg-[#D5E6D3]/20"
+                        : "border-[#D9CFB3] hover:border-[#8A5A00] hover:bg-[#EAE2CC]/30 bg-white/60"
+                    } ${isUploadingBatchPhotos ? "opacity-60 cursor-not-allowed" : ""}`}
+                  >
+                    <input {...getBatchPhotoInputProps()} />
+                    <div className="flex flex-col items-center justify-center gap-3 my-auto py-2">
+                      <div className="h-14 w-14 rounded-full bg-[#EAE2CC] flex items-center justify-center border border-[#D9CFB3] text-[#8A5A00]">
+                        {isUploadingBatchPhotos ? (
+                          <Loader2 className="h-7 w-7 animate-spin text-[#8A5A00]" />
+                        ) : (
+                          <ImageIcon className="h-7 w-7 text-[#8A5A00]" />
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[#1B2A1F] text-base font-serif font-bold">
+                          2. Batch Photographs (Optional)
                         </p>
                         <p className="text-xs text-[#56655A]">
-                          {(csvFile.size / 1024).toFixed(2)} KB
+                          {isUploadingBatchPhotos
+                            ? "Uploading photographs to Supabase CDN..."
+                            : isBatchPhotoDragActive
+                            ? "Drop photographs here..."
+                            : "Drag & drop photos (e.g. tulsi.jpg, neem.png)"}
                         </p>
-                      </>
-                    ) : (
-                      <>
-                        <div className="h-16 w-16 rounded-full bg-[#F3E3B8] flex items-center justify-center border border-[#D9CFB3]">
-                          <Upload className="h-8 w-8 text-[#8A5A00]" />
-                        </div>
-                        <p className="text-[#1B2A1F] text-lg font-serif font-bold">
-                          {isDragActive
-                            ? "Drop the CSV file here"
-                            : "Drag & drop a CSV file, or click to browse"}
-                        </p>
-                        <div className="text-xs text-[#56655A] mt-2 space-y-1">
-                          <p>
-                            Expected columns: primary_name, source_type,
-                            botanical_description, botanical_names, sanskrit_names,
-                            vernacular_names, diseases, usage_methods,
-                            research_articles, research_thesis, photo_urls,
-                            contributor_names, contributor_ages, contributor_addresses,
-                            contributor_gurus, contributor_practice_durations
-                          </p>
-                          <p>
-                            Use semicolons (;) to separate multiple values in a
-                            single field
+                      </div>
+
+                      {uploadedMediaFiles.length > 0 ? (
+                        <div className="w-full bg-white/80 border border-[#3F7A4B]/30 p-2.5 rounded-xl text-left text-xs space-y-1">
+                          <div className="flex items-center justify-between font-semibold text-[#1B2A1F]">
+                            <span className="flex items-center gap-1.5 text-[#3F7A4B]">
+                              <Check className="w-4 h-4" />
+                              {uploadedMediaFiles.length} photo(s) on CDN
+                            </span>
+                            {matchedCount !== null && matchedCount > 0 && (
+                              <Badge className="bg-[#3F7A4B] text-white text-[10px] px-2 py-0.5">
+                                {matchedCount} row(s) matched
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-[#56655A] truncate">
+                            Latest: {uploadedMediaFiles[uploadedMediaFiles.length - 1].originalName}
                           </p>
                         </div>
-                      </>
-                    )}
+                      ) : (
+                        <div className="text-[11px] text-[#56655A] mt-2 bg-[#EAE2CC]/40 p-2.5 rounded-xl border border-[#D9CFB3] text-left w-full space-y-1">
+                          <p className="font-semibold text-[#1B2A1F]">
+                            Smart Auto-Matching:
+                          </p>
+                          <p>
+                            Filenames in your CSV (or image files named after plants) will be matched and converted to public CDN URLs automatically!
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-3 text-[11px] text-[#56655A] text-center font-medium">
+                      PNG, JPG, WEBP, TIFF · Up to 25 MB each · Supabase CDN
+                    </div>
                   </div>
-                  <input
-                    id="test-file-input"
-                    type="file"
-                    accept=".csv"
-                    className="mt-4 p-2 bg-white text-[#1B2A1F] rounded-xl border border-[#D9CFB3] w-full cursor-pointer text-xs"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        onDrop([file]);
-                      }
-                    }}
-                  />
                 </div>
               )}
 
@@ -588,13 +896,44 @@ export default function AdminInsertDataPage() {
                         for multiple values
                       </p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <label
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-[#D9CFB3] bg-white text-[#8A5A00] hover:bg-[#F3E3B8] shadow-xs cursor-pointer transition-colors ${
+                          isUploadingBatchPhotos ? "opacity-60 cursor-not-allowed" : ""
+                        }`}
+                        title="Batch upload photographs to auto-match with table rows"
+                      >
+                        {isUploadingBatchPhotos ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-[#8A5A00]" />
+                        ) : (
+                          <ImageIcon className="w-3.5 h-3.5 text-[#8A5A00]" />
+                        )}
+                        <span>
+                          {uploadedMediaFiles.length > 0
+                            ? `${uploadedMediaFiles.length} Photos (${matchedCount || 0} matched)`
+                            : "Add Batch Photos"}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          className="hidden"
+                          disabled={isUploadingBatchPhotos}
+                          onChange={(e) => {
+                            const files = e.target.files
+                              ? Array.from(e.target.files)
+                              : [];
+                            if (files.length > 0) onBatchPhotoDrop(files);
+                          }}
+                        />
+                      </label>
+
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => scrollTable("left")}
-                        className="text-gray-300 border-zinc-700 bg-zinc-800 hover:bg-zinc-700 hover:text-white cursor-pointer"
+                        className="text-[#1B2A1F] border-[#D9CFB3] bg-white hover:bg-[#EAE2CC] cursor-pointer"
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
@@ -603,7 +942,7 @@ export default function AdminInsertDataPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => scrollTable("right")}
-                        className="text-gray-300 border-zinc-700 bg-zinc-800 hover:bg-zinc-700 hover:text-white cursor-pointer"
+                        className="text-[#1B2A1F] border-[#D9CFB3] bg-white hover:bg-[#EAE2CC] cursor-pointer"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </Button>
@@ -612,7 +951,7 @@ export default function AdminInsertDataPage() {
                         variant="outline"
                         size="sm"
                         onClick={resetForm}
-                        className="text-gray-300 border-zinc-700 bg-zinc-800 hover:bg-zinc-700 hover:text-white cursor-pointer"
+                        className="text-[#1B2A1F] border-[#D9CFB3] bg-white hover:bg-[#EAE2CC] cursor-pointer"
                       >
                         <X className="w-4 h-4 mr-1" />
                         Reset
@@ -621,7 +960,7 @@ export default function AdminInsertDataPage() {
                         type="button"
                         size="sm"
                         onClick={addRow}
-                        className="bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+                        className="bg-[#8A5A00] hover:bg-[#704800] text-white cursor-pointer font-medium"
                       >
                         <Plus className="w-4 h-4 mr-1" />
                         Add Row
@@ -630,7 +969,7 @@ export default function AdminInsertDataPage() {
                   </div>
 
                   {/* Scrollable Table */}
-                  <div className="rounded-md border border-[#1a1a1a] overflow-hidden">
+                  <div className="rounded-xl border border-[#D9CFB3] bg-white overflow-hidden shadow-xs">
                     <div className="max-h-[500px] overflow-y-auto">
                       <div
                         className="overflow-x-auto"
@@ -638,24 +977,24 @@ export default function AdminInsertDataPage() {
                       >
                         <table className="w-max min-w-full">
                           <thead className="sticky top-0 z-10">
-                            <tr className="bg-zinc-900 border-b border-zinc-800">
-                              <th className="text-left text-xs font-semibold text-gray-400 px-3 py-3 w-10 sticky left-0 bg-zinc-900 z-20">
+                            <tr className="bg-[#EAE2CC] border-b border-[#D9CFB3]">
+                              <th className="text-left text-xs font-semibold text-[#1B2A1F] px-3 py-3 w-10 sticky left-0 bg-[#EAE2CC] z-20">
                                 #
                               </th>
                               {COLUMNS.map((col) => (
                                 <th
                                   key={col.key}
-                                  className="text-left text-xs font-semibold text-gray-400 px-2 py-3 min-w-[180px]"
+                                  className="text-left text-xs font-semibold text-[#1B2A1F] px-2 py-3 min-w-[180px]"
                                 >
                                   <div>{col.label}</div>
                                   {"hint" in col && col.hint && (
-                                    <div className="text-[10px] text-gray-600 font-normal mt-0.5">
+                                    <div className="text-[10px] text-[#56655A] font-normal mt-0.5">
                                       {col.hint}
                                     </div>
                                   )}
                                 </th>
                               ))}
-                              <th className="text-center text-xs font-semibold text-gray-400 px-3 py-3 w-16 sticky right-0 bg-zinc-900 z-20">
+                              <th className="text-center text-xs font-semibold text-[#1B2A1F] px-3 py-3 w-16 sticky right-0 bg-[#EAE2CC] z-20">
                                 Del
                               </th>
                             </tr>
@@ -664,9 +1003,9 @@ export default function AdminInsertDataPage() {
                             {tableData.map((row, rowIdx) => (
                               <tr
                                 key={rowIdx}
-                                className="border-b border-zinc-800/50 hover:bg-zinc-900/50 transition-colors"
+                                className="border-b border-[#D9CFB3]/60 hover:bg-[#FDFBF4] transition-colors"
                               >
-                                <td className="px-3 py-1.5 text-xs text-gray-500 font-mono sticky left-0 bg-black z-10">
+                                <td className="px-3 py-1.5 text-xs text-[#56655A] font-mono sticky left-0 bg-[#FDFBF4] z-10">
                                   {rowIdx + 1}
                                 </td>
                                 {COLUMNS.map((col) => (
@@ -681,7 +1020,7 @@ export default function AdminInsertDataPage() {
                                             e.target.value
                                           )
                                         }
-                                        className="w-full bg-zinc-800/50 border border-zinc-700 text-white text-sm rounded-md px-2 h-8 focus:ring-green-500 focus:border-green-500 appearance-none cursor-pointer"
+                                        className="w-full bg-white border border-[#D9CFB3] text-[#1B2A1F] text-xs rounded-md px-2 h-8 focus:ring-[#8A5A00] focus:border-[#8A5A00] appearance-none cursor-pointer"
                                       >
                                         <option value="">Select...</option>
                                         {SOURCE_TYPES.map((t) => (
@@ -690,6 +1029,107 @@ export default function AdminInsertDataPage() {
                                           </option>
                                         ))}
                                       </select>
+                                    ) : col.key === "photo_urls" ? (
+                                      <div className="flex flex-col gap-1 min-w-[240px]">
+                                        <div className="flex items-center gap-1">
+                                          <Input
+                                            value={row[col.key]}
+                                            onChange={(e) =>
+                                              updateCell(
+                                                rowIdx,
+                                                col.key,
+                                                e.target.value
+                                              )
+                                            }
+                                            placeholder="URLs or image filename"
+                                            className="bg-white border-[#D9CFB3] text-[#1B2A1F] text-xs h-8 focus-visible:ring-[#8A5A00] flex-1 font-mono"
+                                          />
+                                          <label
+                                            title="Attach photo directly to this drug row"
+                                            className={`h-8 px-2 flex items-center justify-center rounded-md border border-[#D9CFB3] bg-[#F3E3B8]/60 hover:bg-[#F3E3B8] text-[#8A5A00] cursor-pointer text-xs font-medium transition-colors shrink-0 ${
+                                              rowPhotoUploadingIndex === rowIdx
+                                                ? "opacity-60 cursor-not-allowed"
+                                                : ""
+                                            }`}
+                                          >
+                                            {rowPhotoUploadingIndex === rowIdx ? (
+                                              <Loader2 className="w-3.5 h-3.5 animate-spin text-[#8A5A00]" />
+                                            ) : (
+                                              <ImageIcon className="w-3.5 h-3.5 text-[#8A5A00]" />
+                                            )}
+                                            <input
+                                              type="file"
+                                              accept="image/*"
+                                              className="hidden"
+                                              disabled={rowPhotoUploadingIndex === rowIdx}
+                                              onChange={(e) => {
+                                                const f = e.target.files?.[0];
+                                                if (f) handleRowPhotoUpload(rowIdx, f);
+                                              }}
+                                            />
+                                          </label>
+                                        </div>
+                                        {(() => {
+                                          const urls = row.photo_urls
+                                            ? row.photo_urls
+                                                .split(";")
+                                                .map((s) => s.trim())
+                                                .filter(Boolean)
+                                            : [];
+                                          if (urls.length === 0) return null;
+                                          return (
+                                            <div className="flex flex-wrap gap-1 max-w-[260px]">
+                                              {urls.map((u, pIdx) => {
+                                                const isUrl =
+                                                  u.startsWith("http://") ||
+                                                  u.startsWith("https://");
+                                                const displayName =
+                                                  u.split("/").pop() ||
+                                                  `Photo ${pIdx + 1}`;
+                                                return (
+                                                  <span
+                                                    key={pIdx}
+                                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-[#EAE2CC] text-[#1B2A1F] border border-[#D9CFB3]"
+                                                  >
+                                                    {isUrl && (
+                                                      <img
+                                                        src={u}
+                                                        alt=""
+                                                        className="w-3.5 h-3.5 rounded object-cover"
+                                                        onError={(e) => {
+                                                          (
+                                                            e.target as HTMLElement
+                                                          ).style.display =
+                                                            "none";
+                                                        }}
+                                                      />
+                                                    )}
+                                                    <span
+                                                      className="max-w-[70px] truncate font-mono"
+                                                      title={u}
+                                                    >
+                                                      {displayName}
+                                                    </span>
+                                                    <button
+                                                      type="button"
+                                                      onClick={() =>
+                                                        removeRowPhoto(
+                                                          rowIdx,
+                                                          u
+                                                        )
+                                                      }
+                                                      title="Remove this photo from row"
+                                                      className="text-red-600 hover:text-red-800 ml-0.5 cursor-pointer"
+                                                    >
+                                                      <X className="w-2.5 h-2.5" />
+                                                    </button>
+                                                  </span>
+                                                );
+                                              })}
+                                            </div>
+                                          );
+                                        })()}
+                                      </div>
                                     ) : (
                                       <Input
                                         value={row[col.key]}
@@ -701,18 +1141,18 @@ export default function AdminInsertDataPage() {
                                           )
                                         }
                                         placeholder={col.label.replace(" *", "")}
-                                        className="bg-zinc-800/50 border-zinc-700 text-white text-sm h-8 focus-visible:ring-green-500 focus-visible:ring-1 min-w-[160px]"
+                                        className="bg-white border-[#D9CFB3] text-[#1B2A1F] text-xs h-8 focus-visible:ring-[#8A5A00] min-w-[160px]"
                                       />
                                     )}
                                   </td>
                                 ))}
-                                <td className="px-3 py-1.5 text-center sticky right-0 bg-black z-10">
+                                <td className="px-3 py-1.5 text-center sticky right-0 bg-[#FDFBF4] z-10">
                                   <Button
                                     type="button"
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => deleteRow(rowIdx)}
-                                    className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-900/30 cursor-pointer"
+                                    className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 cursor-pointer"
                                   >
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
@@ -730,7 +1170,7 @@ export default function AdminInsertDataPage() {
                     <Button
                       onClick={handleInsert}
                       disabled={isInserting || tableData.length === 0}
-                      className="bg-gradient-to-r from-green-950 to-green-600 hover:from-green-900 hover:to-green-700 text-white font-semibold px-8 py-2 cursor-pointer"
+                      className="bg-[#8A5A00] hover:bg-[#704800] text-white font-semibold px-8 py-2.5 rounded-xl cursor-pointer shadow-xs disabled:opacity-50"
                     >
                       {isInserting ? (
                         <>
@@ -749,7 +1189,7 @@ export default function AdminInsertDataPage() {
               )}
             </CardContent>
 
-            <CardFooter className="border-t border-[#1a1a1a] bg-black flex justify-center">
+            <CardFooter className="border-t border-[#D9CFB3] bg-[#EAE2CC]/30 flex justify-center py-3">
               <div className="text-xs text-gray-500 flex items-center">
                 <AlertCircle className="h-3 w-3 mr-1" /> Multi-value fields use
                 semicolons (;) as separators

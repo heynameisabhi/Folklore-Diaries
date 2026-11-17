@@ -8,13 +8,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [],
     unoptimized: true, // This allows local file paths
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
-  outputFileTracing: false,
 };
 
 export default nextConfig;
