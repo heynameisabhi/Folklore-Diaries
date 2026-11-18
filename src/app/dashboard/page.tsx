@@ -542,8 +542,9 @@ export default function Dashboard() {
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; margin-top: 14px; }
         .fcard { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; text-align: left; display: flex; flex-direction: column; padding: 0; transition: border-color .2s, transform .2s; position: relative; cursor: pointer; }
         .fcard:hover { border-color: var(--c); transform: translateY(-2px); }
-        .fcard .pic { height: 96px; background: color-mix(in srgb, var(--c) 14%, var(--surface)); color: var(--c); display: grid; place-items: center; position: relative; }
-        .fcard .pic svg.bgm { position: absolute; right: -20px; top: -20px; opacity: .22; }
+        .fcard .pic { height: 140px; background: color-mix(in srgb, var(--c) 14%, var(--surface)); color: var(--c); display: grid; place-items: center; position: relative; overflow: hidden; }
+        .fcard .pic img.fcard-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .fcard .pic svg.bgm { position: absolute; right: -20px; top: -20px; opacity: .22; pointer-events: none; }
         .fcard .bd { padding: 14px 16px 16px; }
         .fcard h3 { font-size: 18px; font-family: var(--serif); font-weight: 600; margin: 0; line-height: 1.15; }
         .fcard .sa { color: var(--muted); font-size: 15px; }
@@ -569,7 +570,9 @@ export default function Dashboard() {
         #sug p { margin: 6px 10px; color: var(--muted); font-size: 14.5px; }
         #scrim { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 99; }
         #dr { position: fixed; right: 0; top: 0; bottom: 0; width: min(420px,100%); background: var(--surface); z-index: 100; overflow: auto; border-left: 1px solid var(--line); }
-        #dr .pic { height: 150px; display: grid; place-items: center; position: relative; overflow: hidden; color: var(--c); background: color-mix(in srgb,var(--c) 14%,var(--surface)); }
+        #dr .pic { height: 180px; display: grid; place-items: center; position: relative; overflow: hidden; color: var(--c); background: color-mix(in srgb,var(--c) 14%,var(--surface)); }
+        #dr .pic img.dr-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        #dr .pic .dr-fallback { width: 100%; height: 100%; display: grid; place-items: center; }
         #dr .bd { padding: 20px 22px 30px; }
         #dr h2 { font-size: 26px; font-family: var(--serif); font-weight: 600; margin: 0; }
         #dr dl { margin: 16px 0; display: grid; grid-template-columns: 110px 1fr; gap: 8px 12px; }
@@ -778,13 +781,36 @@ export default function Dashboard() {
                   </button>
 
                   <div className="pic">
-                    <Icon id={f.form} size={44} />
-                    <svg className="ic bgm" width="130" height="130" viewBox="0 0 24 24">
-                      {srcMeta[1] === "leaf" && <path d="M5 19C3 10 9 3 20 4c1 11-6 17-15 15zM5 19c4-6 8-9 12-11" fill="none" stroke="currentColor" strokeWidth="1.6" />}
-                      {srcMeta[1] === "hex" && <path d="M12 3l7 4v10l-7 4-7-4V7z" fill="none" stroke="currentColor" strokeWidth="1.6" />}
-                      {srcMeta[1] === "gem" && <path d="M12 3l6 6-6 12-6-12zM6 9h12M12 3v18" fill="none" stroke="currentColor" strokeWidth="1.6" />}
-                      {srcMeta[1] === "voice" && <path d="M4 5h16v10H9l-5 4z" fill="none" stroke="currentColor" strokeWidth="1.6" />}
-                    </svg>
+                    {f.photos && f.photos.length > 0 && f.photos[0].image_url ? (
+                      <img
+                        src={formatUrl(f.photos[0].image_url)}
+                        alt={f.n}
+                        className="fcard-img"
+                        onError={(e) => {
+                          (e.target as HTMLElement).style.display = "none";
+                          const fallback = (e.target as HTMLElement).parentElement?.querySelector(".fcard-fallback") as HTMLElement;
+                          if (fallback) fallback.style.display = "grid";
+                        }}
+                      />
+                    ) : null}
+                    <div
+                      className="fcard-fallback"
+                      style={{
+                        display: f.photos && f.photos.length > 0 && f.photos[0].image_url ? "none" : "grid",
+                        width: "100%",
+                        height: "100%",
+                        placeItems: "center",
+                        position: "relative",
+                      }}
+                    >
+                      <Icon id={f.form} size={44} />
+                      <svg className="ic bgm" width="130" height="130" viewBox="0 0 24 24">
+                        {srcMeta[1] === "leaf" && <path d="M5 19C3 10 9 3 20 4c1 11-6 17-15 15zM5 19c4-6 8-9 12-11" fill="none" stroke="currentColor" strokeWidth="1.6" />}
+                        {srcMeta[1] === "hex" && <path d="M12 3l7 4v10l-7 4-7-4V7z" fill="none" stroke="currentColor" strokeWidth="1.6" />}
+                        {srcMeta[1] === "gem" && <path d="M12 3l6 6-6 12-6-12zM6 9h12M12 3v18" fill="none" stroke="currentColor" strokeWidth="1.6" />}
+                        {srcMeta[1] === "voice" && <path d="M4 5h16v10H9l-5 4z" fill="none" stroke="currentColor" strokeWidth="1.6" />}
+                      </svg>
+                    </div>
                   </div>
 
                   <div className="bd">
@@ -886,7 +912,29 @@ export default function Dashboard() {
             style={{ "--c": SOURCES[activeDrawerItem.src][2] } as any}
           >
             <div className="pic">
-              <Icon id={activeDrawerItem.form} size={64} />
+              {activeDrawerItem.photos && activeDrawerItem.photos.length > 0 && activeDrawerItem.photos[0].image_url ? (
+                <img
+                  src={formatUrl(activeDrawerItem.photos[0].image_url)}
+                  alt={activeDrawerItem.n}
+                  className="dr-img"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = "none";
+                    const fallback = (e.target as HTMLElement).parentElement?.querySelector(".dr-fallback") as HTMLElement;
+                    if (fallback) fallback.style.display = "grid";
+                  }}
+                />
+              ) : null}
+              <div
+                className="dr-fallback"
+                style={{
+                  display: activeDrawerItem.photos && activeDrawerItem.photos.length > 0 && activeDrawerItem.photos[0].image_url ? "none" : "grid",
+                  width: "100%",
+                  height: "100%",
+                  placeItems: "center",
+                }}
+              >
+                <Icon id={activeDrawerItem.form} size={64} />
+              </div>
               <button
                 className="x"
                 aria-label="Close"
@@ -970,7 +1018,7 @@ export default function Dashboard() {
                   <>
                     <dt>Photos</dt>
                     <dd>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                         {activeDrawerItem.photos.map((p, pi) =>
                           p.image_url ? (
                             <a
@@ -985,9 +1033,14 @@ export default function Dashboard() {
                                 textDecoration: "none",
                                 display: "inline-flex",
                                 alignItems: "center",
-                                gap: 4,
+                                gap: 6,
                               }}
                             >
+                              <img
+                                src={formatUrl(p.image_url)}
+                                alt=""
+                                style={{ width: 20, height: 20, borderRadius: 4, objectFit: "cover" }}
+                              />
                               Photo #{pi + 1} ↗
                             </a>
                           ) : null
