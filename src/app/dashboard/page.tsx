@@ -568,17 +568,21 @@ export default function Dashboard() {
         #sug button:hover, #sug button:focus-visible { background: var(--accent-soft); }
         #sug small { color: var(--muted); }
         #sug p { margin: 6px 10px; color: var(--muted); font-size: 14.5px; }
-        #scrim { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 99; }
-        #dr { position: fixed; right: 0; top: 0; bottom: 0; width: min(420px,100%); background: var(--surface); z-index: 100; overflow: auto; border-left: 1px solid var(--line); }
-        #dr .pic { height: 180px; display: grid; place-items: center; position: relative; overflow: hidden; color: var(--c); background: color-mix(in srgb,var(--c) 14%,var(--surface)); }
+        #scrim { position: fixed; inset: 0; background: rgba(15,23,20,.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 99; animation: fadeIn .2s ease-out; }
+        #dr-wrap { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; pointer-events: none; }
+        #dr { position: relative; width: min(560px,100%); max-height: min(88vh, 760px); background: var(--surface); border: 1px solid var(--line); border-radius: 24px; box-shadow: 0 25px 60px -15px rgba(0,0,0,.4), 0 0 0 1px rgba(0,0,0,.06); overflow-y: auto; overflow-x: hidden; pointer-events: auto; animation: popIn .25s cubic-bezier(.16,1,.3,1); display: flex; flex-direction: column; }
+        #dr .pic { height: 210px; min-height: 210px; display: grid; place-items: center; position: relative; overflow: hidden; color: var(--c); background: color-mix(in srgb,var(--c) 14%,var(--surface)); border-radius: 24px 24px 0 0; }
         #dr .pic img.dr-img { width: 100%; height: 100%; object-fit: cover; display: block; }
         #dr .pic .dr-fallback { width: 100%; height: 100%; display: grid; place-items: center; }
-        #dr .bd { padding: 20px 22px 30px; }
+        #dr .bd { padding: 24px 28px 32px; }
         #dr h2 { font-size: 26px; font-family: var(--serif); font-weight: 600; margin: 0; }
-        #dr dl { margin: 16px 0; display: grid; grid-template-columns: 110px 1fr; gap: 8px 12px; }
-        #dr dt { color: var(--muted); }
+        #dr dl { margin: 18px 0; display: grid; grid-template-columns: 115px 1fr; gap: 10px 14px; font-size: 14.5px; }
+        #dr dt { color: var(--muted); font-weight: 500; }
         #dr dd { margin: 0; }
-        #dr .x { position: absolute; right: 12px; top: 12px; width: 36px; height: 36px; border-radius: 50%; border: 0; background: var(--surface); font-size: 20px; cursor: pointer; display: grid; place-items: center; }
+        #dr .x { position: absolute; right: 14px; top: 14px; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(0,0,0,.08); background: var(--surface); color: var(--ink); font-size: 20px; cursor: pointer; display: grid; place-items: center; box-shadow: 0 4px 14px rgba(0,0,0,.15); transition: transform .15s, background .15s; z-index: 5; }
+        #dr .x:hover { transform: scale(1.08); background: var(--bg); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes popIn { from { opacity: 0; transform: scale(.95) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         #toast { position: fixed; left: 50%; bottom: 20px; transform: translate(-50%, 30px); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 12px; opacity: 0; transition: .25s; z-index: 120; pointer-events: none; }
         #toast.on { opacity: 1; transform: translate(-50%, 0); }
         
@@ -900,18 +904,24 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* ── Detail Drawer Modal ── */}
+      {/* ── Detail Modal (Centered with Backdrop Blur) ── */}
       {activeDrawerItem && (
         <>
           <div id="scrim" onClick={() => setActiveDrawerItem(null)} />
-          <aside
-            id="dr"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Formulation details"
-            style={{ "--c": SOURCES[activeDrawerItem.src][2] } as any}
+          <div
+            id="dr-wrap"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setActiveDrawerItem(null);
+            }}
           >
-            <div className="pic">
+            <aside
+              id="dr"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Formulation details"
+              style={{ "--c": SOURCES[activeDrawerItem.src][2] } as any}
+            >
+              <div className="pic">
               {activeDrawerItem.photos && activeDrawerItem.photos.length > 0 && activeDrawerItem.photos[0].image_url ? (
                 <img
                   src={formatUrl(activeDrawerItem.photos[0].image_url)}
@@ -1076,8 +1086,9 @@ export default function Dashboard() {
               </div>
             </div>
           </aside>
-        </>
-      )}
+        </div>
+      </>
+    )}
 
       {/* ── Toast Element ── */}
       <div id="toast" className={toastMessage ? "on" : ""} role="status">
