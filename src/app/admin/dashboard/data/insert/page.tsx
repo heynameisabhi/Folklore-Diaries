@@ -362,9 +362,7 @@ export default function AdminInsertDataPage() {
         uploadFormData.append("files", file);
       });
 
-      const res = await axios.post("/api/upload", uploadFormData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await axios.post("/api/upload", uploadFormData);
 
       if (res.data?.success && Array.isArray(res.data.files)) {
         const newUploaded = res.data.files.map((f: any) => ({
@@ -435,9 +433,7 @@ export default function AdminInsertDataPage() {
       uploadFormData.append("folder", "herbs");
       uploadFormData.append("file", file);
 
-      const res = await axios.post("/api/upload", uploadFormData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await axios.post("/api/upload", uploadFormData);
 
       if (res.data?.success && res.data.files?.[0]?.url) {
         const publicUrl = res.data.files[0].url;

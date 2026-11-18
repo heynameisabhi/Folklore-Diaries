@@ -29,18 +29,32 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getAuthSession();
     if (!session || !session.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      console.warn("Upload rejected: Unauthorized session");
+      return NextResponse.json(
+        { error: "Unauthorized: Please log in as an administrator to upload images." },
+        { status: 401 }
+      );
     }
 
     const formData = await request.formData();
 
-    // Collect all files from "files" or "file" form keys
-    const incomingFiles: File[] = [];
+    // Collect all files from "files" or "file" form keys with duck-type checking
+    const incomingFiles: {
+      name: string;
+      size: number;
+      type: string;
+      arrayBuffer: () => Promise<ArrayBuffer>;
+    }[] = [];
     const filesMulti = formData.getAll("files");
     const fileSingle = formData.getAll("file");
 
-    [...filesMulti, ...fileSingle].forEach((item) => {
-      if (item instanceof File && item.size > 0) {
+    [...filesMulti, ...fileSingle].forEach((item: any) => {
+      if (
+        item &&
+        typeof item === "object" &&
+        typeof item.arrayBuffer === "function" &&
+        item.size > 0
+      ) {
         incomingFiles.push(item);
       }
     });
@@ -65,7 +79,8 @@ export async function POST(request: NextRequest) {
     }[] = [];
 
     for (const file of incomingFiles) {
-      const sanitizedName = file.name
+      const originalName = file.name || "image.jpg";
+      const sanitizedName = originalName
         .replace(/[^a-zA-Z0-9._-]/g, "_")
         .toLowerCase();
       const uniqueSuffix = `${Date.now()}_${Math.random()
@@ -76,10 +91,22 @@ export async function POST(request: NextRequest) {
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
+      // Ensure a valid image MIME type
+      let mimeType = file.type;
+      if (!mimeType || mimeType === "application/octet-stream") {
+        const ext = sanitizedName.split(".").pop()?.toLowerCase();
+        if (ext === "png") mimeType = "image/png";
+        else if (ext === "jpg" || ext === "jpeg") mimeType = "image/jpeg";
+        else if (ext === "webp") mimeType = "image/webp";
+        else if (ext === "gif") mimeType = "image/gif";
+        else if (ext === "svg") mimeType = "image/svg+xml";
+        else mimeType = "image/jpeg";
+      }
+
       const { error: uploadError } = await supabaseAdmin.storage
         .from(BUCKET_NAME)
         .upload(filePath, buffer, {
-          contentType: file.type || "application/octet-stream",
+          contentType: mimeType,
           upsert: true,
         });
 
@@ -87,7 +114,7 @@ export async function POST(request: NextRequest) {
         console.error("Supabase storage upload error:", uploadError);
         return NextResponse.json(
           {
-            error: `Failed to upload "${file.name}": ${uploadError.message}`,
+            error: `Failed to upload "${originalName}": ${uploadError.message}`,
           },
           { status: 500 }
         );
@@ -99,10 +126,10 @@ export async function POST(request: NextRequest) {
 
       uploadedResults.push({
         url: publicUrl,
-        originalName: file.name,
+        originalName: originalName,
         path: filePath,
         size: file.size,
-        type: file.type,
+        type: mimeType,
       });
     }
 

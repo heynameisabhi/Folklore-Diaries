@@ -121,9 +121,7 @@ export function SingleDrugInsertForm({
         uploadFormData.append("files", file);
       });
 
-      const res = await axios.post("/api/upload", uploadFormData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await axios.post("/api/upload", uploadFormData);
 
       if (res.data?.success && Array.isArray(res.data.files)) {
         const newUrls = res.data.files.map((f: any) => f.url).filter(Boolean);
